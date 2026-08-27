@@ -51,15 +51,45 @@ class ExcelHandler:
 
         self.sheet.cell(row=row, column=6, value=actual)
 
-        self.sheet.cell(row=row, column=7, value=eval_res.get("relevance"))
+        
 
-        self.sheet.cell(row=row, column=8, value=eval_res.get("status"))
+        # Safe extraction to prevent AttributeError when eval_res is an error string
 
-        self.sheet.cell(row=row, column=9, value=f"{eval_res.get('accuracy_score')}%")
+        if isinstance(eval_res, dict):
 
-        self.sheet.cell(row=row, column=10, value=eval_res.get("evaluation_reason"))
+            relevance = eval_res.get("relevance", "N/A")
 
-        self.sheet.cell(row=row, column=11, value=eval_res.get("remarks"))
+            status = eval_res.get("status", "ERROR")
+
+            accuracy = f"{eval_res.get('accuracy_score', 0)}%"
+
+            reason = eval_res.get("evaluation_reason", "N/A")
+
+            remarks = eval_res.get("remarks", "N/A")
+
+        else:
+
+            relevance = "N/A"
+
+            status = "ERROR"
+
+            accuracy = "0%"
+
+            reason = str(eval_res)
+
+            remarks = "Execution Exception"
+
+
+
+        self.sheet.cell(row=row, column=7, value=relevance)
+
+        self.sheet.cell(row=row, column=8, value=status)
+
+        self.sheet.cell(row=row, column=9, value=accuracy)
+
+        self.sheet.cell(row=row, column=10, value=reason)
+
+        self.sheet.cell(row=row, column=11, value=remarks)
 
 
 
