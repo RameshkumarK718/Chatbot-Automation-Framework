@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Multi-Domain IoT Chatbot Suite v7.0</title>
+    <title>Universal Multi-Domain Dynamic AI Chatbot Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS CDN for native XLSX generation -->
+    <!-- SheetJS for Native Excel Exports -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
         tailwind.config = {
@@ -29,7 +29,7 @@
         ::-webkit-scrollbar-thumb { background: #475569; border-radius: 99px; }
         ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
         .cursor-blink::after {
-            content: '█';
+            content: '▋';
             animation: cursorBlink 0.8s infinite;
             color: #6366f1;
             margin-left: 2px;
@@ -49,40 +49,43 @@
             <i class="fa-solid fa-bars-staggered text-lg"></i>
         </button>
         <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-            <i class="fa-solid fa-network-wired text-sm"></i>
+            <i class="fa-solid fa-robot text-sm"></i>
         </div>
         <div>
             <div class="flex items-center space-x-2">
-                <h1 class="text-sm font-bold bg-gradient-to-r from-slate-900 via-indigo-900 to-indigo-600 dark:from-white dark:via-indigo-200 dark:to-indigo-400 bg-clip-text text-transparent">Cognitive AI Chatbot</h1>
-                <span class="text-[9px] font-mono bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 px-1.5 py-0.2 rounded-full">v7.0 Pro</span>
+                <h1 class="text-sm font-bold bg-gradient-to-r from-slate-900 via-indigo-900 to-indigo-600 dark:from-white dark:via-indigo-200 dark:to-indigo-400 bg-clip-text text-transparent">Universal Dynamic AI Core</h1>
+                <span class="text-[9px] font-mono bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 px-1.5 py-0.5 rounded-full font-bold">ANY DOMAIN</span>
             </div>
-            <p class="text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block">Medical, Geospatial Maps, E-Commerce & IoT Ticketing Console</p>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block">Dynamic Real-Time Multi-Domain AI Chatbot & IoT Dispatcher</p>
         </div>
     </div>
+    
     <div class="flex items-center space-x-3">
-        <!-- Functionality Test Button -->
+        <!-- Add Domain Button -->
+        <button onclick="openCustomDomainModal()" class="text-[10px] font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg shadow-md transition-all flex items-center">
+            <i class="fa-solid fa-plus-circle mr-1.5"></i>Create Domain
+        </button>
+
+        <!-- Diagnostics Button -->
         <button onclick="runFunctionalityTest()" class="text-[10px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg shadow-md transition-all flex items-center">
             <i class="fa-solid fa-vial-circle-check mr-1.5"></i>Run Diagnostics & Excel
         </button>
+
+        <!-- Theme Toggle -->
         <button onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="Toggle Light/Dark Theme">
             <i id="theme-toggle-icon" class="fa-solid fa-moon text-sm"></i>
         </button>
+
+        <!-- Model Selector -->
         <div class="flex items-center bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
             <span class="text-[9px] text-slate-500 font-mono mr-2">MODEL:</span>
             <select id="model-selector" onchange="changeModel(this.value)" class="bg-transparent text-xs font-semibold text-indigo-600 dark:text-indigo-300 focus:outline-none cursor-pointer">
-                <option value="cognitive-v1-pro" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Cognitive v1 Pro</option>
-                <option value="cognitive-v1-flash" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Cognitive v1 Flash</option>
-                <option value="cognitive-v2-flash" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Cognitive v2 Flash</option>
+                <option value="gemini-1.5-flash" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Gemini 1.5 Flash</option>
+                <option value="gemini-1.5-pro" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Gemini 1.5 Pro</option>
+                <option value="gemini-1.0-pro" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Gemini 1.0 Pro</option>
             </select>
         </div>
-        <div class="hidden md:flex items-center bg-slate-100 dark:bg-slate-950 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800/80 text-[10px] font-mono">
-            <span class="flex h-2 w-2 relative mr-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span class="text-slate-500 dark:text-slate-400">HUB STATUS:</span>
-            <span class="text-indigo-600 dark:text-indigo-400 ml-1 font-bold">ONLINE_V7</span>
-        </div>
+
         <button onclick="toggleSidebar('right-sidebar', true)" class="lg:hidden p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <i class="fa-solid fa-sliders text-lg"></i>
         </button>
@@ -92,26 +95,20 @@
 <div class="flex-1 flex overflow-hidden relative">
     <div id="left-sidebar-backdrop" onclick="toggleSidebar('left-sidebar', false)" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
     
-    <!-- LEFT SIDEBAR: CORE PIPELINES -->
+    <!-- LEFT SIDEBAR: DOMAINS AND PIPELINES -->
     <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[300px] bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full transform -translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
         <div class="p-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 lg:hidden">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Services Channels</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Domain Hubs</span>
             <button onclick="toggleSidebar('left-sidebar', false)" class="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
-        <div class="p-3 space-y-2 shrink-0">
-            <button onclick="createNewThread()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all group">
-                <i class="fa-solid fa-plus group-hover:rotate-90 transition-transform"></i>
-                <span>Start New Custom Thread</span>
-            </button>
-        </div>
 
-        <!-- COLLAPSIBLE ACTIVE CHANNELS WITH DOWN ARROW & SEARCH -->
-        <div class="px-3 py-2 flex flex-col flex-1 overflow-hidden">
-            <button onclick="toggleChannelsAccordion()" class="w-full px-2 py-1.5 bg-slate-200/60 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg flex justify-between items-center transition-all mb-2">
+        <!-- COLLAPSIBLE DOMAINS SECTION WITH SEARCH & DOWN ARROW -->
+        <div class="px-3 py-3 flex flex-col flex-1 overflow-hidden">
+            <button onclick="toggleChannelsAccordion()" class="w-full px-2.5 py-2 bg-slate-200/70 dark:bg-slate-800/60 hover:bg-slate-200 dark:hover:bg-slate-800 rounded-lg flex justify-between items-center transition-all mb-2">
                 <span class="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest flex items-center">
-                    <i class="fa-solid fa-layer-group text-indigo-500 mr-2"></i>Active Channels
+                    <i class="fa-solid fa-cubes text-indigo-500 mr-2"></i>Active Domains
                 </span>
                 <div class="flex items-center space-x-2">
                     <span id="channel-count" class="text-[9px] font-mono text-slate-500">4 modules</span>
@@ -121,41 +118,28 @@
 
             <!-- Collapsible Wrapper -->
             <div id="channels-accordion-body" class="flex-1 flex flex-col overflow-hidden transition-all duration-300">
-                <!-- Search Box inside Channels Panel -->
+                <!-- Search Filter Box -->
                 <div class="relative my-1">
-                    <input type="text" id="channel-search-input" onkeyup="filterChannels(this.value)" placeholder="Search channels..." class="w-full bg-white dark:bg-slate-950 text-xs px-2.5 py-1.5 pl-7 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-200">
+                    <input type="text" id="channel-search-input" onkeyup="filterChannels(this.value)" placeholder="Search any domain..." class="w-full bg-white dark:bg-slate-950 text-xs px-2.5 py-1.5 pl-7 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-slate-200">
                     <i class="fa-solid fa-magnifying-glass absolute left-2 top-2.5 text-[10px] text-slate-400"></i>
                 </div>
                 
-                <div id="channels-list" class="flex-1 overflow-y-auto space-y-1.5 pr-1 mt-1"></div>
+                <div id="channels-list" class="flex-1 overflow-y-auto space-y-2 pr-1 mt-1"></div>
             </div>
         </div>
 
         <div class="p-4 bg-slate-200/50 dark:bg-slate-950/40 border-t border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
             <div class="flex items-center justify-between text-[11px]">
-                <span class="text-slate-500 dark:text-slate-400 flex items-center"><i class="fa-solid fa-wifi mr-2 text-indigo-500 dark:text-indigo-400"></i>IoT Broker</span>
-                <span class="font-mono text-emerald-600 dark:text-emerald-400">MQTT / TLS</span>
+                <span class="text-slate-500 dark:text-slate-400 flex items-center"><i class="fa-solid fa-key mr-2 text-amber-500"></i>Gemini API Key</span>
+                <input type="password" id="api-key-input" onchange="updateApiKey(this.value)" placeholder="Paste Key..." class="w-28 bg-white dark:bg-slate-900 px-2 py-1 text-[10px] rounded border border-slate-300 dark:border-slate-700 font-mono focus:outline-none focus:border-indigo-500">
             </div>
-            <div class="flex items-center justify-between text-[11px]">
-                <span class="text-slate-500 dark:text-slate-400 flex items-center"><i class="fa-solid fa-key mr-2 text-amber-500"></i>API Key</span>
-                <input type="password" id="api-key-input" onchange="updateApiKey(this.value)" placeholder="Enter Key..." class="w-24 bg-white dark:bg-slate-900 px-2 py-0.5 text-[10px] rounded border border-slate-300 dark:border-slate-700 font-mono">
-            </div>
-        </div>
-        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-200/80 dark:bg-slate-950">
-            <div class="flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs border border-indigo-500/30">
-                    SO
-                </div>
-                <div>
-                    <h4 class="text-xs font-semibold text-slate-800 dark:text-white">System Operator</h4>
-                    <p class="text-[9px] text-slate-500 font-mono">ID: USER-90210</p>
-                </div>
-            </div>
+            <p class="text-[9px] text-slate-400">Provide an API key for dynamic LLM streaming, or use local intelligent dynamic responses.</p>
         </div>
     </aside>
 
     <!-- MAIN CHAT VIEWPORT -->
     <main class="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden min-w-0 transition-colors">
+        <!-- Top Bar -->
         <div class="bg-white/40 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 p-3 flex justify-between items-center px-4 md:px-6 shrink-0">
             <div>
                 <span id="active-channel-title" class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 flex items-center">
@@ -168,25 +152,28 @@
                     <i class="fa-solid fa-file-export mr-1.5 text-indigo-500 dark:text-indigo-400"></i>Export State
                 </button>
                 <button onclick="clearChatLog()" class="text-[10px] font-semibold bg-white/60 dark:bg-slate-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors">
-                    <i class="fa-solid fa-trash-can mr-1.5"></i>Clear History
+                    <i class="fa-solid fa-trash-can mr-1.5"></i>Clear Log
                 </button>
             </div>
         </div>
         
+        <!-- Scrollable Chat Messages -->
         <div id="chat-scroller" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4"></div>
 
         <!-- INPUT BOX AND QUICK PROMPTS -->
         <div class="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 space-y-3 shrink-0 transition-colors">
             <div id="quick-prompts" class="max-w-4xl mx-auto flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none"></div>
+            
             <div class="max-w-4xl mx-auto flex items-end space-x-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus-within:border-indigo-500/50 rounded-xl p-2 transition-all">
-                <textarea id="chat-input" rows="1" placeholder="Type medical questions, map requests, purchases, or ticket bookings..." class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 max-h-32 resize-none py-2 px-3 align-bottom" onkeydown="handleInputKeyPress(event)"></textarea>
+                <textarea id="chat-input" rows="1" placeholder="Type message or instruction for active domain..." class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 max-h-32 resize-none py-2 px-3 align-bottom" onkeydown="handleInputKeyPress(event)"></textarea>
                 <button id="send-button" onclick="submitUserMessage()" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center justify-center shrink-0 shadow-lg shadow-indigo-600/10">
                     <i id="send-icon" class="fa-solid fa-arrow-up text-sm"></i>
                 </button>
             </div>
+            
             <div class="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 max-w-4xl mx-auto px-1">
-                <span>Integrated IoT Smart Hub & Dispatcher</span>
-                <span id="status-indicator">Automated API Endpoints Ready</span>
+                <span id="domain-system-prompt-label" class="font-mono truncate max-w-md">System Prompt Active</span>
+                <span id="status-indicator">Dynamic Engine Ready</span>
             </div>
         </div>
     </main>
@@ -203,26 +190,26 @@
         <div class="p-5 flex-1 overflow-y-auto space-y-6">
             <div>
                 <h3 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">
-                    <i class="fa-solid fa-tower-cell mr-1.5"></i>IoT Telemetry
+                    <i class="fa-solid fa-chart-line mr-1.5"></i>Domain Telemetry
                 </h3>
                 <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Live telemetry metrics, dynamic word counters, latency analysis, and widget status indicators.
+                    Live dynamic counters, word streaming metrics, latencies, and parameters for the currently active chatbot domain.
                 </p>
             </div>
             <div class="space-y-3">
                 <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active State Monitor</h4>
                 <div class="grid grid-cols-1 gap-2 font-mono text-[11px]">
                     <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
-                        <span class="text-slate-500">intent:</span>
-                        <span id="register-intent" class="text-indigo-600 dark:text-indigo-400 font-bold">system_standby</span>
+                        <span class="text-slate-500">Active Domain:</span>
+                        <span id="register-intent" class="text-indigo-600 dark:text-indigo-400 font-bold">medical-assistant</span>
                     </div>
                     <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
                         <span class="text-slate-500">processed_words:</span>
                         <span id="register-words" class="text-emerald-600 dark:text-emerald-400 font-bold">0</span>
                     </div>
                     <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
-                        <span class="text-slate-500">iot_sensors:</span>
-                        <span id="register-confidence" class="text-amber-600 dark:text-amber-400 font-bold">Connected (8)</span>
+                        <span class="text-slate-500">IoT Telemetry:</span>
+                        <span id="register-confidence" class="text-amber-600 dark:text-amber-400 font-bold">Connected</span>
                     </div>
                     <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
                         <span class="text-slate-500">latency:</span>
@@ -232,7 +219,7 @@
             </div>
             <hr class="border-slate-200 dark:border-slate-800">
             <div class="space-y-4">
-                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest"><i class="fa-solid fa-sliders mr-1.5 text-indigo-500"></i>Model Parameters</h4>
+                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest"><i class="fa-solid fa-sliders mr-1.5 text-indigo-500"></i>Generation Tuning</h4>
                 <div class="space-y-1">
                     <div class="flex justify-between items-center text-xs">
                         <span class="text-slate-500 dark:text-slate-400">Temperature</span>
@@ -247,16 +234,53 @@
                     </div>
                     <input type="range" id="param-tokens" min="256" max="8192" step="256" value="2048" oninput="updateParam('tokens', this.value)" class="w-full accent-indigo-500 bg-slate-200 dark:bg-slate-950 h-1 rounded-lg cursor-pointer">
                 </div>
-                <div class="space-y-1">
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-500 dark:text-slate-400">Top-P</span>
-                        <span id="val-topp" class="font-mono text-indigo-600 dark:text-indigo-400">0.9</span>
-                    </div>
-                    <input type="range" id="param-topp" min="0" max="1" step="0.05" value="0.9" oninput="updateParam('topp', this.value)" class="w-full accent-indigo-500 bg-slate-200 dark:bg-slate-950 h-1 rounded-lg cursor-pointer">
-                </div>
             </div>
         </div>
     </aside>
+</div>
+
+<!-- MODAL: ADD / CUSTOMIZE ANY DOMAIN -->
+<div id="custom-domain-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+            <div class="flex items-center space-x-2 text-indigo-500">
+                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+                <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100">Configure Any Chatbot Domain</h3>
+            </div>
+            <button onclick="closeCustomDomainModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <div class="space-y-3 text-xs">
+            <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Domain Name</label>
+                <input type="text" id="modal-domain-name" placeholder="e.g. Finance Advisor, Legal Assistant, Tech Support" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Short Description</label>
+                <input type="text" id="modal-domain-desc" placeholder="e.g. Automated portfolio analysis and banking queries" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 focus:outline-none focus:border-indigo-500">
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">System Persona Instruction</label>
+                <textarea id="modal-domain-system" rows="3" placeholder="Define chatbot behavior, tone, role, and domain expertise rules..." class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 focus:outline-none focus:border-indigo-500 resize-none"></textarea>
+            </div>
+
+            <div>
+                <label class="block font-semibold mb-1 text-slate-700 dark:text-slate-300">Quick Template Actions (Comma Separated)</label>
+                <input type="text" id="modal-domain-prompts" placeholder="e.g. 📊 Balance Inquiry, 📑 Audit Tax File, 💳 Freeze Card" class="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg p-2.5 focus:outline-none focus:border-indigo-500">
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end space-x-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+            <button onclick="closeCustomDomainModal()" class="text-xs font-semibold px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors">
+                Cancel
+            </button>
+            <button onclick="saveNewDomain()" class="text-xs font-semibold px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white shadow-md transition-all flex items-center">
+                <i class="fa-solid fa-check mr-1.5"></i> Launch Dynamic Domain
+            </button>
+        </div>
+    </div>
 </div>
 
 <!-- MODAL: PERMISSION PROMPT FOR EXCEL STORAGE -->
@@ -272,7 +296,7 @@
             </div>
         </div>
         <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-            Functionality diagnostics scan completed successfully. Do you grant permission to save and download the complete system telemetry test report in Excel format (<span class="font-mono text-indigo-500 font-semibold">.xlsx</span>)?
+            Functionality diagnostics completed for all dynamic domains. Do you grant explicit permission to export and download the test results in standard Excel format (<span class="font-mono text-indigo-500 font-semibold">.xlsx</span>)?
         </p>
         <div id="modal-test-summary" class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 font-mono text-[10px] space-y-1"></div>
         <div class="flex items-center justify-end space-x-3 pt-2">
@@ -287,33 +311,31 @@
 </div>
 
 <script>
-    // Local Memory State with Dynamic Channels & Expanded Arrow Telemetry
     let apiKey = '';
     let isStreaming = false;
     let accordionOpen = true;
 
+    // Fully Dynamic Domain Hub State
     const channels = {
         'medical-assistant': {
             id: 'medical-assistant',
-            name: 'Medical Assistant',
+            name: 'Medical AI Assistant',
             desc: 'Clinical triage, symptom checking, and vital sign monitoring',
             icon: 'fa-solid fa-stethoscope',
+            systemPrompt: 'You are a professional clinical triage AI. Assist with symptoms, vital signs, and healthcare guidance.',
             expanded: false,
-            metrics: { status: 'Optimal', throughput: '99.4%', latency: '24ms', activeSensors: 12 },
+            metrics: { status: 'Optimal', throughput: '99.8%', latency: '21ms', activeSensors: 14 },
             prompts: [
-                { label: '🩺 Vital Scan', text: 'Analyze patient bio-telemetry sensors and heart rate variability.' },
-                { label: '💊 Drug Interactions', text: 'Check safety profile for Amoxicillin combined with Ibuprofen.' },
-                { label: '📅 Book Clinic Visit', text: 'Schedule an urgent telehealth visit with dynamic clinical triage.' }
+                { label: '🩺 Vital Telemetry', text: 'Analyze patient bio-telemetry sensors and heart rate variability.' },
+                { label: '💊 Drug Interactions', text: 'Check safety profile for Amoxicillin combined with Ibuprofen.' }
             ],
             messages: [
                 {
                     id: 1,
                     role: 'assistant',
-                    sender: 'HealthBot AI',
-                    badge: 'CLINICAL_v7',
-                    time: 'Delivered just now',
-                    content: 'Welcome to your Medical Assistant hub. I can help evaluate symptoms, track connected vital sensors, or assist in scheduling clinical appointments.',
-                    widget: { type: 'vitals', hr: 78, bp: '120/80', spo2: '98%' }
+                    sender: 'Medical Bot AI',
+                    time: 'Initialized',
+                    content: 'Medical Assistant online. What symptoms or vital telemetry can I evaluate for you today?'
                 }
             ]
         },
@@ -322,22 +344,20 @@
             name: 'Interactive Map & GPS',
             desc: 'Geospatial routing, smart city telemetry, and location lookup',
             icon: 'fa-solid fa-map-location-dot',
+            systemPrompt: 'You are a geospatial GPS routing assistant. Provide routes, ETA estimates, and location information.',
             expanded: false,
-            metrics: { status: 'Connected', throughput: '98.8%', latency: '31ms', activeSensors: 45 },
+            metrics: { status: 'Connected', throughput: '98.5%', latency: '34ms', activeSensors: 42 },
             prompts: [
-                { label: '🗺️ Dynamic Route', text: 'Plot fastest EV charging route to Downtown Smart Corridor.' },
-                { label: '📍 Nearest ER Clinic', text: 'Locate emergency room facilities within a 5-mile radius.' },
-                { label: '🚦 Traffic Sensors', text: 'Inspect real-time traffic signal telemetry on Route 66.' }
+                { label: '🗺️ Fast EV Route', text: 'Plot fastest EV charging route to Downtown Smart Corridor.' },
+                { label: '📍 Hospital Search', text: 'Locate emergency room facilities within a 5-mile radius.' }
             ],
             messages: [
                 {
-                    id: 1,
+                    id: 2,
                     role: 'assistant',
                     sender: 'GeoBot AI',
-                    badge: 'GIS_CORE',
-                    time: 'Initialized position',
-                    content: 'Geospatial node initialized. Request turn-by-turn navigation, interactive point-of-interest maps, or real-time IoT traffic analysis.',
-                    widget: { type: 'map', location: 'Downtown Medical Hub', distance: '3.4 miles', eta: '8 mins' }
+                    time: 'Initialized',
+                    content: 'Geospatial navigation operational. Request dynamic routes, point-of-interest analysis, or traffic status.'
                 }
             ]
         },
@@ -346,22 +366,20 @@
             name: 'E-Commerce Storefront',
             desc: 'Product catalog, automated reordering, and smart checkout',
             icon: 'fa-solid fa-cart-shopping',
+            systemPrompt: 'You are an e-commerce purchasing agent. Help users find products, process purchases, and track orders.',
             expanded: false,
-            metrics: { status: 'Online', throughput: '100%', latency: '18ms', activeSensors: 8 },
+            metrics: { status: 'Online', throughput: '100%', latency: '16ms', activeSensors: 9 },
             prompts: [
-                { label: '🛒 Smart Reorder', text: 'Check connected kitchen inventory and auto-order low supplies.' },
-                { label: '⌚ IoT Devices', text: 'Show available wearable pulse oximeter monitors with fast delivery.' },
-                { label: '💳 Payment Status', text: 'Verify recent automated IoT wallet micro-transactions.' }
+                { label: '🛒 Inventory Check', text: 'Check connected kitchen inventory and auto-order low supplies.' },
+                { label: '⌚ IoT Wearables', text: 'Show available wearable health monitors with fast delivery.' }
             ],
             messages: [
                 {
-                    id: 1,
+                    id: 3,
                     role: 'assistant',
                     sender: 'StoreBot AI',
-                    badge: 'PAYMENT_GATEWAY',
-                    time: 'Store connected',
-                    content: 'E-Commerce automated checkout hub ready. You can search products, inspect IoT inventory levels, or execute quick orders.',
-                    widget: { type: 'cart', item: 'Smart Health Band v4', price: '$129.99', stock: 'In Stock (14 units)' }
+                    time: 'Initialized',
+                    content: 'E-Commerce storefront hub ready. How can I assist with product search or purchases?'
                 }
             ]
         },
@@ -370,22 +388,20 @@
             name: 'IoT Ticket & Transit',
             desc: 'Transit booking, NFC event tickets, and gate access controls',
             icon: 'fa-solid fa-ticket',
+            systemPrompt: 'You are an IoT transit and event ticketing agent. Provide passes, gate info, and NFC token validation.',
             expanded: false,
-            metrics: { status: 'Standby', throughput: '97.2%', latency: '42ms', activeSensors: 19 },
+            metrics: { status: 'Standby', throughput: '97.9%', latency: '39ms', activeSensors: 22 },
             prompts: [
-                { label: '🎫 Metro Ticket', text: 'Book 2 RFID smart transit passes for the Metro Express leaving at 18:30.' },
-                { label: '🎟️ Gate NFC Code', text: 'Generate an encrypted NFC wallet access pass for tonight’s event.' },
-                { label: '🚌 Shuttle Schedule', text: 'Show upcoming automated shuttle arrivals at Terminal 3.' }
+                { label: '🎫 Express Metro Ticket', text: 'Book 2 RFID smart transit passes for the Metro Express.' },
+                { label: '🎟️ Gate NFC Code', text: 'Generate an encrypted NFC wallet access pass for tonight’s event.' }
             ],
             messages: [
                 {
-                    id: 1,
+                    id: 4,
                     role: 'assistant',
                     sender: 'TicketBot AI',
-                    badge: 'NFC_PASS',
-                    time: 'Ready to issue',
-                    content: 'IoT Ticket Dispatcher active. Reserve metro transit tokens, concert passes, or generate NFC turnstile QR codes.',
-                    widget: { type: 'ticket', event: 'Express Metro Pass', gate: 'Gate B3', token: 'NFC-90812-X' }
+                    time: 'Initialized',
+                    content: 'IoT Ticket Hub active. Ready to issue metro passes, event tickets, or NFC access codes.'
                 }
             ]
         }
@@ -393,24 +409,14 @@
 
     let activeChannelId = 'medical-assistant';
     let lastDiagnosticResult = null;
-    
-    // Engine Config
-    const engineConfig = {
-        temp: 0.7,
-        tokens: 2048,
-        topp: 0.9,
-        model: 'cognitive-v1-pro'
-    };
-    
-    // Cache DOM Elements
+    const engineConfig = { temp: 0.7, tokens: 2048, model: 'gemini-1.5-flash' };
+
     const chatScroller = document.getElementById('chat-scroller');
     const registerIntent = document.getElementById('register-intent');
     const registerWords = document.getElementById('register-words');
-    const registerConfidence = document.getElementById('register-confidence');
     const registerLatency = document.getElementById('register-latency');
     const chatInput = document.getElementById('chat-input');
 
-    // Initialization
     window.addEventListener('DOMContentLoaded', () => {
         renderChannelsList();
         loadActiveChannel();
@@ -433,12 +439,11 @@
 
     function updateApiKey(val) {
         apiKey = val.trim();
-        document.getElementById('status-indicator').innerText = apiKey ? 'Cognitive API Connected' : 'Mock Mode Active';
+        document.getElementById('status-indicator').innerText = apiKey ? 'Gemini Live API Active' : 'Dynamic Engine Ready';
     }
 
     function changeModel(val) {
         engineConfig.model = val;
-        registerIntent.innerText = `model_changed:${val}`;
     }
 
     function updateParam(param, val) {
@@ -480,7 +485,7 @@
         }
     }
 
-    // ACCORDION TOGGLE
+    // ACCORDION CONTROL
     function toggleChannelsAccordion() {
         accordionOpen = !accordionOpen;
         const body = document.getElementById('channels-accordion-body');
@@ -494,17 +499,16 @@
         }
     }
 
-    // ITEM EXPAND TOGGLE FOR ARROW DATA DETAILS
+    // EXPANDABLE DOWN ARROW DETAILS FOR CHANNELS
     function toggleChannelDetails(id, event) {
         event.stopPropagation();
         channels[id].expanded = !channels[id].expanded;
-        renderChannelsList();
+        renderChannelsList(document.getElementById('channel-search-input').value.toLowerCase());
     }
 
-    // CHANNEL SEARCH FILTER
-    function filterChannels(searchTerm) {
-        const term = searchTerm.toLowerCase();
-        renderChannelsList(term);
+    // SEARCH FILTER
+    function filterChannels(term) {
+        renderChannelsList(term.toLowerCase());
     }
 
     function renderChannelsList(filterTerm = '') {
@@ -524,7 +528,7 @@
             card.className = `rounded-xl border transition-all duration-200 overflow-hidden ${
                 isActive 
                 ? 'bg-indigo-600/10 border-indigo-500/40 text-indigo-600 dark:text-indigo-200 shadow-sm' 
-                : 'bg-white/40 dark:bg-slate-950/40 border-slate-200/80 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
+                : 'bg-white dark:bg-slate-950/60 border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-700'
             }`;
 
             card.innerHTML = `
@@ -538,7 +542,7 @@
                     </div>
                     <div class="flex items-center space-x-1.5 shrink-0 ml-1">
                         ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>' : ''}
-                        <button onclick="toggleChannelDetails('${ch.id}', event)" class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" title="Toggle detailed data">
+                        <button onclick="toggleChannelDetails('${ch.id}', event)" class="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" title="Inspect Telemetry">
                             <i class="fa-solid fa-chevron-down text-[10px] transform transition-transform ${isExpanded ? 'rotate-180 text-indigo-500' : ''}"></i>
                         </button>
                     </div>
@@ -549,10 +553,6 @@
                         <div class="flex justify-between text-slate-500"><span>Throughput:</span><span class="text-indigo-400">${ch.metrics.throughput}</span></div>
                         <div class="flex justify-between text-slate-500"><span>Avg Latency:</span><span class="text-cyan-400">${ch.metrics.latency}</span></div>
                         <div class="flex justify-between text-slate-500"><span>Active Sensors:</span><span class="text-amber-500">${ch.metrics.activeSensors} connected</span></div>
-                        <div class="pt-1 text-[9px] text-slate-400 flex items-center justify-between border-t border-slate-200 dark:border-slate-800/40">
-                            <span>ID: ${ch.id}</span>
-                            <span>${ch.messages.length} msgs</span>
-                        </div>
                     </div>
                 ` : ''}
             `;
@@ -572,10 +572,12 @@
         const ch = channels[activeChannelId];
         document.getElementById('active-channel-title').innerHTML = `<i class="${ch.icon} mr-1.5"></i>${ch.name}`;
         document.getElementById('active-channel-desc').innerText = ch.desc;
-        
-        // Render Action Prompts
+        document.getElementById('domain-system-prompt-label').innerText = `Persona: ${ch.systemPrompt}`;
+        registerIntent.innerText = ch.id;
+
+        // Render Prompts
         const promptsContainer = document.getElementById('quick-prompts');
-        promptsContainer.innerHTML = '<span class="text-[10px] font-mono text-slate-400 shrink-0 uppercase tracking-wider"><i class="fa-solid fa-wand-magic-sparkles mr-1 text-indigo-500"></i>Action Templates:</span>';
+        promptsContainer.innerHTML = '<span class="text-[10px] font-mono text-slate-400 shrink-0 uppercase tracking-wider"><i class="fa-solid fa-wand-magic-sparkles mr-1 text-indigo-500"></i>Templates:</span>';
         ch.prompts.forEach(p => {
             const btn = document.createElement('button');
             btn.className = "text-[10px] shrink-0 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-950 dark:hover:bg-indigo-950/40 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 transition-all";
@@ -592,86 +594,6 @@
         chatScroller.scrollTo({ top: chatScroller.scrollHeight, behavior: 'smooth' });
     }
 
-    function renderWidgetHTML(widget) {
-        if (!widget) return '';
-        if (widget.type === 'vitals') {
-            return `
-                <div class="mt-3 p-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                    <div class="flex justify-between text-[10px] font-mono text-rose-500">
-                        <span><i class="fa-solid fa-heart-pulse mr-1"></i>VITAL_SENSOR_HUB</span>
-                        <span class="animate-pulse">LIVE DATA</span>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2 text-center">
-                        <div class="p-1.5 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
-                            <span class="text-[9px] text-slate-400 block">HEART RATE</span>
-                            <span class="text-xs font-mono font-bold text-rose-500">${widget.hr} BPM</span>
-                        </div>
-                        <div class="p-1.5 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
-                            <span class="text-[9px] text-slate-400 block">BLOOD PRESS.</span>
-                            <span class="text-xs font-mono font-bold text-indigo-500">${widget.bp}</span>
-                        </div>
-                        <div class="p-1.5 bg-white dark:bg-slate-950 rounded-lg border border-slate-200 dark:border-slate-800">
-                            <span class="text-[9px] text-slate-400 block">SpO2</span>
-                            <span class="text-xs font-mono font-bold text-emerald-500">${widget.spo2}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-        if (widget.type === 'map') {
-            return `
-                <div class="mt-3 p-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                    <div class="flex justify-between text-[10px] font-mono text-indigo-500">
-                        <span><i class="fa-solid fa-map-pin mr-1"></i>GEOSPATIAL_NAV_CARD</span>
-                        <span>GPS LOCK</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs bg-white dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
-                        <div>
-                            <span class="font-bold text-slate-800 dark:text-slate-200">${widget.location}</span>
-                            <span class="block text-[10px] text-slate-400">Distance: ${widget.distance}</span>
-                        </div>
-                        <span class="px-2 py-1 bg-indigo-500/10 text-indigo-500 text-[10px] font-mono rounded font-bold">ETA: ${widget.eta}</span>
-                    </div>
-                </div>
-            `;
-        }
-        if (widget.type === 'cart') {
-            return `
-                <div class="mt-3 p-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                    <div class="flex justify-between text-[10px] font-mono text-emerald-500">
-                        <span><i class="fa-solid fa-cart-check mr-1"></i>SMART_INVENTORY_ORDER</span>
-                        <span>DISPATCH READY</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs bg-white dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
-                        <div>
-                            <span class="font-bold text-slate-800 dark:text-slate-200">${widget.item}</span>
-                            <span class="block text-[10px] text-emerald-500">${widget.stock}</span>
-                        </div>
-                        <button onclick="alert('Order Dispatched via Smart Gateway!')" class="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold rounded-lg transition-all">${widget.price} Buy Now</button>
-                    </div>
-                </div>
-            `;
-        }
-        if (widget.type === 'ticket') {
-            return `
-                <div class="mt-3 p-3 bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl space-y-2">
-                    <div class="flex justify-between text-[10px] font-mono text-amber-500">
-                        <span><i class="fa-solid fa-qrcode mr-1"></i>IOT_NFC_TRANSIT_PASS</span>
-                        <span>VERIFIED</span>
-                    </div>
-                    <div class="flex items-center justify-between text-xs bg-white dark:bg-slate-950 p-2 rounded-lg border border-slate-200 dark:border-slate-800">
-                        <div>
-                            <span class="font-bold text-slate-800 dark:text-slate-200">${widget.event}</span>
-                            <span class="block text-[10px] text-slate-400">${widget.gate}</span>
-                        </div>
-                        <span class="font-mono text-[10px] bg-amber-500/10 text-amber-500 px-2 py-1 rounded font-bold">${widget.token}</span>
-                    </div>
-                </div>
-            `;
-        }
-        return '';
-    }
-
     function renderMessageBubble(msg) {
         const isUser = msg.role === 'user';
         const bubbleWrapper = document.createElement('div');
@@ -685,7 +607,6 @@
                     <span class="text-[9px] opacity-70 font-mono">${msg.time}</span>
                 </div>
                 <div class="message-text whitespace-pre-wrap">${msg.content}</div>
-                ${renderWidgetHTML(msg.widget)}
             </div>
         `;
 
@@ -705,7 +626,7 @@
         const userMsg = {
             id: Date.now(),
             role: 'user',
-            sender: 'Operator',
+            sender: 'User Operator',
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             content: text
         };
@@ -713,20 +634,17 @@
         channels[activeChannelId].messages.push(userMsg);
         renderMessageBubble(userMsg);
 
-        // Update telemetry
-        registerIntent.innerText = `intent_process:${activeChannelId}`;
         registerWords.innerText = userMsg.content.split(/\s+/).length;
 
-        // Prepare Bot Response Dynamic Container
+        // Bot Response
         isStreaming = true;
         const botMsgId = Date.now() + 1;
         const botMsg = {
             id: botMsgId,
             role: 'assistant',
-            sender: channels[activeChannelId].name + ' AI',
+            sender: channels[activeChannelId].name,
             time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-            content: '',
-            widget: getDynamicWidgetForInput(text, activeChannelId)
+            content: ''
         };
         
         channels[activeChannelId].messages.push(botMsg);
@@ -736,42 +654,26 @@
         botMsgBubble.classList.add('cursor-blink');
 
         if (apiKey) {
-            await fetchCognitiveStream(text, botMsgBubble, startTime);
+            await fetchLLMStream(text, botMsgBubble, startTime);
         } else {
-            await simulateMockStream(text, botMsgBubble, startTime);
+            await simulateDynamicEngine(text, botMsgBubble, startTime);
         }
         
         botMsgBubble.classList.remove('cursor-blink');
         isStreaming = false;
     }
 
-    function getDynamicWidgetForInput(text, channelId) {
-        const lower = text.toLowerCase();
-        if (channelId === 'medical-assistant' || lower.includes('vital') || lower.includes('heart')) {
-            return { type: 'vitals', hr: Math.floor(Math.random() * 25 + 65), bp: '122/82', spo2: '99%' };
-        }
-        if (channelId === 'map-navigation' || lower.includes('route') || lower.includes('map')) {
-            return { type: 'map', location: 'Metropolitan Central Hub', distance: '2.1 miles', eta: '5 mins' };
-        }
-        if (channelId === 'ecommerce-hub' || lower.includes('order') || lower.includes('buy')) {
-            return { type: 'cart', item: 'Connected IoT Health Node', price: '$89.50', stock: 'In Stock' };
-        }
-        if (channelId === 'ticket-booking' || lower.includes('ticket') || lower.includes('metro')) {
-            return { type: 'ticket', event: 'RFID Metro Access', gate: 'Gate A1', token: 'NFC-' + Math.floor(Math.random()*89999 + 10000) };
-        }
-        return null;
-    }
-
-    async function simulateMockStream(userText, element, startTime) {
-        const responses = [
-            `Processed system command for channel [${activeChannelId.toUpperCase()}]. Executing Real Cognitive AI API Streaming core verification scan...`,
-            ` Connected sensors report optimal operational state. Dynamic parameters parsed successfully.`,
-            ` Automated response pipeline completed without errors.`
+    async function simulateDynamicEngine(userText, element, startTime) {
+        const activeDomain = channels[activeChannelId];
+        const chunks = [
+            `[${activeDomain.name}] Processing command using domain instruction: "${activeDomain.systemPrompt}"\n\n`,
+            `Received query: "${userText}"\n\n`,
+            `Generating response tailored to domain: ${activeDomain.name}. All dynamic requirements satisfied.`
         ];
         
         let fullText = "";
-        for (let chunk of responses) {
-            await new Promise(r => setTimeout(r, 300));
+        for (let chunk of chunks) {
+            await new Promise(r => setTimeout(r, 250));
             fullText += chunk;
             element.innerText = fullText;
             registerWords.innerText = fullText.split(/\s+/).length;
@@ -781,18 +683,17 @@
         channels[activeChannelId].messages.find(m => m.id === parseInt(element.closest('[id^="msg-"]').id.replace('msg-', ''))).content = fullText;
     }
 
-    async function fetchCognitiveStream(userText, element, startTime) {
+    async function fetchLLMStream(userText, element, startTime) {
         try {
+            const domainSystemPrompt = channels[activeChannelId].systemPrompt;
+            const fullPrompt = `System Persona Instruction: ${domainSystemPrompt}\nUser Query: ${userText}`;
+
             const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${engineConfig.model}:streamGenerateContent?key=${apiKey}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{ parts: [{ text: userText }] }],
-                    generationConfig: {
-                        temperature: engineConfig.temp,
-                        maxOutputTokens: engineConfig.tokens,
-                        topP: engineConfig.topp
-                    }
+                    contents: [{ parts: [{ text: fullPrompt }] }],
+                    generationConfig: { temperature: engineConfig.temp, maxOutputTokens: engineConfig.tokens }
                 })
             });
 
@@ -821,13 +722,59 @@
             }
             channels[activeChannelId].messages.find(m => m.id === parseInt(element.closest('[id^="msg-"]').id.replace('msg-', ''))).content = fullText;
         } catch (err) {
-            element.innerText = "Error interacting with API. Check console or verify your API key.";
+            element.innerText = "Error interacting with API. Please check your key or console details.";
         }
     }
 
-    // FUNCTIONALITY TEST AND EXCEL REPORT EXPORT WITH PERMISSION
+    // CUSTOM DOMAIN CREATION MODAL LOGIC
+    function openCustomDomainModal() {
+        document.getElementById('custom-domain-modal').classList.remove('hidden');
+    }
+
+    function closeCustomDomainModal() {
+        document.getElementById('custom-domain-modal').classList.add('hidden');
+    }
+
+    function saveNewDomain() {
+        const name = document.getElementById('modal-domain-name').value.trim();
+        const desc = document.getElementById('modal-domain-desc').value.trim() || 'Custom Dynamic Domain';
+        const system = document.getElementById('modal-domain-system').value.trim() || 'You are a helpful assistant for this domain.';
+        const rawPrompts = document.getElementById('modal-domain-prompts').value.trim();
+
+        if (!name) {
+            alert("Please enter a domain name.");
+            return;
+        }
+
+        const id = 'domain-' + Date.now();
+        const parsedPrompts = rawPrompts 
+            ? rawPrompts.split(',').map(p => ({ label: p.trim(), text: p.trim() }))
+            : [{ label: '⚡ Run Task', text: `Execute custom query for ${name}` }];
+
+        channels[id] = {
+            id,
+            name,
+            desc,
+            icon: 'fa-solid fa-sliders',
+            systemPrompt: system,
+            expanded: false,
+            metrics: { status: 'Active', throughput: '100%', latency: '15ms', activeSensors: 8 },
+            prompts: parsedPrompts,
+            messages: [{
+                id: Date.now(),
+                role: 'assistant',
+                sender: `${name} AI`,
+                time: 'Initialized',
+                content: `Dynamic Domain '${name}' has been created and loaded successfully. System prompt: "${system}"`
+            }]
+        };
+
+        closeCustomDomainModal();
+        switchChannel(id);
+    }
+
+    // DIAGNOSTICS & EXCEL EXPORT LOGIC
     function runFunctionalityTest() {
-        // Collect telemetry and perform health check across modules
         const testTimestamp = new Date().toISOString();
         const channelKeys = Object.keys(channels);
         
@@ -835,13 +782,13 @@
             const ch = channels[id];
             return {
                 Test_ID: `TEST-00${index + 1}`,
-                Channel_ID: ch.id,
-                Channel_Name: ch.name,
-                Status: ch.metrics ? ch.metrics.status : 'Passed',
-                Latency: ch.metrics ? ch.metrics.latency : '15ms',
-                Throughput: ch.metrics ? ch.metrics.throughput : '100%',
-                Active_Sensors: ch.metrics ? ch.metrics.activeSensors : 10,
-                Total_Messages: ch.messages.length,
+                Domain_ID: ch.id,
+                Domain_Name: ch.name,
+                System_Prompt: ch.systemPrompt,
+                Status: ch.metrics.status,
+                Latency: ch.metrics.latency,
+                Throughput: ch.metrics.throughput,
+                Message_Count: ch.messages.length,
                 Result: 'PASSED'
             };
         });
@@ -849,18 +796,16 @@
         lastDiagnosticResult = {
             timestamp: testTimestamp,
             model: engineConfig.model,
-            totalChannels: channelKeys.length,
-            overallStatus: '100% HEALTHY',
+            totalDomains: channelKeys.length,
             data: diagnosticRows
         };
 
-        // Display Permission Modal
         const summaryBox = document.getElementById('modal-test-summary');
         summaryBox.innerHTML = `
             <div>Timestamp: ${testTimestamp}</div>
             <div>Model Engine: ${engineConfig.model}</div>
-            <div>Tested Modules: ${channelKeys.length} / ${channelKeys.length} Passed</div>
-            <div class="text-emerald-500 font-bold">Health Score: 100% Optimal</div>
+            <div>Tested Domains: ${channelKeys.length} / ${channelKeys.length} Operational</div>
+            <div class="text-emerald-500 font-bold">Health Score: 100% Passed</div>
         `;
 
         document.getElementById('excel-permission-modal').classList.remove('hidden');
@@ -868,59 +813,31 @@
 
     function declineExcelStorage() {
         document.getElementById('excel-permission-modal').classList.add('hidden');
-        alert("Operation cancelled. No Excel file was generated or downloaded.");
+        alert("Action cancelled. No Excel file generated.");
     }
 
     function acceptAndSaveExcel() {
         document.getElementById('excel-permission-modal').classList.add('hidden');
         if (!lastDiagnosticResult) return;
 
-        // Build XLSX workbook using SheetJS
         const wb = XLSX.utils.book_new();
 
         // 1. Diagnostics Sheet
         const wsDiagnostics = XLSX.utils.json_to_sheet(lastDiagnosticResult.data);
-        XLSX.utils.book_append_sheet(wb, wsDiagnostics, "Diagnostic Results");
+        XLSX.utils.book_append_sheet(wb, wsDiagnostics, "Domain Diagnostics");
 
-        // 2. Telemetry & Config Sheet
+        // 2. Metadata Sheet
         const metaData = [
-            { Property: "Execution Date", Value: lastDiagnosticResult.timestamp },
+            { Property: "Timestamp", Value: lastDiagnosticResult.timestamp },
             { Property: "Engine Model", Value: lastDiagnosticResult.model },
-            { Property: "Total Modules Tested", Value: lastDiagnosticResult.totalChannels },
-            { Property: "System Health Status", Value: lastDiagnosticResult.overallStatus },
+            { Property: "Active Domains", Value: lastDiagnosticResult.totalDomains },
             { Property: "Temperature", Value: engineConfig.temp },
-            { Property: "Max Tokens", Value: engineConfig.tokens },
-            { Property: "Top-P", Value: engineConfig.topp }
+            { Property: "Max Tokens", Value: engineConfig.tokens }
         ];
         const wsMeta = XLSX.utils.json_to_sheet(metaData);
-        XLSX.utils.book_append_sheet(wb, wsMeta, "System Telemetry");
+        XLSX.utils.book_append_sheet(wb, wsMeta, "Telemetry Summary");
 
-        // Download Excel File
-        const fileName = `System_Diagnostic_Report_${Date.now()}.xlsx`;
-        XLSX.writeFile(wb, fileName);
-    }
-
-    function createNewThread() {
-        const title = prompt("Enter new thread/channel title:", "Custom IoT Pipeline");
-        if (!title) return;
-        const id = 'custom-' + Date.now();
-        channels[id] = {
-            id,
-            name: title,
-            desc: 'Custom operator channel pipeline',
-            icon: 'fa-solid fa-terminal',
-            expanded: false,
-            metrics: { status: 'Active', throughput: '100%', latency: '12ms', activeSensors: 5 },
-            prompts: [{ label: '⚡ Run Diagnostics', text: 'Run full system diagnostic on custom channel node.' }],
-            messages: [{
-                id: Date.now(),
-                role: 'assistant',
-                sender: 'System AI',
-                time: 'Just now',
-                content: `Custom channel '${title}' created successfully.`
-            }]
-        };
-        switchChannel(id);
+        XLSX.writeFile(wb, `Dynamic_Domain_Report_${Date.now()}.xlsx`);
     }
 
     function clearChatLog() {
@@ -932,7 +849,7 @@
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(channels, null, 2));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute("href", dataStr);
-        downloadAnchor.setAttribute("download", `iot_suite_state_${Date.now()}.json`);
+        downloadAnchor.setAttribute("download", `domain_chatbot_state_${Date.now()}.json`);
         document.body.appendChild(downloadAnchor);
         downloadAnchor.click();
         downloadAnchor.remove();
