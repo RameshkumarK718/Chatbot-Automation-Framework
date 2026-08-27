@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="h-full dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Dual-Viewport Chatbot Playground v5.0</title>
+    <title>Enterprise Multi-Domain IoT Chatbot Suite v6.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,10 +21,10 @@
         }
     </script>
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #030712; color: #f1f5f9; }
+        body { font-family: 'Inter', sans-serif; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0b0f19; }
-        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 99px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 99px; }
         ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
         .cursor-blink::after {
             content: '█';
@@ -38,47 +38,58 @@
         }
     </style>
 </head>
-<body class="h-full flex flex-col overflow-hidden bg-slate-950 text-slate-100">
-<header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shrink-0 px-6 py-3 flex items-center justify-between z-30">
+<body class="h-full flex flex-col overflow-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+<header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shrink-0 px-6 py-3 flex items-center justify-between z-30 transition-colors">
     <div class="flex items-center space-x-3">
-        <button onclick="toggleSidebar('left-sidebar', true)" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+        <button onclick="toggleSidebar('left-sidebar', true)" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <i class="fa-solid fa-bars-staggered text-lg"></i>
         </button>
         <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-            <i class="fa-solid fa-microchip text-sm"></i>
+            <i class="fa-solid fa-network-wired text-sm"></i>
         </div>
         <div>
             <div class="flex items-center space-x-2">
-                <h1 class="text-sm font-bold bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">Gemini AI Suite</h1>
-                <span class="text-[9px] font-mono bg-indigo-950 text-indigo-400 border border-indigo-800/60 px-1.5 py-0.2 rounded-full">v5.0</span>
+                <h1 class="text-sm font-bold bg-gradient-to-r from-slate-900 via-indigo-900 to-indigo-600 dark:from-white dark:via-indigo-200 dark:to-indigo-400 bg-clip-text text-transparent">Gemini IoT & Services Suite</h1>
+                <span class="text-[9px] font-mono bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/60 px-1.5 py-0.2 rounded-full">v6.0</span>
             </div>
-            <p class="text-[10px] text-slate-400 hidden sm:block">Enterprise Multi-Channel Control Console</p>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block">Medical, Geospatial Maps, E-Commerce & IoT Ticketing Console</p>
         </div>
     </div>
     <div class="flex items-center space-x-4">
-        <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1">
+        <button onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors" title="Toggle Light/Dark Theme">
+            <i id="theme-toggle-icon" class="fa-solid fa-moon text-sm"></i>
+        </button>
+        <div class="flex items-center bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
             <span class="text-[9px] text-slate-500 font-mono mr-2">ACTIVE MODEL:</span>
-            <select id="model-selector" class="bg-transparent text-xs font-semibold text-indigo-300 focus:outline-none cursor-pointer">
-                <option value="gemini-1.5-pro" class="bg-slate-900 text-slate-200">Gemini 1.5 Pro</option>
-                <option value="gemini-1.5-flash" class="bg-slate-900 text-slate-200">Gemini 1.5 Flash</option>
+            <select id="model-selector" class="bg-transparent text-xs font-semibold text-indigo-600 dark:text-indigo-300 focus:outline-none cursor-pointer">
+                <option value="gemini-1-5-pro" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Gemini 1.5 Pro</option>
+                <option value="gemini-1-5-flash" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Gemini 1.5 Flash</option>
+                <option value="gemini-ultra" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Gemini Ultra</option>
             </select>
         </div>
-        <div class="hidden md:flex items-center bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800/80 text-[10px] font-mono">
+        <div class="hidden md:flex items-center bg-slate-100 dark:bg-slate-950 px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-800/80 text-[10px] font-mono">
             <span class="flex h-2 w-2 relative mr-2">
                 <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
             </span>
-            <span class="text-slate-400">ENGINE STATE:</span>
-            <span class="text-indigo-400 ml-1 font-bold">ONLINE_V5</span>
+            <span class="text-slate-500 dark:text-slate-400">HUB STATUS:</span>
+            <span class="text-indigo-600 dark:text-indigo-400 ml-1 font-bold">ONLINE_V6</span>
         </div>
-        <button onclick="toggleSidebar('right-sidebar', true)" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+        <button onclick="toggleSidebar('right-sidebar', true)" class="lg:hidden p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             <i class="fa-solid fa-sliders text-lg"></i>
         </button>
     </div>
 </header>
 <div class="flex-1 flex overflow-hidden relative">
     <div id="left-sidebar-backdrop" onclick="toggleSidebar('left-sidebar', false)" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
-    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-slate-900 border-r border-slate-800 flex flex-col h-full transform -translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
+    <!-- LEFT SIDEBAR: CORE PIPELINES -->
+    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full transform -translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
+        <div class="p-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 lg:hidden">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Services Channels</span>
+            <button onclick="toggleSidebar('left-sidebar', false)" class="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
         <div class="p-4 space-y-2 shrink-0">
             <button onclick="createNewThread()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all group">
                 <i class="fa-solid fa-plus group-hover:rotate-90 transition-transform"></i>
@@ -86,84 +97,324 @@
             </button>
         </div>
         <div class="flex-1 overflow-y-auto px-2 space-y-1">
+            <div class="px-3 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex justify-between items-center">
+                <span>Active Channels</span>
+                <span class="text-[9px] lowercase font-normal text-slate-500">4 modules</span>
+            </div>
             <div id="channels-list" class="space-y-1"></div>
         </div>
+        <div class="p-4 bg-slate-200/50 dark:bg-slate-950/40 border-t border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
+            <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-500 dark:text-slate-400 flex items-center"><i class="fa-solid fa-wifi mr-2 text-indigo-500 dark:text-indigo-400"></i>IoT Broker</span>
+                <span class="font-mono text-emerald-600 dark:text-emerald-400">MQTT / TLS</span>
+            </div>
+            <div class="flex items-center justify-between text-[11px]">
+                <span class="text-slate-500 dark:text-slate-400 flex items-center"><i class="fa-solid fa-heart-pulse mr-2 text-rose-500 dark:text-rose-400"></i>Telehealth Node</span>
+                <span class="font-mono text-slate-700 dark:text-slate-200">ACTIVE</span>
+            </div>
+        </div>
+        <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-200/80 dark:bg-slate-950">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-600 dark:text-indigo-400 font-bold text-xs border border-indigo-500/30">
+                    SO
+                </div>
+                <div>
+                    <h4 class="text-xs font-semibold text-slate-800 dark:text-white">System Operator</h4>
+                    <p class="text-[9px] text-slate-500 font-mono">ID: USER-90210</p>
+                </div>
+            </div>
+        </div>
     </aside>
-    <main class="flex-1 flex flex-col h-full bg-slate-950 overflow-hidden min-w-0">
-        <div class="bg-slate-900/40 border-b border-slate-800 p-3 flex justify-between items-center px-4 md:px-6 shrink-0">
+    <!-- MAIN CHAT VIEWPORT -->
+    <main class="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden min-w-0 transition-colors">
+        <div class="bg-white/40 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 p-3 flex justify-between items-center px-4 md:px-6 shrink-0">
             <div>
-                <span id="active-channel-title" class="text-xs font-bold uppercase tracking-wider text-indigo-400"><i class="fa-solid fa-hashtag mr-1"></i>General Core Support</span>
-                <p id="active-channel-desc" class="text-[10px] text-slate-500 hidden sm:block">Direct natural language parsing channel pipeline</p>
+                <span id="active-channel-title" class="text-xs font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                    <i class="fa-solid fa-stethoscope mr-1"></i>Medical AI Assistant
+                </span>
+                <p id="active-channel-desc" class="text-[10px] text-slate-500 hidden sm:block">Clinical triage, symptom checking, and vital sign monitoring</p>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="clearChatLog()" class="text-[10px] font-semibold bg-slate-900/60 hover:bg-red-950/40 text-slate-400 hover:text-red-400 px-3 py-1.5 rounded-lg border border-slate-800 transition-colors">
+                <button onclick="exportJSONState()" class="text-[10px] font-semibold bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors">
+                    <i class="fa-solid fa-file-export mr-1.5 text-indigo-500 dark:text-indigo-400"></i>Export State
+                </button>
+                <button onclick="clearChatLog()" class="text-[10px] font-semibold bg-white/60 dark:bg-slate-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors">
                     <i class="fa-solid fa-trash-can mr-1.5"></i>Clear History
                 </button>
             </div>
         </div>
         <div id="chat-scroller" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4"></div>
-        <div class="p-4 bg-slate-900 border-t border-slate-800 space-y-3 shrink-0">
-            <div class="max-w-4xl mx-auto flex items-end space-x-2 bg-slate-950 border border-slate-800 focus-within:border-indigo-500/50 rounded-xl p-2 transition-all">
-                <textarea id="chat-input" rows="1" placeholder="Describe your prompt here (Shift + Enter for new lines)..." class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-xs text-slate-100 placeholder-slate-500 max-h-32 resize-none py-2 px-3 align-bottom" onkeydown="handleInputKeyPress(event)"></textarea>
+        <!-- INPUT BOX AND QUICK PROMPTS -->
+        <div class="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 space-y-3 shrink-0 transition-colors">
+            <div class="max-w-4xl mx-auto flex items-center space-x-2 overflow-x-auto pb-1 scrollbar-none">
+                <span class="text-[10px] font-mono text-slate-400 shrink-0 uppercase tracking-wider">
+                    <i class="fa-solid fa-wand-magic-sparkles mr-1 text-indigo-500"></i>Action Templates:
+                </span>
+                <button onclick="applyPromptBlock('Medical Alert: Analyze current heart rate variability and blood pressure sensors for potential anomalies.')" class="text-[10px] shrink-0 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-950 dark:hover:bg-indigo-950/40 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 transition-all">
+                    🩺 Vital Scan
+                </button>
+                <button onclick="applyPromptBlock('GPS Route Request: Find the fastest EV charging transit path with optimal IoT traffic signals to Downtown.')" class="text-[10px] shrink-0 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-950 dark:hover:bg-indigo-950/40 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 transition-all">
+                    🗺️ Dynamic Route
+                </button>
+                <button onclick="applyPromptBlock('IoT Commerce Order: Check smart fridge inventory and reorder organic milk and coffee pods via smart payment gateway.')" class="text-[10px] shrink-0 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-950 dark:hover:bg-indigo-950/40 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 transition-all">
+                    🛒 Smart Reorder
+                </button>
+                <button onclick="applyPromptBlock('Transit Ticket: Book 2 RFID smart transit passes for the Metro Express leaving at 18:30.')" class="text-[10px] shrink-0 bg-slate-100 hover:bg-indigo-50 dark:bg-slate-950 dark:hover:bg-indigo-950/40 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-300 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-800 transition-all">
+                    🎫 Metro Ticket
+                </button>
+            </div>
+            <div class="max-w-4xl mx-auto flex items-end space-x-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus-within:border-indigo-500/50 rounded-xl p-2 transition-all">
+                <textarea id="chat-input" rows="1" placeholder="Type medical questions, map requests, purchases, or ticket bookings..." class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 max-h-32 resize-none py-2 px-3 align-bottom" onkeydown="handleInputKeyPress(event)"></textarea>
                 <button id="send-button" onclick="submitUserMessage()" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center justify-center shrink-0 shadow-lg shadow-indigo-600/10">
                     <i id="send-icon" class="fa-solid fa-arrow-up text-sm"></i>
                 </button>
             </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 max-w-4xl mx-auto px-1">
+                <span>Integrated IoT Smart Hub & Dispatcher</span>
+                <span>Automated API Endpoints Ready</span>
+            </div>
         </div>
     </main>
-    <aside id="right-sidebar" class="fixed inset-y-0 right-0 w-[320px] bg-slate-900 border-l border-slate-800 flex flex-col h-full transform translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
+    <!-- RIGHT SIDEBAR: ANALYTICS & MONITORING -->
+    <div id="right-sidebar-backdrop" onclick="toggleSidebar('right-sidebar', false)" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
+    <aside id="right-sidebar" class="fixed inset-y-0 right-0 w-[320px] bg-slate-100 dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full transform translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
+        <div class="p-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 lg:hidden">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Settings & Telemetry</span>
+            <button onclick="toggleSidebar('right-sidebar', false)" class="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
         <div class="p-5 flex-1 overflow-y-auto space-y-6">
-            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2"><i class="fa-solid fa-microchip mr-1.5"></i>Live Engine Analytics</h3>
-            <div class="grid grid-cols-1 gap-2 font-mono text-[11px]">
-                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-850 flex justify-between items-center">
-                    <span class="text-slate-500">intent:</span>
-                    <span id="register-intent" class="text-indigo-400 font-bold">session_init</span>
+            <div>
+                <h3 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">
+                    <i class="fa-solid fa-tower-cell mr-1.5"></i>IoT & Service Telemetry
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    Live register indicators monitoring active telemetry feeds, geolocation streams, and ticket dispatchers.
+                </p>
+            </div>
+            <div class="space-y-3">
+                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active System State</h4>
+                <div class="grid grid-cols-1 gap-2 font-mono text-[11px]">
+                    <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
+                        <span class="text-slate-500">intent:</span>
+                        <span id="register-intent" class="text-indigo-600 dark:text-indigo-400 font-bold">system_standby</span>
+                    </div>
+                    <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
+                        <span class="text-slate-500">processed_words:</span>
+                        <span id="register-words" class="text-emerald-600 dark:text-emerald-400 font-bold">0</span>
+                    </div>
+                    <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
+                        <span class="text-slate-500">iot_sensors:</span>
+                        <span id="register-confidence" class="text-amber-600 dark:text-amber-400 font-bold">Connected (8)</span>
+                    </div>
+                    <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
+                        <span class="text-slate-500">latency:</span>
+                        <span id="register-latency" class="text-cyan-600 dark:text-cyan-400 font-bold">0ms</span>
+                    </div>
                 </div>
-                <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-850 flex justify-between items-center">
-                    <span class="text-slate-500">engine_speed:</span>
-                    <span id="register-latency" class="text-cyan-400 font-bold">0ms</span>
+            </div>
+            <hr class="border-slate-200 dark:border-slate-800">
+            <div class="space-y-4">
+                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest"><i class="fa-solid fa-sliders mr-1.5 text-indigo-500"></i>Model Tuning</h4>
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400">Temperature</span>
+                        <span id="val-temp" class="font-mono text-indigo-600 dark:text-indigo-400">0.7</span>
+                    </div>
+                    <input type="range" id="param-temp" min="0" max="2" step="0.1" value="0.7" oninput="updateParam('temp', this.value)" class="w-full accent-indigo-500 bg-slate-200 dark:bg-slate-950 h-1 rounded-lg cursor-pointer">
+                </div>
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400">Max Tokens</span>
+                        <span id="val-tokens" class="font-mono text-indigo-600 dark:text-indigo-400">2048</span>
+                    </div>
+                    <input type="range" id="param-tokens" min="256" max="8192" step="256" value="2048" oninput="updateParam('tokens', this.value)" class="w-full accent-indigo-500 bg-slate-200 dark:bg-slate-950 h-1 rounded-lg cursor-pointer">
+                </div>
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="text-slate-500 dark:text-slate-400">Top-P Sampling</span>
+                        <span id="val-topp" class="font-mono text-indigo-600 dark:text-indigo-400">0.9</span>
+                    </div>
+                    <input type="range" id="param-topp" min="0" max="1" step="0.05" value="0.9" oninput="updateParam('topp', this.value)" class="w-full accent-indigo-500 bg-slate-200 dark:bg-slate-950 h-1 rounded-lg cursor-pointer">
+                </div>
+            </div>
+            <hr class="border-slate-200 dark:border-slate-800">
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300">Hub Integrations</h4>
+                <div class="space-y-2 text-xs text-slate-500 dark:text-slate-400">
+                    <div class="flex items-start space-x-2">
+                        <i class="fa-solid fa-heart-pulse text-rose-500 mt-0.5"></i>
+                        <span><strong>Medical Triage:</strong> Tracks bio-metrics, schedules appointments, and provides health advice.</span>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <i class="fa-solid fa-map-location-dot text-indigo-500 mt-0.5"></i>
+                        <span><strong>GIS Navigation:</strong> Interactive map rendering with real-time route plotting.</span>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <i class="fa-solid fa-cart-shopping text-emerald-500 mt-0.5"></i>
+                        <span><strong>Smart Commerce:</strong> Automated supply reordering & express cart checkout.</span>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <i class="fa-solid fa-ticket text-amber-500 mt-0.5"></i>
+                        <span><strong>IoT Ticketing:</strong> Rapid transit, concert, and smart turnstile ticketing.</span>
+                    </div>
                 </div>
             </div>
         </div>
     </aside>
 </div>
-
 <script>
-    // Set your valid Gemini API Key here
-    const API_KEY = "YOUR_GEMINI_API_KEY";
-
+    // System Local Memory State with 4 Specialized Domain Channels
     const channels = {
-        'general-core': {
-            id: 'general-core',
-            name: 'General Core Support',
-            desc: 'Direct natural language parsing channel pipeline',
-            icon: 'fa-regular fa-comments',
-            messages: [{
-                id: 1,
-                role: 'assistant',
-                sender: 'GeminiAgent',
-                badge: 'SYS_BOT',
-                time: 'Delivered just now',
-                content: 'Hello! I am Gemini AI v5.0. Ask me any question to test execution.'
-            }]
+        'medical-assistant': {
+            id: 'medical-assistant',
+            name: 'Medical Assistant',
+            desc: 'Clinical triage, symptom evaluation, and smart patient monitoring',
+            icon: 'fa-solid fa-stethoscope',
+            messages: [
+                {
+                    id: 1,
+                    role: 'assistant',
+                    sender: 'HealthBot AI',
+                    badge: 'CLINICAL_v6',
+                    time: 'Delivered just now',
+                    content: 'Welcome to your Medical Assistant hub. I can help evaluate symptoms, track connected vital sensors, or assist in scheduling clinical appointments.\n\n*Note: In case of acute medical emergencies, call immediate emergency services.*',
+                    chips: [
+                        { label: '🩺 Evaluate Symptoms', text: 'I have a sore throat, mild fever, and headaches. What should I do?' },
+                        { label: '📊 Read Wearable Sensors', text: 'Analyze continuous ECG and SpO2 readings from connected IoT wearable band.' },
+                        { label: '📅 Book Clinic Visit', text: 'Schedule a telehealth consultation with a General Practitioner tomorrow.' }
+                    ]
+                }
+            ]
+        },
+        'map-navigation': {
+            id: 'map-navigation',
+            name: 'Interactive Map & GPS',
+            desc: 'Geospatial routing, smart city telemetry, and location lookup',
+            icon: 'fa-solid fa-map-location-dot',
+            messages: [
+                {
+                    id: 1,
+                    role: 'assistant',
+                    sender: 'GeoBot AI',
+                    badge: 'GIS_CORE',
+                    time: 'Initialized position',
+                    content: 'Geospatial node initialized. Request turn-by-turn navigation, interactive point-of-interest maps, or real-time IoT traffic analysis.',
+                    chips: [
+                        { label: '📍 Local Hospital Map', text: 'Show an interactive route map to the nearest Urgent Care Hospital.' },
+                        { label: '🚦 Smart City Traffic', text: 'Check congestion telemetry and signal timings for Main Street Corridor.' }
+                    ]
+                }
+            ]
+        },
+        'ecommerce-hub': {
+            id: 'ecommerce-hub',
+            name: 'E-Commerce Storefront',
+            desc: 'Product catalog, automated reordering, and smart checkout',
+            icon: 'fa-solid fa-cart-shopping',
+            messages: [
+                {
+                    id: 1,
+                    role: 'assistant',
+                    sender: 'StoreBot AI',
+                    badge: 'PAYMENT_GATEWAY',
+                    time: 'Store connected',
+                    content: 'E-Commerce automated checkout hub ready. You can search products, inspect IoT inventory levels, or execute quick orders.',
+                    chips: [
+                        { label: '📦 Browse Devices', text: 'Display available smart home health monitors with instant checkout.' },
+                        { label: '🔄 Smart Appliance Restock', text: 'Check connected kitchen inventory and auto-order low supplies.' }
+                    ]
+                }
+            ]
+        },
+        'ticket-booking': {
+            id: 'ticket-booking',
+            name: 'IoT Ticket & Transit',
+            desc: 'Transit booking, NFC event tickets, and gate access controls',
+            icon: 'fa-solid fa-ticket',
+            messages: [
+                {
+                    id: 1,
+                    role: 'assistant',
+                    sender: 'TicketBot AI',
+                    badge: 'NFC_PASS',
+                    time: 'Ready to issue',
+                    content: 'IoT Ticket Dispatcher active. Reserve metro transit tokens, concert passes, or generate NFC turnstile QR codes.',
+                    chips: [
+                        { label: '🚆 Book Metro Pass', text: 'Book an express train ticket for Station A to Station B for 2 passengers.' },
+                        { label: '🎟️ Gate NFC Code', text: 'Generate an encrypted NFC wallet access pass for tonight’s event.' }
+                    ]
+                }
+            ]
         }
     };
-    
-    let activeChannelId = 'general-core';
+
+    let activeChannelId = 'medical-assistant';
     let isStreaming = false;
-    const engineConfig = { temp: 0.7, tokens: 2048, topp: 0.9, model: 'gemini-1.5-flash' };
-
+    
+    // Engine Parameters
+    const engineConfig = {
+        temp: 0.7,
+        tokens: 2048,
+        topp: 0.9,
+        model: 'gemini-1-5-pro'
+    };
+    
+    // DOM Elements Cache
     const chatScroller = document.getElementById('chat-scroller');
-    const chatInput = document.getElementById('chat-input');
-    const registerLatency = document.getElementById('register-latency');
     const registerIntent = document.getElementById('register-intent');
+    const registerWords = document.getElementById('register-words');
+    const registerConfidence = document.getElementById('register-confidence');
+    const registerLatency = document.getElementById('register-latency');
+    const chatInput = document.getElementById('chat-input');
+    const modelSelector = document.getElementById('model-selector');
 
+    const API_KEY = "YOUR_GEMINI_API_KEY";
+
+    // Initialize Application
     window.addEventListener('DOMContentLoaded', () => {
         renderChannelsList();
         loadActiveChannel();
         setupInputAutoResize();
+        
+        document.getElementById('param-temp').value = engineConfig.temp;
+        document.getElementById('param-tokens').value = engineConfig.tokens;
+        document.getElementById('param-topp').value = engineConfig.topp;
+        modelSelector.value = engineConfig.model;
     });
 
+    // Theme Switcher Toggle Function
+    function toggleTheme() {
+        const html = document.documentElement;
+        const icon = document.getElementById('theme-toggle-icon');
+        if (html.classList.contains('dark')) {
+            html.classList.remove('dark');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        } else {
+            html.classList.add('dark');
+            icon.classList.remove('fa-sun');
+            icon.classList.add('fa-moon');
+        }
+    }
+
+    // Dynamic Prompt Inserter
+    function applyPromptBlock(prefixText) {
+        chatInput.value = prefixText + ' ';
+        chatInput.focus();
+        chatInput.style.height = 'auto';
+        chatInput.style.height = (chatInput.scrollHeight) + 'px';
+    }
+
+    // Model Selector Change Handler
+    modelSelector.addEventListener('change', (e) => {
+        engineConfig.model = e.target.value;
+        const alertMsg = `Model reallocated to: **${e.target.value.toUpperCase()}**`;
+        appendMessageDirectly('assistant', 'SystemAgent', 'CONFIG', alertMsg);
+    });
+
+    // Auto-expand input box
     function setupInputAutoResize() {
         chatInput.addEventListener('input', function() {
             this.style.height = 'auto';
@@ -178,29 +429,45 @@
         }
     }
 
+    // Sidebar Toggle Logic
     function toggleSidebar(id, show) {
         const sidebar = document.getElementById(id);
         const backdrop = document.getElementById(`${id}-backdrop`);
-        if (!sidebar) return;
         if (show) {
             sidebar.classList.remove('-translate-x-full', 'translate-x-full');
-            if (backdrop) backdrop.classList.remove('hidden');
+            backdrop.classList.remove('hidden');
         } else {
             if (id === 'left-sidebar') sidebar.classList.add('-translate-x-full');
             if (id === 'right-sidebar') sidebar.classList.add('translate-x-full');
-            if (backdrop) backdrop.classList.add('hidden');
+            backdrop.classList.add('hidden');
         }
     }
 
+    function updateParam(param, val) {
+        engineConfig[param] = parseFloat(val) || parseInt(val);
+        document.getElementById(`val-${param}`).innerText = val;
+    }
+
+    // Render Sidebar Channels
     function renderChannelsList() {
         const listContainer = document.getElementById('channels-list');
         listContainer.innerHTML = '';
         Object.values(channels).forEach(ch => {
             const isActive = ch.id === activeChannelId;
             const btn = document.createElement('button');
-            btn.className = `w-full text-left px-3 py-2.5 text-xs rounded-lg flex items-center justify-between transition-all ${isActive ? 'bg-indigo-600/10 border border-indigo-500/30 text-indigo-200 font-semibold' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'}`;
+            btn.className = `w-full text-left px-3 py-2.5 text-xs rounded-lg flex items-center justify-between transition-all duration-200 ${
+                isActive 
+                ? 'bg-indigo-600/10 border border-indigo-500/30 text-indigo-600 dark:text-indigo-200 font-semibold' 
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/50 dark:hover:bg-slate-800/40 border border-transparent'
+            }`;
             btn.onclick = () => switchChannel(ch.id);
-            btn.innerHTML = `<span class="truncate flex items-center"><i class="${ch.icon} mr-2 text-xs"></i>${ch.name}</span>`;
+            btn.innerHTML = `
+                <span class="truncate flex items-center pr-2">
+                    <i class="${ch.icon} mr-2.5 text-xs ${isActive ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}"></i>
+                    <span class="truncate">${ch.name}</span>
+                </span>
+                ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span>' : ''}
+            `;
             listContainer.appendChild(btn);
         });
     }
@@ -210,7 +477,9 @@
         document.getElementById('active-channel-title').innerHTML = `<i class="${ch.icon} mr-1.5"></i>${ch.name}`;
         document.getElementById('active-channel-desc').innerText = ch.desc;
         chatScroller.innerHTML = '';
-        ch.messages.forEach(msg => renderMessageBubble(msg));
+        ch.messages.forEach(msg => {
+            renderMessageBubble(msg);
+        });
         chatScroller.scrollTo({ top: chatScroller.scrollHeight });
     }
 
@@ -219,97 +488,6 @@
         const bubbleWrapper = document.createElement('div');
         bubbleWrapper.className = `flex items-start space-x-3 max-w-[85%] md:max-w-[75%] my-2 ${isUser ? 'ml-auto justify-end' : ''}`;
         
-        let headerRow = `<div class="flex items-center space-x-2 ${isUser ? 'justify-end' : ''}">
-            <span class="text-xs font-bold text-slate-200">${msg.sender}</span>
-            <span class="text-[9px] bg-indigo-950/80 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-900 font-mono">${msg.badge}</span>
-        </div>`;
-
-        bubbleWrapper.innerHTML = `
-            <div class="space-y-1 ${isUser ? 'text-right' : 'text-left'}">
-                ${headerRow}
-                <div class="${isUser ? 'bg-indigo-600 text-white' : 'bg-slate-900 border border-slate-800/80 text-slate-300'} rounded-2xl p-4 text-xs leading-relaxed shadow-sm">
-                    <div>${parseMarkdown(msg.content)}</div>
-                </div>
-                <span class="text-[9px] text-slate-600 font-mono block pl-1">${msg.time}</span>
-            </div>
-        `;
-        chatScroller.appendChild(bubbleWrapper);
-    }
-
-    function parseMarkdown(text) {
-        return text
-            .replace(/</g, "&lt;").replace(/>/g, "&gt;")
-            .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-white">$1</strong>')
-            .replace(/`([^`]+)`/g, '<code class="bg-slate-950 text-rose-400 font-mono px-1 rounded">$1</code>');
-    }
-
-    function switchChannel(channelId) {
-        if (isStreaming) return;
-        activeChannelId = channelId;
-        renderChannelsList();
-        loadActiveChannel();
-    }
-
-    function submitUserMessage() {
-        if (isStreaming) return;
-        const userPrompt = chatInput.value.trim();
-        if (!userPrompt) return;
-        
-        chatInput.value = '';
-        chatInput.style.height = 'auto';
-
-        appendMessageDirectly('user', 'You', 'OPERATOR', userPrompt);
-        executeResponsePipeline(userPrompt);
-    }
-
-    function appendMessageDirectly(role, sender, badge, text) {
-        const msg = { id: Date.now(), role, sender, badge, time: 'Delivered just now', content: text };
-        channels[activeChannelId].messages.push(msg);
-        renderMessageBubble(msg);
-        chatScroller.scrollTo({ top: chatScroller.scrollHeight, behavior: 'smooth' });
-    }
-
-    async function executeResponsePipeline(userPrompt) {
-        isStreaming = true;
-        registerIntent.innerText = 'generate_content';
-        const startTime = Date.now();
-
-        try {
-            const apiResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${engineConfig.model}:generateContent?key=${API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: userPrompt }] }] })
-            });
-            
-            const data = await apiResponse.json();
-            const latency = Date.now() - startTime;
-            registerLatency.innerText = `${latency}ms`;
-
-            if (data.candidates && data.candidates[0].content.parts[0].text) {
-                const text = data.candidates[0].content.parts[0].text;
-                appendMessageDirectly('assistant', 'GeminiAgent', 'API_BOT', text);
-            } else {
-                appendMessageDirectly('assistant', 'GeminiAgent', 'ERROR', 'Error processing request or invalid API key.');
-            }
-        } catch (err) {
-            appendMessageDirectly('assistant', 'GeminiAgent', 'ERROR', 'Failed to connect to backend service.');
-        } finally {
-            isStreaming = false;
-        }
-    }
-
-    function clearChatLog() {
-        if (isStreaming) return;
-        channels[activeChannelId].messages = [];
-        loadActiveChannel();
-    }
-    function createNewThread() {
-        const threadName = prompt("Enter thread name:", "Custom Workspace");
-        if (!threadName) return;
-        const safeId = 'ch-' + Date.now();
-        channels[safeId] = { id: safeId, name: threadName, desc: 'Workspace thread', icon: 'fa-solid fa-cubes-stacked', messages: [] };
-        switchChannel(safeId);
-    }
-</script>
-</body>
-</html>
+        let headerRow = isUser ? `
+            <div class="flex items-center space-x-2 justify-end">
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200">${msg
