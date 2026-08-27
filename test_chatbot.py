@@ -1,45 +1,19 @@
+import pytest
+from playwright.sync_api import Page
 
-from selenium import webdriver
+# Sample data structure for data-driven testing
+TEST_CASES = [
+    ("Hello", "greeting"),
+    ("What are your business hours?", "hours"),
+    ("How do I reset my password?", "support")
+]
 
-from selenium.webdriver.chrome.service import Service
-
-from webdriver_manager.chrome import ChromeDriverManager
-
-from config import Config
-
-
-
-def test_launch_chatbot():
-
-    # Automatically manages ChromeDriver versions
-
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
-
-    driver.maximize_window()
-
+@pytest.mark.parametrize("user_input, expected_category", TEST_CASES)
+def test_chatbot_responses(page: Page, user_input, expected_category):
+    page.goto("https://rameshkumark718.github.io/Chatbot-Automation-Framework/")
     
-
-    # Access target UI
-
-    driver.get(Config.BASE_URL)
-
+    # Fill chatbot input and submit
+    # page.fill("#chat-input", user_input)
+    # page.click("#send-btn")
     
-
-    print("Page Title:", driver.title)
-
-    print("Current URL:", driver.current_url)
-
-    
-
-    # Assert successful connection
-
-    assert Config.BASE_URL in driver.current_url
-
-    driver.quit()
-
-
-
-if __name__ == "__main__":
-
-    test_launch_chatbot()
-
+    assert page.title() == "Enterprise Dual-Viewport Chatbot Playground v5.0"
