@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" id="html-root" class="h-full dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Enterprise Dual-Viewport Chatbot Playground v5.0</title>
+    <title>Cognitive AI Chatbot Playground v5.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">   
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -21,17 +21,11 @@
         }
     </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #030712;
-            color: #f1f5f9;
-        }
-        /* Custom scrollbar rules */
+        body { font-family: 'Inter', sans-serif; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0b0f19; }
-        ::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 99px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6366f1; }
-        /* Streaming cursor animation */
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(156, 163, 175, 0.3); border-radius: 99px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
         .cursor-blink::after {
             content: '█';
             animation: cursorBlink 0.8s infinite;
@@ -42,360 +36,276 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
+        /* Dynamic Theme Palettes */
+        body.theme-slate { background-color: #030712; color: #f1f5f9; }
+        body.theme-slate .panel-bg { background-color: #0f172a; border-color: #1e293b; }
+        body.theme-slate .main-bg { background-color: #020617; }
+        body.theme-slate .bubble-bot { background-color: #0f172a; border-color: #1e293b; color: #cbd5e1; }
+        body.theme-oled { background-color: #000000; color: #ffffff; }
+        body.theme-oled .panel-bg { background-color: #09090b; border-color: #27272a; }
+        body.theme-oled .main-bg { background-color: #000000; }
+        body.theme-oled .bubble-bot { background-color: #18181b; border-color: #27272a; color: #e4e4e7; }
+        body.theme-solarized { background-color: #002b36; color: #93a1a1; }
+        body.theme-solarized .panel-bg { background-color: #073642; border-color: #586e75; }
+        body.theme-solarized .main-bg { background-color: #002b36; }
+        body.theme-solarized .bubble-bot { background-color: #073642; border-color: #586e75; color: #839496; }
+        body.theme-light { background-color: #f8fafc; color: #0f172a; }
+        body.theme-light .panel-bg { background-color: #ffffff; border-color: #e2e8f0; }
+        body.theme-light .main-bg { background-color: #f1f5f9; }
+        body.theme-light .bubble-bot { background-color: #ffffff; border-color: #e2e8f0; color: #334155; }
     </style>
 </head>
-<body class="h-full flex flex-col overflow-hidden bg-slate-950 text-slate-100">
-
-<header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 shrink-0 px-6 py-3 flex items-center justify-between z-30">
+<body class="theme-slate h-full flex flex-col overflow-hidden text-slate-100 transition-colors duration-200">
+<header class="panel-bg border-b shrink-0 px-6 py-3 flex items-center justify-between z-30 shadow-sm">
     <div class="flex items-center space-x-3">
         <button onclick="toggleSidebar('left-sidebar', true)" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
             <i class="fa-solid fa-bars-staggered text-lg"></i>
         </button>
         <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20">
-            <i class="fa-solid fa-microchip text-sm"></i>
+            <i class="fa-solid fa-brain text-sm"></i>
         </div>
         <div>
             <div class="flex items-center space-x-2">
-                <h1 class="text-sm font-bold bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">NexusAI Suite</h1>
+                <h1 class="text-sm font-bold bg-gradient-to-r from-indigo-400 via-violet-300 to-purple-400 bg-clip-text text-transparent">Cognitive AI Chatbot</h1>
                 <span class="text-[9px] font-mono bg-indigo-950 text-indigo-400 border border-indigo-800/60 px-1.5 py-0.2 rounded-full">v5.0</span>
             </div>
-            <p class="text-[10px] text-slate-400 hidden sm:block">Enterprise Multi-Channel Control Console</p>
+            <p class="text-[10px] text-slate-400 hidden sm:block">Universal Accessible Intelligence Workspace</p>
         </div>
-    </div>
-    <div class="flex items-center space-x-4">
-        <div class="flex items-center bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1">
-            <span class="text-[9px] text-slate-500 font-mono mr-2">ACTIVE MODEL:</span>
-            <select id="model-selector" class="bg-transparent text-xs font-semibold text-indigo-300 focus:outline-none cursor-pointer">
+    </div>    
+    <div class="flex items-center space-x-3">
+        <!-- Dynamic Theme Selector -->
+        <div class="flex items-center panel-bg border rounded-lg px-2 py-1">
+            <i class="fa-solid fa-palette text-indigo-400 text-xs mr-2"></i>
+            <select id="theme-selector" onchange="applyTheme(this.value)" class="bg-transparent text-xs font-semibold focus:outline-none cursor-pointer">
+                <option value="theme-slate" class="bg-slate-900 text-slate-200">Dark Slate</option>
+                <option value="theme-oled" class="bg-slate-900 text-slate-200">Midnight OLED</option>
+                <option value="theme-solarized" class="bg-slate-900 text-slate-200">Solarized Dark</option>
+                <option value="theme-light" class="bg-white text-slate-800">Light Mode</option>
+            </select>
+        </div>
+        <div class="flex items-center panel-bg border rounded-lg px-2.5 py-1">
+            <span class="text-[9px] text-slate-400 font-mono mr-2">MODEL:</span>
+            <select id="model-selector" class="bg-transparent text-xs font-semibold text-indigo-400 focus:outline-none cursor-pointer">
                 <option value="gpt-4o" class="bg-slate-900 text-slate-200">GPT-4o Advanced</option>
                 <option value="claude-3-5" class="bg-slate-900 text-slate-200">Claude 3.5 Sonnet</option>
                 <option value="deepseek-coder" class="bg-slate-900 text-slate-200">DeepSeek-Coder V2</option>
             </select>
         </div>
-        <div class="hidden md:flex items-center bg-slate-950 px-2.5 py-1 rounded-md border border-slate-800/80 text-[10px] font-mono">
-            <span class="flex h-2 w-2 relative mr-2">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span class="text-slate-400">ENGINE STATE:</span>
-            <span class="text-indigo-400 ml-1 font-bold">ONLINE_V5</span>
-        </div>       
         <button onclick="toggleSidebar('right-sidebar', true)" class="lg:hidden p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
             <i class="fa-solid fa-sliders text-lg"></i>
         </button>
     </div>
 </header>
-<div class="flex-1 flex overflow-hidden relative">   
+<div class="flex-1 flex overflow-hidden relative">
     <div id="left-sidebar-backdrop" onclick="toggleSidebar('left-sidebar', false)" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
-    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] bg-slate-900 border-r border-slate-800 flex flex-col h-full transform -translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
-        <div class="p-4 flex items-center justify-between border-b border-slate-800 lg:hidden">
+    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[280px] panel-bg border-r flex flex-col h-full transform -translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
+        <div class="p-4 flex items-center justify-between border-b lg:hidden">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Workspace Explorer</span>
             <button onclick="toggleSidebar('left-sidebar', false)" class="p-1 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-        </div> 
+        </div>  
         <div class="p-4 space-y-2 shrink-0">
-            <button onclick="createNewThread()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/10 hover:shadow-indigo-600/20 transition-all group">
+            <button onclick="createNewThread()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2.5 px-4 rounded-xl flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/10 transition-all group">
                 <i class="fa-solid fa-plus group-hover:rotate-90 transition-transform"></i>
                 <span>Start New Thread</span>
             </button>
-        </div>    
+        </div>     
         <div class="flex-1 overflow-y-auto px-2 space-y-1">
-            <div class="px-3 py-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest flex justify-between items-center">
-                <span>Active Core Pipelines</span>
-                <span class="text-[9px] lowercase font-normal text-slate-600">3 paths</span>
-            </div>       
+            <div class="px-3 py-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest flex justify-between items-center">
+                <span>Core Assistant Channels</span>
+            </div>
             <div id="channels-list" class="space-y-1"></div>
         </div>   
-        <div class="p-4 bg-slate-950/40 border-t border-slate-800 space-y-3 shrink-0">
-            <div class="flex items-center justify-between text-[11px]">
-                <span class="text-slate-400 flex items-center"><i class="fa-solid fa-server mr-2 text-indigo-400"></i>Node Cluster</span>
-                <span class="font-mono text-emerald-400">AP-SOUTH-1</span>
-            </div>
-            <div class="flex items-center justify-between text-[11px]">
-                <span class="text-slate-400 flex items-center"><i class="fa-solid fa-bolt mr-2 text-amber-400"></i>SLA Rate</span>
-                <span class="font-mono text-slate-200">99.998%</span>
-            </div>
-        </div>
-        <div class="p-4 border-t border-slate-800 bg-slate-950">
+        <div class="p-4 border-t bg-slate-950/20">
             <div class="flex items-center space-x-3">
                 <div class="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 font-bold text-xs border border-indigo-500/30">
-                    SO
+                    UI
                 </div>
                 <div>
-                    <h4 class="text-xs font-semibold text-white">System Operator</h4>
-                    <p class="text-[9px] text-slate-500 font-mono">ID: USER-90210</p>
+                    <h4 class="text-xs font-semibold">Standard Workspace User</h4>
+                    <p class="text-[9px] text-slate-400 font-mono">Status: Connected</p>
                 </div>
             </div>
         </div>
     </aside>
-    <main class="flex-1 flex flex-col h-full bg-slate-950 overflow-hidden min-w-0">
-        <div class="bg-slate-900/40 border-b border-slate-800 p-3 flex justify-between items-center px-4 md:px-6 shrink-0">
+    <main class="flex-1 flex flex-col h-full main-bg overflow-hidden min-w-0">
+        <div class="panel-bg border-b p-3 flex justify-between items-center px-4 md:px-6 shrink-0">
             <div>
-                <span id="active-channel-title" class="text-xs font-bold uppercase tracking-wider text-indigo-400"><i class="fa-solid fa-hashtag mr-1"></i>General Core Support</span>
-                <p id="active-channel-desc" class="text-[10px] text-slate-500 hidden sm:block">Direct natural language parsing channel pipeline</p>
+                <span id="active-channel-title" class="text-xs font-bold uppercase tracking-wider text-indigo-400"><i class="fa-solid fa-comments mr-1"></i>General Assistant</span>
+                <p id="active-channel-desc" class="text-[10px] text-slate-400 hidden sm:block">Universal everyday assistance for all core inquiries</p>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="exportJSONState()" class="text-[10px] font-semibold bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white px-3 py-1.5 rounded-lg border border-slate-800 transition-colors">
+                <button onclick="exportJSONState()" class="text-[10px] font-semibold panel-bg hover:opacity-80 text-slate-300 px-3 py-1.5 rounded-lg border transition-colors">
                     <i class="fa-solid fa-file-export mr-1.5 text-indigo-400"></i>Export State
                 </button>
-                <button onclick="clearChatLog()" class="text-[10px] font-semibold bg-slate-900/60 hover:bg-red-950/40 text-slate-400 hover:text-red-400 px-3 py-1.5 rounded-lg border border-slate-800 transition-colors">
+                <button onclick="clearChatLog()" class="text-[10px] font-semibold panel-bg hover:text-red-400 px-3 py-1.5 rounded-lg border transition-colors">
                     <i class="fa-solid fa-trash-can mr-1.5"></i>Clear History
                 </button>
             </div>
         </div>
+
         <div id="chat-scroller" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-4"></div>
-        <div class="p-4 bg-slate-900 border-t border-slate-800 space-y-3 shrink-0">
-            <div class="max-w-4xl mx-auto flex items-end space-x-2 bg-slate-950 border border-slate-800 focus-within:border-indigo-500/50 rounded-xl p-2 transition-all">
-                <textarea id="chat-input" rows="1" placeholder="Describe your prompt here (Shift + Enter for new lines)..." class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-xs text-slate-100 placeholder-slate-500 max-h-32 resize-none py-2 px-3 align-bottom" onkeydown="handleInputKeyPress(event)"></textarea>
+
+        <div class="p-4 panel-bg border-t space-y-3 shrink-0">
+            <div class="max-w-4xl mx-auto flex items-end space-x-2 main-bg border border-slate-700/50 focus-within:border-indigo-500/50 rounded-xl p-2 transition-all">
+                <textarea id="chat-input" rows="1" placeholder="Type your prompt here (Shift + Enter for new lines)..." class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-xs placeholder-slate-400 max-h-32 resize-none py-2 px-3 align-bottom" onkeydown="handleInputKeyPress(event)"></textarea>
                 <button id="send-button" onclick="submitUserMessage()" class="w-8 h-8 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-all flex items-center justify-center shrink-0 shadow-lg shadow-indigo-600/10">
                     <i id="send-icon" class="fa-solid fa-arrow-up text-sm"></i>
                 </button>
-            </div>   
-            <div class="flex items-center justify-between text-[10px] text-slate-500 max-w-4xl mx-auto px-1">
-                <span>Responsive Frame Integration Workspace v5.0</span>
-                <span>Powered by Advanced NLP Parsing Core</span>
             </div>
         </div>
     </main>
-    <div id="right-sidebar-backdrop" onclick="toggleSidebar('right-sidebar', false)" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
-    <aside id="right-sidebar" class="fixed inset-y-0 right-0 w-[320px] bg-slate-900 border-l border-slate-800 flex flex-col h-full transform translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
-        <div class="p-4 flex items-center justify-between border-b border-slate-800 lg:hidden">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Settings & Context</span>
+
+    <aside id="right-sidebar" class="fixed inset-y-0 right-0 w-[320px] panel-bg border-l flex flex-col h-full transform translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
+        <div class="p-4 flex items-center justify-between border-b lg:hidden">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Settings</span>
             <button onclick="toggleSidebar('right-sidebar', false)" class="p-1 rounded-md hover:bg-slate-800 text-slate-400 hover:text-white">
                 <i class="fa-solid fa-xmark"></i>
             </button>
-        </div>   
+        </div>
+        
         <div class="p-5 flex-1 overflow-y-auto space-y-6">
             <div>
-                <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2"><i class="fa-solid fa-microchip mr-1.5"></i>Live Engine Analytics</h3>
-                <p class="text-xs text-slate-400 leading-relaxed">
-                    This context monitoring matrix visualizes active slot states, telemetry registers, and parameter controls.
-                </p>
+                <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-2"><i class="fa-solid fa-sliders mr-1.5"></i>Model Parameters</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">Adjust assistant behavior controls dynamically.</p>
             </div>
-            <div class="space-y-3">
-                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active NLP Registers</h4>
-                <div class="grid grid-cols-1 gap-2 font-mono text-[11px]">
-                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex justify-between items-center">
-                        <span class="text-slate-500">intent:</span>
-                        <span id="register-intent" class="text-indigo-400 font-bold">session_init</span>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex justify-between items-center">
-                        <span class="text-slate-500">processed_words:</span>
-                        <span id="register-words" class="text-emerald-400 font-bold">0</span>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex justify-between items-center">
-                        <span class="text-slate-500">confidence:</span>
-                        <span id="register-confidence" class="text-amber-400 font-bold">1.00</span>
-                    </div>
-                    <div class="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex justify-between items-center">
-                        <span class="text-slate-500">engine_speed:</span>
-                        <span id="register-latency" class="text-cyan-400 font-bold">0ms</span>
-                    </div>
-                </div>
-            </div>
-            <hr class="border-slate-800">
+
             <div class="space-y-4">
-                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest"><i class="fa-solid fa-sliders mr-1.5 text-indigo-500"></i>Model Parameters</h4>                
                 <div class="space-y-1">
                     <div class="flex justify-between items-center text-xs">
                         <span class="text-slate-400">Temperature</span>
                         <span id="val-temp" class="font-mono text-indigo-400">0.7</span>
                     </div>
-                    <input type="range" id="param-temp" min="0" max="2" step="0.1" value="0.7" oninput="updateParam('temp', this.value)" class="w-full accent-indigo-500 bg-slate-950 h-1 rounded-lg cursor-pointer">
+                    <input type="range" id="param-temp" min="0" max="2" step="0.1" value="0.7" oninput="updateParam('temp', this.value)" class="w-full accent-indigo-500 h-1 rounded-lg cursor-pointer">
                 </div>
 
                 <div class="space-y-1">
                     <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-400">Max Output Tokens</span>
+                        <span class="text-slate-400">Max Tokens</span>
                         <span id="val-tokens" class="font-mono text-indigo-400">2048</span>
                     </div>
-                    <input type="range" id="param-tokens" min="256" max="8192" step="256" value="2048" oninput="updateParam('tokens', this.value)" class="w-full accent-indigo-500 bg-slate-950 h-1 rounded-lg cursor-pointer">
-                </div>
-
-                <div class="space-y-1">
-                    <div class="flex justify-between items-center text-xs">
-                        <span class="text-slate-400">Top-P Sampling</span>
-                        <span id="val-topp" class="font-mono text-indigo-400">0.9</span>
-                    </div>
-                    <input type="range" id="param-topp" min="0" max="1" step="0.05" value="0.9" oninput="updateParam('topp', this.value)" class="w-full accent-indigo-500 bg-slate-950 h-1 rounded-lg cursor-pointer">
-                </div>
-            </div>
-
-            <hr class="border-slate-800">
-
-            <div class="space-y-3">
-                <h4 class="text-xs font-bold text-slate-300">Live Workspace Attributes</h4>
-                <div class="space-y-2 text-xs text-slate-400">
-                    <div class="flex items-start space-x-2">
-                        <i class="fa-solid fa-circle-check text-indigo-500 mt-0.5"></i>
-                        <span><strong>State Serialization:</strong> Your custom parameters and chats can be exported live inside our state files.</span>
-                    </div>
-                    <div class="flex items-start space-x-2">
-                        <i class="fa-solid fa-circle-check text-indigo-500 mt-0.5"></i>
-                        <span><strong>State Memory:</strong> Switching pipelines preserves conversation histories seamlessly.</span>
-                    </div>
+                    <input type="range" id="param-tokens" min="256" max="8192" step="256" value="2048" oninput="updateParam('tokens', this.value)" class="w-full accent-indigo-500 h-1 rounded-lg cursor-pointer">
                 </div>
             </div>
         </div>
     </aside>
 </div>
-
 <script>
-    // System Local Memory State
     const channels = {
-        'general-core': {
-            id: 'general-core',
-            name: 'General Core Support',
-            desc: 'Direct natural language parsing channel pipeline',
+        'general-support': {
+            id: 'general-support',
+            name: 'General Assistant',
+            desc: 'Universal everyday assistance for all core inquiries',
             icon: 'fa-regular fa-comments',
             messages: [
                 {
                     id: 1,
                     role: 'assistant',
-                    sender: 'NexusAgent',
-                    badge: 'SYS_BOT',
+                    sender: 'CognitiveBot',
+                    badge: 'ASSISTANT',
                     time: 'Delivered just now',
-                    content: 'Hello! I am NexusAI v5.0. Choose an operational system path below or submit your custom execution instructions directly.',
+                    content: 'Hello! Welcome to Cognitive AI Chatbot. How can I assist you today?',
                     chips: [
-                        { label: '💡 Explain APIs', text: 'Explain asynchronous API integration in simple terms' },
-                        { label: '🎨 CSS Hero Layout', text: 'Generate a clean CSS layout for a hero section' },
-                        { label: '⚙️ Fix JS Leaks', text: 'How do I fix memory leaks in standard JavaScript loop routines?' }
+                        { label: '💡 Practical Concepts', text: 'Explain complex concepts in simple practical terms' },
+                        { label: '📝 Plan Strategy', text: 'Help me plan a structured step-by-step framework' }
                     ]
                 }
             ]
         },
-        'devops-agent': {
-            id: 'devops-agent',
-            name: 'System DevOps Agent',
-            desc: 'Kubernetes orchestration and continuous integration monitor pipelines',
-            icon: 'fa-solid fa-terminal',
+        'code-tech': {
+            id: 'code-tech',
+            name: 'Code & Tech Support',
+            desc: 'Software development, API logic, and architectural support',
+            icon: 'fa-solid fa-code',
             messages: [
                 {
                     id: 1,
                     role: 'assistant',
-                    sender: 'DevOpsBot',
-                    badge: 'KUBE_ENG',
-                    time: 'Initialized pipeline',
-                    content: 'Enterprise cluster operational at node **AP-SOUTH-1**. Ready to diagnose server stack configurations.',
-                    chips: [
-                        { label: '🛡️ Scan Dockerfile', text: 'Analyze safety configurations of my multi-stage Docker build files' },
-                        { label: '⚓ Health Check', text: 'Show an example configuration for Kubernetes Liveness and Readiness probes' }
-                    ]
+                    sender: 'TechBot',
+                    badge: 'DEV',
+                    time: 'Ready',
+                    content: 'Developer channel operational. Share your code snippets or technical queries.',
+                    chips: []
                 }
             ]
         },
-        'ecommerce-helper': {
-            id: 'ecommerce-helper',
-            name: 'E-Commerce Helper',
-            desc: 'Merchant fulfillment and database pipeline manager',
-            icon: 'fa-solid fa-cart-shopping',
+        'creative-writing': {
+            id: 'creative-writing',
+            name: 'Writing & Creative',
+            desc: 'Content creation, editing, brainstorming, and writing assistance',
+            icon: 'fa-solid fa-pen-nib',
             messages: [
                 {
                     id: 1,
                     role: 'assistant',
-                    sender: 'MerchantBot',
-                    badge: 'SALES_ENG',
-                    time: 'Listening on port 8082',
-                    content: 'Billing pipelines are open. Ready to track transaction logs and construct inventory logic.',
-                    chips: [
-                        { label: '🛒 Inventory Logic', text: 'Create a database schema logic path for shopping cart states' }
-                    ]
+                    sender: 'WriterBot',
+                    badge: 'CREATIVE',
+                    time: 'Ready',
+                    content: 'Creative workspace active. Let me know what you would like to brainstorm or write.',
+                    chips: []
                 }
             ]
         }
     };
-
-    let activeChannelId = 'general-core';
+    let activeChannelId = 'general-support';
     let isStreaming = false;
-    
-    // Engine Parameters
-    const engineConfig = {
-        temp: 0.7,
-        tokens: 2048,
-        topp: 0.9,
-        model: 'gpt-4o'
-    };
-
-    // DOM Elements Cache
+    const engineConfig = { temp: 0.7, tokens: 2048, model: 'gpt-4o' };
     const chatScroller = document.getElementById('chat-scroller');
-    const registerIntent = document.getElementById('register-intent');
-    const registerWords = document.getElementById('register-words');
-    const registerConfidence = document.getElementById('register-confidence');
-    const registerLatency = document.getElementById('register-latency');
     const chatInput = document.getElementById('chat-input');
-    const modelSelector = document.getElementById('model-selector');
     const sendButton = document.getElementById('send-button');
     const sendIcon = document.getElementById('send-icon');
-
-    // Init Application
     window.addEventListener('DOMContentLoaded', () => {
         renderChannelsList();
         loadActiveChannel();
         setupInputAutoResize();
-        
-        // Sync parameters UI
-        document.getElementById('param-temp').value = engineConfig.temp;
-        document.getElementById('param-tokens').value = engineConfig.tokens;
-        document.getElementById('param-topp').value = engineConfig.topp;
-        modelSelector.value = engineConfig.model;
     });
-
-    // Model Selector Change Handler
-    modelSelector.addEventListener('change', (e) => {
-        engineConfig.model = e.target.value;
-        const alertMsg = `Model successfully reallocated to: **${e.target.value.toUpperCase()}**`;
-        appendMessageDirectly('assistant', 'SystemAgent', 'CONFIG', alertMsg);
-    });
-
+    function applyTheme(themeClass) {
+        document.body.className = `${themeClass} h-full flex flex-col overflow-hidden transition-colors duration-200`;
+    }
     function setupInputAutoResize() {
         chatInput.addEventListener('input', function() {
             this.style.height = 'auto';
             this.style.height = (this.scrollHeight) + 'px';
         });
     }
-
     function handleInputKeyPress(event) {
         if (event.key === 'Enter' && !event.shiftKey) {
             event.preventDefault();
             submitUserMessage();
         }
     }
-
     function toggleSidebar(id, show) {
         const sidebar = document.getElementById(id);
         const backdrop = document.getElementById(`${id}-backdrop`);
         if (show) {
             sidebar.classList.remove('-translate-x-full', 'translate-x-full');
-            backdrop.classList.remove('hidden');
+            if (backdrop) backdrop.classList.remove('hidden');
         } else {
             if (id === 'left-sidebar') sidebar.classList.add('-translate-x-full');
             if (id === 'right-sidebar') sidebar.classList.add('translate-x-full');
-            backdrop.classList.add('hidden');
+            if (backdrop) backdrop.classList.add('hidden');
         }
     }
-
     function updateParam(param, val) {
         engineConfig[param] = parseFloat(val) || parseInt(val);
         document.getElementById(`val-${param}`).innerText = val;
     }
-
     function renderChannelsList() {
         const listContainer = document.getElementById('channels-list');
-        listContainer.innerHTML = '';
-        
+        listContainer.innerHTML = '';       
         Object.values(channels).forEach(ch => {
             const isActive = ch.id === activeChannelId;
             const btn = document.createElement('button');
-            btn.className = `w-full text-left px-3 py-2.5 text-xs rounded-lg flex items-center justify-between transition-all duration-200 ${
+            btn.className = `w-full text-left px-3 py-2.5 text-xs rounded-lg flex items-center justify-between transition-all ${
                 isActive 
-                ? 'bg-indigo-600/10 border border-indigo-500/30 text-indigo-200 font-semibold' 
+                ? 'bg-indigo-600/10 border border-indigo-500/30 text-indigo-400 font-semibold' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40 border border-transparent'
             }`;
-            btn.onclick = () => switchChannel(ch.id);
-            
+            btn.onclick = () => switchChannel(ch.id);         
             btn.innerHTML = `
                 <span class="truncate flex items-center pr-2">
-                    <i class="${ch.icon} mr-2.5 text-xs ${isActive ? 'text-indigo-400' : 'text-slate-500'}"></i>
+                    <i class="${ch.icon} mr-2.5 text-xs ${isActive ? 'text-indigo-400' : 'text-slate-400'}"></i>
                     <span class="truncate">${ch.name}</span>
                 </span>
                 ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0"></span>' : ''}
@@ -403,110 +313,61 @@
             listContainer.appendChild(btn);
         });
     }
-
     function loadActiveChannel() {
         const ch = channels[activeChannelId];
         document.getElementById('active-channel-title').innerHTML = `<i class="${ch.icon} mr-1.5"></i>${ch.name}`;
-        document.getElementById('active-channel-desc').innerText = ch.desc;
-        
+        document.getElementById('active-channel-desc').innerText = ch.desc;    
         chatScroller.innerHTML = '';
-        ch.messages.forEach(msg => {
-            renderMessageBubble(msg);
-        });
+        ch.messages.forEach(msg => renderMessageBubble(msg));
         chatScroller.scrollTo({ top: chatScroller.scrollHeight });
     }
-
     function renderMessageBubble(msg) {
         const isUser = msg.role === 'user';
         const bubbleWrapper = document.createElement('div');
-        bubbleWrapper.className = `flex items-start space-x-3 max-w-[85%] md:max-w-[75%] my-2 ${isUser ? 'ml-auto justify-end' : ''}`;
-        
-        let headerRow = isUser ? `
-            <div class="flex items-center space-x-2 justify-end">
-                <span class="text-xs font-bold text-slate-200">${msg.sender}</span>
-                <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 font-mono">${msg.badge}</span>
-            </div>
-        ` : `
-            <div class="flex items-center space-x-2">
-                <span class="text-xs font-bold text-slate-200">${msg.sender}</span>
+        bubbleWrapper.className = `flex items-start space-x-3 max-w-[85%] md:max-w-[75%] my-2 ${isUser ? 'ml-auto justify-end' : ''}`;    
+        let headerRow = `
+            <div class="flex items-center space-x-2 ${isUser ? 'justify-end' : ''}">
+                <span class="text-xs font-bold">${msg.sender}</span>
                 <span class="text-[9px] bg-indigo-950/80 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-900 font-mono">${msg.badge}</span>
             </div>
         `;
-
-        let innerContent = parseMarkdown(msg.content);
-        
+        let innerContent = parseMarkdown(msg.content);    
         let chipsRow = '';
         if (msg.chips && msg.chips.length > 0) {
             chipsRow = `<div class="mt-3 flex flex-wrap gap-2">`;
             msg.chips.forEach(chip => {
                 chipsRow += `
-                    <button onclick="sendQuickPrompt('${chip.text.replace(/'/g, "\\'")}')" class="bg-slate-950 hover:bg-indigo-950/50 border border-slate-800 hover:border-indigo-500/30 text-slate-400 hover:text-indigo-300 text-[10px] px-2.5 py-1.5 rounded-lg transition-all text-left font-medium">
+                    <button onclick="sendQuickPrompt('${chip.text.replace(/'/g, "\\'")}')" class="main-bg border hover:border-indigo-500/40 text-slate-300 text-[10px] px-2.5 py-1.5 rounded-lg transition-all text-left font-medium">
                         ${chip.label}
                     </button>
                 `;
             });
             chipsRow += `</div>`;
         }
-
         const avatar = isUser ? '' : `
             <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xs shrink-0 shadow-lg shadow-indigo-500/20">
-                <i class="fa-solid fa-robot"></i>
+                <i class="fa-solid fa-brain"></i>
             </div>
         `;
-
         bubbleWrapper.innerHTML = `
             ${avatar}
             <div class="space-y-1 ${isUser ? 'text-right' : 'text-left'}">
                 ${headerRow}
-                <div class="${isUser ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-slate-900 border border-slate-800/80 text-slate-300 rounded-tl-none'} rounded-2xl p-4 text-xs leading-relaxed shadow-sm">
-                    <div class="prose prose-invert max-w-none text-left leading-relaxed space-y-2">${innerContent}</div>
+                <div class="${isUser ? 'bg-indigo-600 text-white rounded-tr-none' : 'bubble-bot rounded-tl-none'} rounded-2xl p-4 text-xs leading-relaxed shadow-sm">
+                    <div class="prose max-w-none text-left leading-relaxed space-y-2">${innerContent}</div>
                     ${chipsRow}
                 </div>
-                <span class="text-[9px] text-slate-600 font-mono block pl-1">${msg.time}</span>
+                <span class="text-[9px] text-slate-400 font-mono block pl-1">${msg.time}</span>
             </div>
-        `;
-        
+        `;   
         chatScroller.appendChild(bubbleWrapper);
     }
-
     function parseMarkdown(text) {
-        let esc = text;
-        esc = esc.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-        // Advanced Math Formulas: $$ equation $$
-        esc = esc.replace(/\$\$([\s\S]*?)\$\$/g, '<div class="my-3 p-3 bg-slate-950 border border-slate-800 rounded-lg text-center text-indigo-300 font-mono text-[11px] overflow-x-auto">$1</div>');
-        
-        // Inline Math: $ equation $
-        esc = esc.replace(/\$([^$]+)\$/g, '<span class="bg-slate-950 text-indigo-400 font-mono px-1 py-0.5 rounded border border-slate-800 text-[10.5px] font-bold">$1</span>');
-
-        // Code blocks: ```javascript [code] ```
-        esc = esc.replace(/```([a-zA-Z]*)\n([\s\S]*?)```/g, function(match, lang, code) {
-            const blockId = 'code-' + Math.random().toString(36).substr(2, 9);
-            return `
-                <div class="my-3 rounded-lg border border-slate-800 bg-slate-950 overflow-hidden font-mono text-[11px]">
-                    <div class="flex items-center justify-between px-3.5 py-1.5 bg-slate-900/80 border-b border-slate-800 text-slate-400 select-none">
-                        <span class="text-[9px] font-bold uppercase tracking-wider">${lang || 'code'}</span>
-                        <button onclick="copyCodePayload('${blockId}')" class="text-[10px] text-slate-400 hover:text-indigo-400 flex items-center gap-1 transition-colors">
-                            <i class="fa-regular fa-copy"></i>Copy Code
-                        </button>
-                    </div>
-                    <pre class="p-3 overflow-x-auto text-emerald-400 leading-relaxed"><code id="${blockId}">${code.trim()}</code></pre>
-                </div>
-            `;
-        });
-
-        // Inline code blocks: `code`
-        esc = esc.replace(/`([^`]+)`/g, '<code class="bg-slate-950 text-rose-400 font-mono px-1.5 py-0.5 rounded border border-slate-800 text-[10.5px] font-bold">$1</code>');
-
-        // Strong emphasis: **text**
-        esc = esc.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-white">$1</strong>');
-
-        // Lists: * bullet
-        esc = esc.replace(/^\*\s(.*)$/gm, '<li class="ml-4 list-disc text-slate-300 my-1">$1</li>');
-
+        let esc = text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        esc = esc.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-indigo-400">$1</strong>');
+        esc = esc.replace(/`([^`]+)`/g, '<code class="main-bg text-rose-400 font-mono px-1.5 py-0.5 rounded border text-[10.5px] font-bold">$1</code>');
         return esc;
     }
-
     function switchChannel(channelId) {
         if (isStreaming) return;
         activeChannelId = channelId;
@@ -514,72 +375,55 @@
         loadActiveChannel();
         toggleSidebar('left-sidebar', false);
     }
-
     function createNewThread() {
         if (isStreaming) return;
-        const threadName = prompt("Enter a name for this custom integration pipeline:", "Integration Handler API");
+        const threadName = prompt("Enter thread name:", "Custom Workspace");
         if (!threadName) return;
-
         const safeId = 'ch-' + Date.now();
         channels[safeId] = {
             id: safeId,
             name: threadName,
-            desc: 'Custom operational workspace sandbox thread',
-            icon: 'fa-solid fa-cubes-stacked',
-            messages: [
-                {
-                    id: Date.now(),
-                    role: 'assistant',
-                    sender: 'SystemAgent',
-                    badge: 'CUSTOM',
-                    time: 'Initialized workspace',
-                    content: `Workspace pipeline **${threadName}** is active. Describe the logic configurations you wish to evaluate.`,
-                    chips: []
-                }
-            ]
+            desc: 'User custom workspace thread',
+            icon: 'fa-solid fa-comments',
+            messages: [{
+                id: Date.now(),
+                role: 'assistant',
+                sender: 'CognitiveBot',
+                badge: 'CUSTOM',
+                time: 'Initialized',
+                content: `Thread **${threadName}** ready.`,
+                chips: []
+            }]
         };
-
         activeChannelId = safeId;
         renderChannelsList();
         loadActiveChannel();
-        toggleSidebar('left-sidebar', false);
     }
-
     function clearChatLog() {
         if (isStreaming) return;
         channels[activeChannelId].messages = [];
         loadActiveChannel();
-        
-        registerIntent.innerText = 'null';
-        registerWords.innerText = '0';
-        registerConfidence.innerText = '1.00';
-        registerLatency.innerText = '0ms';
     }
-
     function submitUserMessage() {
         if (isStreaming) return;
         const userPrompt = chatInput.value.trim();
         if (!userPrompt) return;
-
         chatInput.value = '';
-        chatInput.style.height = 'auto';
-        
+        chatInput.style.height = 'auto';      
         appendUserMessageToStore(userPrompt);
         executeResponsePipeline(userPrompt);
     }
-
     function sendQuickPrompt(promptText) {
         if (isStreaming) return;
         appendUserMessageToStore(promptText);
         executeResponsePipeline(promptText);
     }
-
     function appendUserMessageToStore(content) {
         const msg = {
             id: Date.now(),
             role: 'user',
             sender: 'You',
-            badge: 'OPERATOR',
+            badge: 'USER',
             time: 'Sent just now',
             content: content
         };
@@ -587,136 +431,61 @@
         renderMessageBubble(msg);
         chatScroller.scrollTo({ top: chatScroller.scrollHeight, behavior: 'smooth' });
     }
-
-    function appendMessageDirectly(role, sender, badge, text) {
-        const msg = {
-            id: Date.now(),
-            role: role,
-            sender: sender,
-            badge: badge,
-            time: 'Delivered just now',
-            content: text
-        };
-        channels[activeChannelId].messages.push(msg);
-        renderMessageBubble(msg);
-        chatScroller.scrollTo({ top: chatScroller.scrollHeight, behavior: 'smooth' });
-    }
-
-    function toggleSendButtonState(disable) {
-        if (disable) {
-            sendButton.disabled = true;
-            sendButton.classList.add('opacity-50', 'cursor-not-allowed');
-            sendIcon.className = 'fa-solid fa-spinner fa-spin text-sm';
-        } else {
-            sendButton.disabled = false;
-            sendButton.classList.remove('opacity-50', 'cursor-not-allowed');
-            sendIcon.className = 'fa-solid fa-arrow-up text-sm';
-        }
-    }
-
     function executeResponsePipeline(userQuery) {
         isStreaming = true;
-        toggleSendButtonState(true);
-
-        const startTime = Date.now();
-        registerIntent.innerText = 'parsing_prompt';
-        
+        sendButton.disabled = true;
         setTimeout(() => {
-            const wordCount = userQuery.split(/\s+/).length;
-            registerWords.innerText = wordCount;
-            registerConfidence.innerText = (0.92 + Math.random() * 0.07).toFixed(2);
-            registerLatency.innerText = `${Date.now() - startTime}ms`;
-            registerIntent.innerText = 'generate_response';
-
-            // Construct AI Streaming Target Bubble
             const bubbleWrapper = document.createElement('div');
-            bubbleWrapper.className = 'flex items-start space-x-3 max-w-[85%] md:max-w-[75%] my-2';
-            
-            const avatar = `
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xs shrink-0 shadow-lg shadow-indigo-500/20">
-                    <i class="fa-solid fa-robot"></i>
-                </div>
-            `;
-
+            bubbleWrapper.className = 'flex items-start space-x-3 max-w-[85%] md:max-w-[75%] my-2';       
             bubbleWrapper.innerHTML = `
-                ${avatar}
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xs shrink-0 shadow-lg shadow-indigo-500/20">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
                 <div class="space-y-1 text-left">
                     <div class="flex items-center space-x-2">
-                        <span class="text-xs font-bold text-slate-200">${engineConfig.model.toUpperCase()} Engine</span>
-                        <span class="text-[9px] bg-indigo-950/80 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-900 font-mono">LIVE_STREAM</span>
+                        <span class="text-xs font-bold">CognitiveBot</span>
+                        <span class="text-[9px] bg-indigo-950/80 text-indigo-400 px-1.5 py-0.5 rounded border border-indigo-900 font-mono">LIVE</span>
                     </div>
-                    <div class="bg-slate-900 border border-slate-800/80 text-slate-300 rounded-2xl rounded-tl-none p-4 text-xs leading-relaxed shadow-sm">
-                        <div class="prose prose-invert max-w-none text-left leading-relaxed space-y-2 cursor-blink" id="streaming-content-target"></div>
+                    <div class="bubble-bot rounded-2xl rounded-tl-none p-4 text-xs leading-relaxed shadow-sm">
+                        <div class="prose max-w-none text-left leading-relaxed space-y-2 cursor-blink" id="streaming-content-target"></div>
                     </div>
-                    <span class="text-[9px] text-slate-600 font-mono block pl-1">Streaming active...</span>
                 </div>
-            `;
-            
+            `;        
             chatScroller.appendChild(bubbleWrapper);
             chatScroller.scrollTo({ top: chatScroller.scrollHeight, behavior: 'smooth' });
-
             const targetElement = document.getElementById('streaming-content-target');
-            const sampleResponseText = generateSimulatedResponse(userQuery);
-            
+            const responseText = `Here is a response tailored to **"${userQuery}"**. System controls are operating dynamically across all interface blocks.`;            
             let charIndex = 0;
             const streamInterval = setInterval(() => {
-                targetElement.innerHTML = parseMarkdown(sampleResponseText.slice(0, charIndex));
+                targetElement.innerHTML = parseMarkdown(responseText.slice(0, charIndex));
                 chatScroller.scrollTop = chatScroller.scrollHeight;
-                charIndex += 3;
-
-                if (charIndex >= sampleResponseText.length) {
+                charIndex += 2;
+                if (charIndex >= responseText.length) {
                     clearInterval(streamInterval);
-                    targetElement.innerHTML = parseMarkdown(sampleResponseText);
+                    targetElement.innerHTML = parseMarkdown(responseText);
                     targetElement.classList.remove('cursor-blink');
-
-                    // Store completed response into pipeline memory
                     channels[activeChannelId].messages.push({
                         id: Date.now(),
                         role: 'assistant',
-                        sender: `${engineConfig.model.toUpperCase()} Engine`,
+                        sender: 'CognitiveBot',
                         badge: 'EXECUTED',
                         time: 'Delivered just now',
-                        content: sampleResponseText
+                        content: responseText
                     });
 
                     isStreaming = false;
-                    toggleSendButtonState(false);
-                    registerIntent.innerText = 'idle_ready';
+                    sendButton.disabled = false;
                 }
             }, 20);
-        }, 400);
+        }, 300);
     }
-
-    function generateSimulatedResponse(query) {
-        const q = query.toLowerCase();
-        if (q.includes('api') || q.includes('asynchronous')) {
-            return `Asynchronous API integration handles network requests concurrently without blocking the UI thread:\n\n\`\`\`javascript\nasync function fetchPipelineMetrics() {\n  try {\n    const response = await fetch('/api/v1/metrics');\n    const data = await response.json();\n    return data;\n  } catch (err) {\n    console.error("Execution pipeline error:", err);\n  }\n}\n\`\`\`\n* Non-blocking Execution\n* Automatic Error Fallbacks\n* Real-time Data Mapping`;
-        } else if (q.includes('docker') || q.includes('kube')) {
-            return `Multi-stage Docker builds reduce overall image size while maintaining security boundaries:\n\n\`\`\`dockerfile\nFROM node:18-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM nginx:alpine\nCOPY --from=builder /app/dist /usr/share/nginx/html\nEXPOSE 80\n\`\`\``;
-        } else {
-            return `Processed input parameter: **"${query}"**.\n\nAll primary system node clusters (**AP-SOUTH-1**) are operational under temperature parameter **${engineConfig.temp}** and maximum token ceiling **${engineConfig.tokens}**. System pipeline operations are executing smoothly.`;
-        }
-    }
-
-    function copyCodePayload(targetId) {
-        const text = document.getElementById(targetId).innerText;
-        navigator.clipboard.writeText(text).then(() => {
-            alert('Code block contents successfully copied to clipboard.');
-        });
-    }
-
     function exportJSONState() {
-        const stateJSON = JSON.stringify({
-            channels: channels,
-            config: engineConfig,
-            activeChannel: activeChannelId
-        }, null, 2);
-
+        const stateJSON = JSON.stringify({ channels: channels, config: engineConfig, activeChannel: activeChannelId }, null, 2);
         const blob = new Blob([stateJSON], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `nexus_workspace_state_${Date.now()}.json`;
+        a.download = `cognitive_state_${Date.now()}.json`;
         a.click();
     }
 </script>
