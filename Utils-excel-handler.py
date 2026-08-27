@@ -32,5 +32,8 @@ class ExcelHandler:
         self.sheet.cell(row=row, column=11, value=eval_res.get("remarks"))
 
     def save(self):
+<<<<<<< HEAD
         self.workbook.save(self.file_path)
 EOF
+=======
+>>>>>>> 98c8d0b (Add core framework files: Page objects, Excel handler, and AI evaluator)
