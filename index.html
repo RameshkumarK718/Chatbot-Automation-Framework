@@ -41,7 +41,6 @@
 </head>
 <body class="h-full flex flex-col overflow-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
 
-<!-- HEADER -->
 <header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shrink-0 px-6 py-3 flex items-center justify-between z-30 transition-colors">
     <div class="flex items-center space-x-3">
         <button onclick="toggleSidebar('left-sidebar', true)" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
@@ -86,7 +85,6 @@
 <div class="flex-1 flex overflow-hidden relative">
     <div id="left-sidebar-backdrop" onclick="toggleSidebar('left-sidebar', false)" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
     
-    <!-- LEFT SIDEBAR: Workbook Tabs -->
     <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[300px] bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full transform -translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
         <div class="p-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 lg:hidden">
             <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Dashboard Tabs</span>
@@ -136,7 +134,6 @@
         </div>
     </aside>
 
-    <!-- MAIN VIEWPORT -->
     <main class="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden min-w-0 transition-colors">
         <div class="bg-white/40 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 p-3 flex justify-between items-center px-4 md:px-6 shrink-0">
             <div>
@@ -155,42 +152,40 @@
             </div>
         </div>
         
-        <!-- AUTOMATION TARGET: Main Dashboard Content Area -->
         <div id="dashboard-viewport" data-testid="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-            <!-- Dynamic Dashboard Cards Container -->
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <p class="text-[10px] text-slate-400 uppercase font-mono">Total Cases</p>
-                    <p id="metric-total" class="text-lg font-bold text-slate-800 dark:text-slate-100 mt-1">250</p>
+                    <p id="metric-total" class="text-lg font-bold text-slate-800 dark:text-slate-100 mt-1">{{ metrics.total_cases }}</p>
                 </div>
                 <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <p class="text-[10px] text-slate-400 uppercase font-mono">Passed</p>
-                    <p id="metric-pass" class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">231</p>
+                    <p id="metric-pass" class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">{{ metrics.passed_cases }}</p>
                 </div>
                 <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <p class="text-[10px] text-slate-400 uppercase font-mono">Failed</p>
-                    <p id="metric-fail" class="text-lg font-bold text-rose-600 dark:text-rose-400 mt-1">19</p>
+                    <p id="metric-fail" class="text-lg font-bold text-rose-600 dark:text-rose-400 mt-1">{{ metrics.failed_cases }}</p>
                 </div>
                 <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <p class="text-[10px] text-slate-400 uppercase font-mono">Pass Rate</p>
-                    <p id="metric-passrate" class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">92.40%</p>
+                    <p id="metric-passrate" class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">{{ metrics.pass_rate }}</p>
                 </div>
                 <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <p class="text-[10px] text-slate-400 uppercase font-mono">Fail Rate</p>
-                    <p id="metric-failrate" class="text-lg font-bold text-rose-600 dark:text-rose-400 mt-1">7.60%</p>
+                    <p id="metric-failrate" class="text-lg font-bold text-rose-600 dark:text-rose-400 mt-1">{{ metrics.fail_rate }}</p>
                 </div>
                 <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                     <p class="text-[10px] text-slate-400 uppercase font-mono">Relevance Rate</p>
-                    <p id="metric-relevance" class="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-1">96.80%</p>
+                    <p id="metric-relevance" class="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-1">{{ metrics.relevance_rate }}</p>
                 </div>
             </div>
 
             <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 p-4 rounded-xl flex items-center justify-between">
                 <div>
                     <h3 class="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">System Reliability Status</h3>
-                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">Current chatbot evaluation level: <strong class="underline">High Reliability</strong></p>
+                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">Current chatbot evaluation level: <strong class="underline">{{ metrics.reliability_level }} Reliability</strong></p>
                 </div>
-                <span class="px-2.5 py-1 bg-emerald-600 text-white font-mono text-[10px] font-bold rounded-full">92.4% PASS</span>
+                <span class="px-2.5 py-1 bg-emerald-600 text-white font-mono text-[10px] font-bold rounded-full">{{ metrics.pass_rate }} PASS</span>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -198,11 +193,11 @@
                     <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-chart-pie mr-2 text-emerald-500"></i>Status Distribution</h4>
                     <div class="space-y-2">
                         <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">PASS (231 cases)</span><span class="font-mono text-emerald-600">92.4%</span></div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">PASS ({{ metrics.passed_cases }} cases)</span><span class="font-mono text-emerald-600">{{ metrics.pass_rate }}</span></div>
                             <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full rounded-full" style="width: 92.4%"></div></div>
                         </div>
                         <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">FAIL (19 cases)</span><span class="font-mono text-rose-600">7.6%</span></div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">FAIL ({{ metrics.failed_cases }} cases)</span><span class="font-mono text-rose-600">{{ metrics.fail_rate }}</span></div>
                             <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-rose-500 h-full rounded-full" style="width: 7.6%"></div></div>
                         </div>
                     </div>
@@ -211,7 +206,7 @@
                     <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-chart-bar mr-2 text-indigo-500"></i>Intent Relevance Distribution</h4>
                     <div class="space-y-2">
                         <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">Relevant Queries</span><span class="font-mono text-indigo-600">96.8%</span></div>
+                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">Relevant Queries</span><span class="font-mono text-indigo-600">{{ metrics.relevance_rate }}</span></div>
                             <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-indigo-500 h-full rounded-full" style="width: 96.8%"></div></div>
                         </div>
                         <div>
@@ -224,9 +219,7 @@
         </div>
         <div class="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 space-y-3 shrink-0 transition-colors">
             <div class="max-w-4xl mx-auto flex items-end space-x-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus-within:border-emerald-500/50 rounded-xl p-2 transition-all">
-                <!-- AUTOMATION TARGET: Input Field -->
                 <textarea id="chat-input" data-testid="chat-input" rows="1" placeholder="Query QA metrics or enter custom evaluation commands..." class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 max-h-32 resize-none py-2 px-3 align-bottom"></textarea>
-                <!-- AUTOMATION TARGET: Send Button -->
                 <button id="send-button" data-testid="send-button" onclick="handleUserQuery()" class="w-8 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center shrink-0 shadow-lg shadow-emerald-600/10">
                     <i class="fa-solid fa-arrow-up text-sm"></i>
                 </button>
@@ -238,7 +231,6 @@
             </div>
         </div>
     </main>
-    <!-- RIGHT SIDEBAR: Filters & Telemetry -->
     <div id="right-sidebar-backdrop" onclick="toggleSidebar('right-sidebar', false)" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
     <aside id="right-sidebar" class="fixed inset-y-0 right-0 w-[320px] bg-slate-100 dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full transform translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
         <div class="p-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 lg:hidden">
@@ -284,21 +276,21 @@
                     </select>
                 </div>
             </div>
-            <hr class="border-slate-200 dark:border-slate-800">   
+            <hr class="border-slate-200 dark:border-slate-800">    
             <div class="space-y-3">
                 <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active State Monitor</h4>
                 <div class="grid grid-cols-1 gap-2 font-mono text-[11px]">
                     <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
                         <span class="text-slate-500">Pass Rate:</span>
-                        <span class="text-emerald-600 dark:text-emerald-400 font-bold">92.4%</span>
+                        <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ metrics.pass_rate }}</span>
                     </div>
                     <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
                         <span class="text-slate-500">processed_cases:</span>
-                        <span class="text-indigo-600 dark:text-indigo-400 font-bold">250</span>
+                        <span class="text-indigo-600 dark:text-indigo-400 font-bold">{{ metrics.total_cases }}</span>
                     </div>
                     <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
                         <span class="text-slate-500">Reliability Level:</span>
-                        <span class="text-amber-600 dark:text-amber-400 font-bold">High</span>
+                        <span class="text-amber-600 dark:text-amber-400 font-bold">{{ metrics.reliability_level }}</span>
                     </div>
                 </div>
             </div>
@@ -335,8 +327,22 @@
             document.getElementById('system-status-indicator').innerText = 'Excel Workbook Parsed Successfully';
         }
     }
-    function runDiagnostics() {
-        alert('Running System Reliability Diagnostics... All 250 evaluation vectors validated successfully.');
+    
+    // BACKEND HOOK 3: Asynchronous Javascript Fetch linking to Python backend route
+    async function runDiagnostics() {
+        document.getElementById('system-status-indicator').innerText = 'Running Diagnostics...';
+        try {
+            const response = await fetch('/api/run-diagnostics', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            const data = await response.json();
+            document.getElementById('system-status-indicator').innerText = data.message || 'Diagnostics Complete.';
+            alert(data.message);
+        } catch (error) {
+            console.error('Diagnostic error:', error);
+            alert('Failed to connect to Python backend endpoint.');
+        }
     }
 </script>
 </body>
