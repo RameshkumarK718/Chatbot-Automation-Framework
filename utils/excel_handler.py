@@ -40,6 +40,4 @@ class ExcelHandler:
         self.sheet.cell(row=row, column=10, value=reason)
         self.sheet.cell(row=row, column=11, value=remarks)
     def save(self):
-
         self.workbook.save(self.file_path)
-
