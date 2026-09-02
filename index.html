@@ -151,8 +151,8 @@
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-table text-emerald-500"></i>
                         <h3 id="current-sheet-title" class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Executive Dashboard</h3>
-                    </div>              
-                    <!-- Dropdown & Keyword Filters Toolbar -->
+                    </div>             
+                    <!-- Multi-Dropdown & Keyword Filters Toolbar -->
                     <div class="flex flex-wrap items-center gap-2">
                         <!-- Domain Category Dropdown Filter -->
                         <div class="relative">
@@ -176,13 +176,32 @@
                                 <option value="Trainer / Coach">Trainer / Coach</option>
                             </select>
                         </div>
+                        <!-- Status Phase 01 Dropdown Filter -->
+                        <div class="relative">
+                            <select id="status1-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
+                                <option value="">Status(Phase.01)</option>
+                                <option value="PASS">PASS</option>
+                                <option value="FAIL">FAIL</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                        </div>
+                        <!-- Status Phase 02 Dropdown Filter -->
+                        <div class="relative">
+                            <select id="status2-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
+                                <option value="">Status(Phase.02)</option>
+                                <option value="PASS">PASS</option>
+                                <option value="FAIL">FAIL</option>
+                                <option value="N/A">N/A</option>
+                            </select>
+                        </div>
                         <!-- Keyword Search Input -->
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
                                 <i class="fa-solid fa-search text-[10px]"></i>
                             </span>
-                            <input type="text" id="table-filter-input" onkeyup="filterTable()" placeholder="Search keywords..." class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg pl-7 pr-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200 w-36 sm:w-48">
+                            <input type="text" id="table-filter-input" onkeyup="filterTable()" placeholder="Search keywords..." class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg pl-7 pr-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200 w-32 sm:w-40">
                         </div>
+
                         <!-- Row Count Badge -->
                         <span id="row-count-badge" class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1.5 rounded">23 rows</span>
                     </div>
@@ -222,7 +241,6 @@
         let globalWorkbook = null;
         let currentActiveSheetName = 'Executive Dashboard';
         let tableHeadersMap = {}; // Maps column header names to column indices
-
         function toggleDarkMode() {
             document.documentElement.classList.toggle('dark');
         }
@@ -266,7 +284,9 @@
             currentActiveSheetName = sheetName;
             document.getElementById('current-sheet-title').innerText = sheetName;          
             document.getElementById('table-filter-input').value = ''; 
-            document.getElementById('category-filter-select').value = '';     
+            document.getElementById('category-filter-select').value = '';
+            document.getElementById('status1-filter-select').value = '';
+            document.getElementById('status2-filter-select').value = '';     
             const container = document.getElementById('table-view-container');          
             if (globalWorkbook && globalWorkbook.Sheets[sheetName]) {
                 const worksheet = globalWorkbook.Sheets[sheetName];
@@ -277,8 +297,8 @@
                     tableEl.className = "w-full text-left text-xs border-collapse";
                     tableEl.querySelectorAll('th, td').forEach(cell => {
                         cell.className = "p-2 border border-slate-200 dark:border-slate-800";
-                    });              
-                    // Map headers to locate "Category" column automatically if present
+                    });                  
+                    // Map column headers dynamically to locate Category, Status(Phase.01), and Status(Phase.02)
                     tableHeadersMap = {};
                     const headerRow = tableEl.querySelector('tr');
                     if (headerRow) {
@@ -301,16 +321,23 @@
         }
         function filterTable() {
             const categoryFilter = document.getElementById('category-filter-select').value.toLowerCase();
-            const keywordFilter = document.getElementById('table-filter-input').value.toLowerCase();
+            const status1Filter = document.getElementById('status1-filter-select').value.toLowerCase();
+            const status2Filter = document.getElementById('status2-filter-select').value.toLowerCase();
+            const keywordFilter = document.getElementById('table-filter-input').value.toLowerCase();        
             const container = document.getElementById('table-view-container');
             const table = container.querySelector('table');
             if (!table) return;
             const trs = table.getElementsByTagName('tr');
             let visibleCount = 0;
+            // Dynamically resolve column indices
             const categoryColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : 0;
+            const status1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : -1);
+            const status2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : -1);
             // Start from index 1 to skip header row
             for (let i = 1; i < trs.length; i++) {
                 let matchesCategory = true;
+                let matchesStatus1 = true;
+                let matchesStatus2 = true;
                 let matchesKeyword = true;
                 const tds = trs[i].getElementsByTagName('td');
                 // 1. Category Dropdown Filter check
@@ -322,7 +349,25 @@
                         }
                     }
                 }
-                // 2. Keyword Search Filter check (matches any column)
+                // 2. Status Phase 01 Filter check
+                if (status1Filter !== '' && status1ColIdx !== -1) {
+                    if (tds[status1ColIdx]) {
+                        const cellVal = tds[status1ColIdx].innerText.trim().toLowerCase();
+                        if (cellVal !== status1Filter && !cellVal.includes(status1Filter)) {
+                            matchesStatus1 = false;
+                        }
+                    }
+                }
+                // 3. Status Phase 02 Filter check
+                if (status2Filter !== '' && status2ColIdx !== -1) {
+                    if (tds[status2ColIdx]) {
+                        const cellVal = tds[status2ColIdx].innerText.trim().toLowerCase();
+                        if (cellVal !== status2Filter && !cellVal.includes(status2Filter)) {
+                            matchesStatus2 = false;
+                        }
+                    }
+                }
+                // 4. Keyword Search Filter check (matches any column)
                 if (keywordFilter !== '') {
                     let rowMatched = false;
                     for (let j = 0; j < tds.length; j++) {
@@ -333,7 +378,7 @@
                     }
                     matchesKeyword = rowMatched;
                 }
-                if (matchesCategory && matchesKeyword) {
+                if (matchesCategory && matchesStatus1 && matchesStatus2 && matchesKeyword) {
                     trs[i].style.display = "";
                     visibleCount++;
                 } else {
