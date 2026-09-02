@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sportime Chatbot QA & System Reliability Dashboard</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -18,224 +17,254 @@
             }
         }
     </script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS for Excel Parsing -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body class="h-full bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased flex flex-col">
-    <!-- Top Navigation Bar -->
-    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between shadow-sm z-10">
+<body class="h-full bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased flex flex-col overflow-x-hidden">
+    <input type="file" id="excel-file-input" accept=".xlsx, .xls, .csv" class="hidden" onchange="handleExcelUpload(event)">
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3 flex items-center justify-between shadow-sm z-20">
         <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-500/20">
-                <i class="fa-solid fa-robot"></i>
+            <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-600 dark:text-slate-300 hover:text-emerald-500 focus:outline-none">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+            <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-500/20">
+                <i class="fa-solid fa-robot text-sm sm:text-base"></i>
             </div>
             <div>
-                <h1 class="text-sm font-bold tracking-tight text-slate-900 dark:text-white">Sportime Chatbot QA & System Reliability Dashboard</h1>
-                <p class="text-[11px] text-slate-400">Multi-Sheet Compliance & Workflow Dashboard</p>
+                <h1 class="text-xs sm:text-sm font-bold tracking-tight text-slate-900 dark:text-white truncate max-w-[180px] sm:max-w-none">Sportime Chatbot QA & System Reliability</h1>
+                <p class="text-[10px] sm:text-[11px] text-slate-400 hidden xs:block">Multi-Sheet Compliance & Workflow Dashboard</p>
             </div>
         </div>
-        <div class="flex items-center space-x-4">
-            <!-- File Upload Button -->
-            <label class="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-sm flex items-center space-x-2">
+        <div class="flex items-center space-x-2 sm:space-x-4">
+            <div class="hidden lg:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700 space-x-1">
+                <button onclick="setViewportMode('desktop')" id="btn-mode-desktop" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white dark:bg-slate-900 text-slate-800 dark:text-white shadow-sm transition-all">
+                    <i class="fa-solid fa-desktop mr-1.5"></i>Desktop
+                </button>
+                <button onclick="setViewportMode('mobile')" id="btn-mode-mobile" class="px-2.5 py-1 rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all">
+                    <i class="fa-solid fa-mobile-screen mr-1.5"></i>Mobile
+                </button>
+            </div>
+            <button onclick="triggerFileUpload()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3 py-2 rounded-lg transition-all shadow-sm flex items-center space-x-1.5">
                 <i class="fa-solid fa-file-excel"></i>
-                <span>Upload Report (.xlsx)</span>
-                <input type="file" id="excel-file-input" accept=".xlsx, .xls" class="hidden" onchange="handleExcelUpload(event)">
-            </label>
-            <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                <span class="hidden xs:inline">Upload Report</span>
+            </button>         
+            <button onclick="toggleDarkMode()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
                 <i class="fa-solid fa-moon dark:hidden"></i>
                 <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
             </button>
         </div>
     </header>
-    <!-- Main Workspace Layout -->
-    <div class="flex-1 flex overflow-hidden">     
-        <!-- Sidebar Navigation -->
-        <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between p-4 hidden md:flex">
-            <div>
-                <div class="mb-4">
-                    <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Workbook Sheets</span>
-                    <span id="sheet-count-badge" class="ml-2 text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold">3 sheets</span>
+    <div id="workspace-wrapper" class="flex-1 flex justify-center items-center overflow-hidden transition-all duration-300">
+        <div id="workspace-container" class="w-full h-full flex overflow-hidden bg-slate-100 dark:bg-slate-950 transition-all duration-300">
+            
+            <aside id="sidebar-nav" class="fixed inset-y-0 left-0 z-30 w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between p-4 transform -translate-x-full md:translate-x-0 md:static transition-transform duration-200 shadow-xl md:shadow-none">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Workbook Sheets</span>
+                            <span id="sheet-count-badge" class="ml-2 text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold">3 sheets</span>
+                        </div>
+                        <button onclick="toggleMobileSidebar()" class="md:hidden text-slate-400 hover:text-slate-600">
+                            <i class="fa-solid fa-xmark text-base"></i>
+                        </button>
+                    </div>
+                    <nav id="sheets-list" class="space-y-1.5">
+                        <button onclick="switchTab('Executive Dashboard')" class="w-full text-left px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between">
+                            <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>Executive Dashboard</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                        </button>
+                        <button onclick="switchTab('Topic Wise Master Audit')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
+                            <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>Topic Wise Master Audit</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                        </button>
+                        <button onclick="switchTab('QA & Master Audit')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
+                            <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>QA & Master Audit</span>
+                            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                        </button>
+                    </nav>
                 </div>
-                <!-- Dynamic Sheets List -->
-                <nav id="sheets-list" class="space-y-1.5">
-                    <button onclick="switchTab('Executive Dashboard')" class="w-full text-left px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between">
-                        <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>Executive Dashboard</span>
-                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-                    </button>
-                    <button onclick="switchTab('Topic Wise Master Audit')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
-                        <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>Topic Wise Master Audit</span>
-                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-                    </button>
-                    <button onclick="switchTab('QA & Master Audit')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
-                        <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>QA & Master Audit</span>
-                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-                    </button>
-                </nav>
-            </div>
-            <!-- System Info Card -->
-            <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
-                <div class="flex items-center space-x-2 mb-1">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300" id="dataset-status-text">Default Data Active</span>
+                <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800 mt-4">
+                    <div class="flex items-center space-x-2 mb-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300" id="dataset-status-text">Default Data Active</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400" id="system-status-indicator">Ready for custom workbook upload</p>
                 </div>
-                <p class="text-[10px] text-slate-400" id="system-status-indicator">Ready for custom workbook upload</p>
-            </div>
-        </aside>
-        <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col overflow-y-auto p-6 space-y-6">     
-            <!-- Dynamic Workflow Pipeline Section -->
-            <div id="workflow-container" class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                <div class="flex items-center justify-between mb-4">
-                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
-                        <i class="fa-solid fa-diagram-project mr-2 text-emerald-500"></i>Active Workbook Execution Pipeline
-                    </h4>
-                    <span id="workflow-filename" class="text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md font-bold">Report.xlsx</span>
-                </div>          
-                <div id="workflow-steps" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-folder-open"></i></span>
-                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Completed</span>
+            </aside>
+            <main class="flex-1 flex flex-col overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">     
+                <div id="workflow-container" class="bg-white dark:bg-slate-900 p-4 sm:p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                    <div class="flex items-center justify-between mb-3 sm:mb-4">
+                        <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                            <i class="fa-solid fa-diagram-project mr-2 text-emerald-500"></i>Active Workbook Execution Pipeline
+                        </h4>
+                        <span id="workflow-filename" class="text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md font-bold">Report.xlsx</span>
+                    </div>          
+                    <div id="workflow-steps" class="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+                        <div class="bg-slate-50 dark:bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-folder-open"></i></span>
+                                    <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Completed</span>
+                                </div>
+                                <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">1. Ingestion</h5>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Workbook parsed</p>
                             </div>
-                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">1. Ingestion</h5>
-                            <p class="text-[10px] text-slate-400 mt-0.5">Workbook parsed</p>
                         </div>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-table-cells"></i></span>
-                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Completed</span>
+                        <div class="bg-slate-50 dark:bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-table-cells"></i></span>
+                                    <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Completed</span>
+                                </div>
+                                <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">2. Sheets Index</h5>
+                                <p class="text-[10px] text-slate-400 mt-0.5">3 sheets mapped</p>
                             </div>
-                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">2. Sheets Index</h5>
-                            <p class="text-[10px] text-slate-400 mt-0.5">3 sheets mapped</p>
                         </div>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-broom"></i></span>
-                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Completed</span>
+                        <div class="bg-slate-50 dark:bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-broom"></i></span>
+                                    <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Completed</span>
+                                </div>
+                                <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">3. Sanitization</h5>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Cleaned assertions</p>
                             </div>
-                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">3. Sanitization</h5>
-                            <p class="text-[10px] text-slate-400 mt-0.5">Cleaned assertions</p>
                         </div>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-brain"></i></span>
-                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Active</span>
+                        <div class="bg-slate-50 dark:bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-brain"></i></span>
+                                    <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Active</span>
+                                </div>
+                                <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">4. AI Eval</h5>
+                                <p class="text-[10px] text-slate-400 mt-0.5">Testing accuracy</p>
                             </div>
-                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">4. AI Eval</h5>
-                            <p class="text-[10px] text-slate-400 mt-0.5">Testing accuracy</p>
                         </div>
-                    </div>
-                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-chart-column"></i></span>
-                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Ready</span>
+                        <div class="bg-slate-50 dark:bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between col-span-2 sm:col-span-1">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-chart-column"></i></span>
+                                    <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Ready</span>
+                                </div>
+                                <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">5. Report Gen</h5>
+                                <p class="text-[10px] text-slate-400 mt-0.5">KPIs compiled</p>
                             </div>
-                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">5. Report Gen</h5>
-                            <p class="text-[10px] text-slate-400 mt-0.5">KPIs compiled</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-            <!-- Spreadsheet Tab Display Card -->
-            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex-1 flex flex-col overflow-hidden">
-                <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/50">
-                    <div class="flex items-center space-x-2">
-                        <i class="fa-solid fa-table text-emerald-500"></i>
-                        <h3 id="current-sheet-title" class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Executive Dashboard</h3>
-                    </div>               
-                    <!-- Fully Dynamic Filters Toolbar -->
-                    <div class="flex flex-wrap items-center gap-2">
-                        <!-- Dynamic Domain Category Dropdown Filter -->
-                        <div class="relative">
-                            <select id="category-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
-                                <option value="">All Categories</option>
-                            </select>
-                        </div>
-                        <!-- Dynamic Status Phase 01 Filter (Col K) -->
-                        <div class="relative">
-                            <select id="status1-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
-                                <option value="">Status(Phase.01)</option>
-                                <option value="PASS">PASS</option>
-                                <option value="FAIL">FAIL</option>
-                                <option value="N/A">N/A</option>
-                            </select>
-                        </div>
-                        <!-- Dynamic Status Phase 02 Filter (Col L) -->
-                        <div class="relative">
-                            <select id="status2-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
-                                <option value="">Status(Phase.02)</option>
-                                <option value="PASS">PASS</option>
-                                <option value="FAIL">FAIL</option>
-                                <option value="N/A">N/A</option>
-                            </select>
-                        </div>
-                        <!-- Keyword Search Input -->
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
-                                <i class="fa-solid fa-search text-[10px]"></i>
-                            </span>
-                            <input type="text" id="table-filter-input" onkeyup="filterTable()" placeholder="Search keywords..." class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg pl-7 pr-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200 w-32 sm:w-40">
-                        </div>
-                        <!-- Row Count Badge -->
-                        <span id="row-count-badge" class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1.5 rounded">1 row</span>
-                    </div>
-                </div>          
-                <!-- Data Table Viewport -->
-                <div class="flex-1 overflow-auto p-4">
-                    <div id="table-view-container" class="min-w-full">
-                        <table class="w-full text-left text-xs border-collapse">
-                            <thead>
-                                <tr class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">CATEGORY</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">TEST CASE DESCRIPTION</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.01) [Col K]</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.02) [Col L]</th>
-                                </tr>
-                            </thead>
-                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-mono text-[11px]">
-                                <tr>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700">Fitness / Yoga</td>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700">Verify chatbot handles class scheduling queries correctly.</td>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700 text-emerald-600 font-bold">PASS</td>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700 text-emerald-600 font-bold">PASS</td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
-            </div>
-        </main>
+                <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex-1 flex flex-col overflow-hidden">
+                    <div class="px-4 sm:px-5 py-3 sm:py-4 border-b border-slate-200 dark:border-slate-800 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-900/50">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-table text-emerald-500"></i>
+                            <h3 id="current-sheet-title" class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Executive Dashboard</h3>
+                        </div> 
+                        <div class="flex flex-wrap items-center gap-2 w-full lg:w-auto">
+                            <div class="relative flex-1 sm:flex-initial">
+                                <select id="category-filter-select" onchange="filterTable()" class="w-full text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
+                                    <option value="">All Categories</option>
+                                    <option value="Basketball">Basketball</option>
+                                    <option value="Boxing">Boxing</option>
+                                    <option value="Classes & Schedules">Classes & Schedules</option>
+                                    <option value="Cycling">Cycling</option>
+                                    <option value="Fitness / Yoga">Fitness / Yoga</option>
+                                </select>
+                            </div>
+                            <div class="relative flex-1 sm:flex-initial">
+                                <select id="status1-filter-select" onchange="filterTable()" class="w-full text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
+                                    <option value="">Status(Phase.01)</option>
+                                    <option value="PASS">PASS</option>
+                                    <option value="FAIL">FAIL</option>
+                                    <option value="N/A">N/A</option>
+                                </select>
+                            </div>
+                            <div class="relative flex-1 sm:flex-initial">
+                                <select id="status2-filter-select" onchange="filterTable()" class="w-full text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
+                                    <option value="">Status(Phase.02)</option>
+                                    <option value="PASS">PASS</option>
+                                    <option value="FAIL">FAIL</option>
+                                    <option value="N/A">N/A</option>
+                                </select>
+                            </div>
+                            <div class="relative flex-1 sm:flex-initial">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400">
+                                    <i class="fa-solid fa-search text-[10px]"></i>
+                                </span>
+                                <input type="text" id="table-filter-input" onkeyup="filterTable()" placeholder="Search..." class="w-full text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg pl-7 pr-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200 sm:w-32">
+                            </div>
+
+                            <span id="row-count-badge" class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1.5 rounded">1 row</span>
+                        </div>
+                    </div>          
+                    <div class="flex-1 overflow-auto p-4">
+                        <div id="table-view-container" class="min-w-full">
+                            <table class="w-full text-left text-xs border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                        <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">CATEGORY</th>
+                                        <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">TEST CASE DESCRIPTION</th>
+                                        <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.01) [Col K]</th>
+                                        <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.02) [Col L]</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-mono text-[11px]">
+                                    <tr>
+                                        <td class="p-2 border border-slate-200 dark:border-slate-700">Fitness / Yoga</td>
+                                        <td class="p-2 border border-slate-200 dark:border-slate-700">Verify chatbot handles class scheduling queries correctly.</td>
+                                        <td class="p-2 border border-slate-200 dark:border-slate-700 text-emerald-600 font-bold">PASS</td>
+                                        <td class="p-2 border border-slate-200 dark:border-slate-700 text-emerald-600 font-bold">PASS</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
     </div>
-    <!-- Script Logic -->
     <script>
         let globalWorkbook = null;
         let currentActiveSheetName = 'Executive Dashboard';
-        let tableHeadersMap = {}; // Maps column header names to column indices
+        let tableHeadersMap = {}; 
         function toggleDarkMode() {
             document.documentElement.classList.toggle('dark');
+        }
+        function triggerFileUpload() {
+            document.getElementById('excel-file-input').click();
+        }
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar-nav');
+            sidebar.classList.toggle('-translate-x-full');
+        }
+        function setViewportMode(mode) {
+            const wrapper = document.getElementById('workspace-wrapper');
+            const container = document.getElementById('workspace-container');
+            const btnDesktop = document.getElementById('btn-mode-desktop');
+            const btnMobile = document.getElementById('btn-mode-mobile');
+            if (mode === 'mobile') {
+                wrapper.className = "flex-1 flex justify-center items-center p-4 bg-slate-900/40 backdrop-blur-sm overflow-hidden transition-all duration-300";
+                container.className = "w-[390px] h-[780px] rounded-3xl border-8 border-slate-800 shadow-2xl flex overflow-hidden bg-slate-100 dark:bg-slate-950 transition-all duration-300";
+                btnMobile.className = "px-2.5 py-1 rounded-md text-xs font-semibold bg-white dark:bg-slate-900 text-slate-800 dark:text-white shadow-sm transition-all";
+                btnDesktop.className = "px-2.5 py-1 rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all";
+            } else {
+                wrapper.className = "flex-1 flex justify-center items-center overflow-hidden transition-all duration-300";
+                container.className = "w-full h-full flex overflow-hidden bg-slate-100 dark:bg-slate-950 transition-all duration-300";
+                btnDesktop.className = "px-2.5 py-1 rounded-md text-xs font-semibold bg-white dark:bg-slate-900 text-slate-800 dark:text-white shadow-sm transition-all";
+                btnMobile.className = "px-2.5 py-1 rounded-md text-xs font-medium text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-all";
+            }
         }
         function handleExcelUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
             document.getElementById('dataset-status-text').innerText = 'Loaded: ' + file.name;
             document.getElementById('system-status-indicator').innerText = 'Workbook Parsed Successfully';
-            document.getElementById('workflow-filename').innerText = file.name;
+            document.getElementById('workflow-filename').innerText = file.name;     
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
                     globalWorkbook = XLSX.read(data, { type: 'array' });                 
                     const sheetNames = globalWorkbook.SheetNames;
-                    document.getElementById('sheet-count-badge').innerText = `${sheetNames.length} sheets`;                 
+                    document.getElementById('sheet-count-badge').innerText = `${sheetNames.length} sheets`;                             
                     const sheetsListEl = document.getElementById('sheets-list');
                     sheetsListEl.innerHTML = '';                 
                     sheetNames.forEach((sheetName, index) => {
@@ -244,7 +273,7 @@
                             ? "w-full text-left px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between"
                             : "w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors";                 
                         sheetsListEl.innerHTML += `
-                            <button onclick="switchTab('${sheetName}')" class="${btnClass}">
+                            <button onclick="switchTab('${sheetName}'); toggleMobileSidebar();" class="${btnClass}">
                                 <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>${sheetName}</span>
                                 <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
                             </button>
@@ -262,7 +291,7 @@
         function switchTab(sheetName) {
             currentActiveSheetName = sheetName;
             document.getElementById('current-sheet-title').innerText = sheetName;          
-            document.getElementById('table-filter-input').value = '';         
+            document.getElementById('table-filter-input').value = '';    
             const container = document.getElementById('table-view-container');          
             if (globalWorkbook && globalWorkbook.Sheets[sheetName]) {
                 const worksheet = globalWorkbook.Sheets[sheetName];
@@ -273,8 +302,7 @@
                     tableEl.className = "w-full text-left text-xs border-collapse";
                     tableEl.querySelectorAll('th, td').forEach(cell => {
                         cell.className = "p-2 border border-slate-200 dark:border-slate-800";
-                    });                  
-                    // Map column headers dynamically
+                    });               
                     tableHeadersMap = {};
                     const headerRow = tableEl.querySelector('tr');
                     if (headerRow) {
@@ -283,7 +311,6 @@
                             tableHeadersMap[th.innerText.trim().toLowerCase()] = idx;
                         });
                     }
-                    // Dynamically populate dropdown filters based on table contents and Columns K & L
                     populateDynamicDropdowns(tableEl);
                 }
                 updateRowCount();
@@ -304,18 +331,14 @@
             }
         }
         function populateDynamicDropdowns(tableEl) {
-            const trs = tableEl.getElementsByTagName('tr');      
-            // Map columns: Category (flexible index or column 0/1), Status Phase 01 (Col K index 10 or header name), Status Phase 02 (Col L index 11 or header name)
+            const trs = tableEl.getElementsByTagName('tr');       
             const catColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : 
-                              (tableHeadersMap['domain'] !== undefined ? tableHeadersMap['domain'] : 0);                          
-            const s1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : 
-                             (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : 10);                         
-            const s2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : 
-                             (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : 11);
-            const categoriesSet = new Set();
-            const status1Set = new Set(['PASS', 'FAIL', 'N/A']); // Ensure PASS, FAIL, N/A are always available options
+                              (tableHeadersMap['domain'] !== undefined ? tableHeadersMap['domain'] : 0);                             
+            const s1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : 10;
+            const s2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : 11;
+            const categoriesSet = new Set(['Basketball', 'Boxing', 'Classes & Schedules', 'Cycling', 'Fitness / Yoga']);
+            const status1Set = new Set(['PASS', 'FAIL', 'N/A']); 
             const status2Set = new Set(['PASS', 'FAIL', 'N/A']);
-            // Loop through data rows (skipping header at index 0)
             for (let i = 1; i < trs.length; i++) {
                 const tds = trs[i].getElementsByTagName('td');
                 if (catColIdx !== -1 && tds[catColIdx]) {
@@ -331,19 +354,16 @@
                     if (val) status2Set.add(val.toUpperCase());
                 }
             }
-            // Populate Category Filter Dropdown dynamically
             const catSelect = document.getElementById('category-filter-select');
             catSelect.innerHTML = '<option value="">All Categories</option>';
             Array.from(categoriesSet).sort().forEach(cat => {
                 catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
             });
-            // Populate Status 1 Dropdown dynamically (PASS, FAIL, N/A + any sheet values)
             const s1Select = document.getElementById('status1-filter-select');
             s1Select.innerHTML = '<option value="">Status(Phase.01)</option>';
             Array.from(status1Set).sort().forEach(st => {
                 s1Select.innerHTML += `<option value="${st}">${st}</option>`;
             });
-            // Populate Status 2 Dropdown dynamically (PASS, FAIL, N/A + any sheet values)
             const s2Select = document.getElementById('status2-filter-select');
             s2Select.innerHTML = '<option value="">Status(Phase.02)</option>';
             Array.from(status2Set).sort().forEach(st => {
@@ -360,47 +380,33 @@
             if (!table) return;
             const trs = table.getElementsByTagName('tr');
             let visibleCount = 0;
-            const catColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : 
-                              (tableHeadersMap['domain'] !== undefined ? tableHeadersMap['domain'] : 0);                          
-            const s1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : 
-                             (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : 10);                      
-            const s2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : 
-                             (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : 11);
-            // Start from index 1 to skip header row
+            const catColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : 0;
+            const s1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : 10;
+            const s2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : 11;
             for (let i = 1; i < trs.length; i++) {
                 let matchesCategory = true;
                 let matchesStatus1 = true;
                 let matchesStatus2 = true;
                 let matchesKeyword = true;
                 const tds = trs[i].getElementsByTagName('td');
-                // 1. Category Filter Check
-                if (categoryFilter !== '' && catColIdx !== -1) {
-                    if (tds[catColIdx]) {
-                        const cellVal = tds[catColIdx].innerText.trim().toLowerCase();
-                        if (cellVal !== categoryFilter && !cellVal.includes(categoryFilter)) {
-                            matchesCategory = false;
-                        }
+                if (categoryFilter !== '' && catColIdx !== -1 && tds[catColIdx]) {
+                    const cellVal = tds[catColIdx].innerText.trim().toLowerCase();
+                    if (cellVal !== categoryFilter && !cellVal.includes(categoryFilter)) {
+                        matchesCategory = false;
                     }
                 }
-                // 2. Status Phase 01 Filter Check (Col K)
-                if (status1Filter !== '' && s1ColIdx !== -1) {
-                    if (tds[s1ColIdx]) {
-                        const cellVal = tds[s1ColIdx].innerText.trim().toLowerCase();
-                        if (cellVal !== status1Filter && !cellVal.includes(status1Filter)) {
-                            matchesStatus1 = false;
-                        }
+                if (status1Filter !== '' && s1ColIdx !== -1 && tds[s1ColIdx]) {
+                    const cellVal = tds[s1ColIdx].innerText.trim().toLowerCase();
+                    if (cellVal !== status1Filter && !cellVal.includes(status1Filter)) {
+                        matchesStatus1 = false;
                     }
                 }
-                // 3. Status Phase 02 Filter Check (Col L)
-                if (status2Filter !== '' && s2ColIdx !== -1) {
-                    if (tds[s2ColIdx]) {
-                        const cellVal = tds[s2ColIdx].innerText.trim().toLowerCase();
-                        if (cellVal !== status2Filter && !cellVal.includes(status2Filter)) {
-                            matchesStatus2 = false;
-                        }
+                if (status2Filter !== '' && s2ColIdx !== -1 && tds[s2ColIdx]) {
+                    const cellVal = tds[s2ColIdx].innerText.trim().toLowerCase();
+                    if (cellVal !== status2Filter && !cellVal.includes(status2Filter)) {
+                        matchesStatus2 = false;
                     }
                 }
-                // 4. Keyword Search Filter Check
                 if (keywordFilter !== '') {
                     let rowMatched = false;
                     for (let j = 0; j < tds.length; j++) {
@@ -439,12 +445,9 @@
                 { title: "5. Reporting", desc: "KPIs compiled", icon: "fa-chart-column", status: "Ready" }
             ];
             stepsContainer.innerHTML = '';
-            pipelineSteps.steps.forEach((step) => {
-                // handled below correctly
-            });
             pipelineSteps.forEach((step) => {
                 stepsContainer.innerHTML += `
-                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                    <div class="bg-slate-50 dark:bg-slate-950 p-2.5 sm:p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
                         <div>
                             <div class="flex items-center justify-between mb-2">
                                 <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid ${step.icon}"></i></span>
