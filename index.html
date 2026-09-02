@@ -49,7 +49,7 @@
         </div>
     </header>
     <!-- Main Workspace Layout -->
-    <div class="flex-1 flex overflow-hidden">        
+    <div class="flex-1 flex overflow-hidden">     
         <!-- Sidebar Navigation -->
         <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between p-4 hidden md:flex">
             <div>
@@ -83,7 +83,7 @@
             </div>
         </aside>
         <!-- Main Content Area -->
-        <main class="flex-1 flex flex-col overflow-y-auto p-6 space-y-6">            
+        <main class="flex-1 flex flex-col overflow-y-auto p-6 space-y-6">     
             <!-- Dynamic Workflow Pipeline Section -->
             <div id="workflow-container" class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
                 <div class="flex items-center justify-between mb-4">
@@ -91,8 +91,7 @@
                         <i class="fa-solid fa-diagram-project mr-2 text-emerald-500"></i>Active Workbook Execution Pipeline
                     </h4>
                     <span id="workflow-filename" class="text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md font-bold">Report.xlsx</span>
-                </div>
-                
+                </div>          
                 <div id="workflow-steps" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
                     <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
                         <div>
@@ -201,16 +200,16 @@
             reader.onload = function(e) {
                 try {
                     const data = new Uint8Array(e.target.result);
-                    globalWorkbook = XLSX.read(data, { type: 'array' });                  
+                    globalWorkbook = XLSX.read(data, { type: 'array' });                   
                     const sheetNames = globalWorkbook.SheetNames;
-                    document.getElementById('sheet-count-badge').innerText = `${sheetNames.length} sheets`;                    
+                    document.getElementById('sheet-count-badge').innerText = `${sheetNames.length} sheets`;                
                     const sheetsListEl = document.getElementById('sheets-list');
-                    sheetsListEl.innerHTML = '';                  
+                    sheetsListEl.innerHTML = '';                 
                     sheetNames.forEach((sheetName, index) => {
                         const isActive = index === 0;
                         const btnClass = isActive 
                             ? "w-full text-left px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between"
-                            : "w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors";                
+                            : "w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors";                    
                         sheetsListEl.innerHTML += `
                             <button onclick="switchTab('${sheetName}')" class="${btnClass}">
                                 <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>${sheetName}</span>
@@ -228,8 +227,8 @@
             reader.readAsArrayBuffer(file);
         }
         function switchTab(sheetName) {
-            document.getElementById('current-sheet-title').innerText = sheetName;   
-            const container = document.getElementById('table-view-container');           
+            document.getElementById('current-sheet-title').innerText = sheetName;          
+            const container = document.getElementById('table-view-container');          
             if (globalWorkbook && globalWorkbook.Sheets[sheetName]) {
                 const worksheet = globalWorkbook.Sheets[sheetName];
                 const htmlTable = XLSX.utils.sheet_to_html(worksheet, { header: "" });
