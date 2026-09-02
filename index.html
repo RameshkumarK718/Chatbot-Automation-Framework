@@ -151,10 +151,10 @@
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-table text-emerald-500"></i>
                         <h3 id="current-sheet-title" class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Executive Dashboard</h3>
-                    </div>                
+                    </div>              
                     <!-- Fully Dynamic Filters Toolbar -->
                     <div class="flex flex-wrap items-center gap-2">
-                        <!-- Domain Category Dropdown Filter -->
+                        <!-- Dynamic Domain Category Dropdown Filter -->
                         <div class="relative">
                             <select id="category-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
                                 <option value="">All Categories</option>
@@ -164,12 +164,18 @@
                         <div class="relative">
                             <select id="status1-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
                                 <option value="">Status(Phase.01)</option>
+                                <option value="PASS">PASS</option>
+                                <option value="FAIL">FAIL</option>
+                                <option value="N/A">N/A</option>
                             </select>
                         </div>
                         <!-- Dynamic Status Phase 02 Filter -->
                         <div class="relative">
                             <select id="status2-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
                                 <option value="">Status(Phase.02)</option>
+                                <option value="PASS">PASS</option>
+                                <option value="FAIL">FAIL</option>
+                                <option value="N/A">N/A</option>
                             </select>
                         </div>
                         <!-- Keyword Search Input -->
@@ -179,8 +185,9 @@
                             </span>
                             <input type="text" id="table-filter-input" onkeyup="filterTable()" placeholder="Search keywords..." class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg pl-7 pr-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200 w-32 sm:w-40">
                         </div>
+
                         <!-- Row Count Badge -->
-                        <span id="row-count-badge" class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1.5 rounded">23 rows</span>
+                        <span id="row-count-badge" class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1.5 rounded">1 row</span>
                     </div>
                 </div>          
                 <!-- Data Table Viewport -->
@@ -189,22 +196,18 @@
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
                                 <tr class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">TOTAL TEST CASES</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">EVALUATED TEST CASES</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">PASSED</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">FAILED</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">PASS ACCURACY</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">RELEVANCE RATE</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">CATEGORY</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">TEST CASE DESCRIPTION</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.01)</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.02)</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-mono text-[11px]">
                                 <tr>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700">154</td>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700">122</td>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700 text-emerald-600 font-bold">84</td>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700 text-rose-600 font-bold">38</td>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700">68.85%</td>
-                                    <td class="p-2 border border-slate-200 dark:border-slate-700">94.16%</td>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700">Fitness / Yoga</td>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700">Verify chatbot handles class scheduling queries correctly.</td>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700 text-emerald-600 font-bold">PASS</td>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700 text-emerald-600 font-bold">PASS</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -260,7 +263,7 @@
         function switchTab(sheetName) {
             currentActiveSheetName = sheetName;
             document.getElementById('current-sheet-title').innerText = sheetName;          
-            document.getElementById('table-filter-input').value = '';            
+            document.getElementById('table-filter-input').value = '';       
             const container = document.getElementById('table-view-container');          
             if (globalWorkbook && globalWorkbook.Sheets[sheetName]) {
                 const worksheet = globalWorkbook.Sheets[sheetName];
@@ -271,7 +274,7 @@
                     tableEl.className = "w-full text-left text-xs border-collapse";
                     tableEl.querySelectorAll('th, td').forEach(cell => {
                         cell.className = "p-2 border border-slate-200 dark:border-slate-800";
-                    });                  
+                    });                
                     // Map column headers dynamically
                     tableHeadersMap = {};
                     const headerRow = tableEl.querySelector('tr');
@@ -281,76 +284,93 @@
                             tableHeadersMap[th.innerText.trim().toLowerCase()] = idx;
                         });
                     }
-                    // Populate dropdown filter options dynamically from table data
-                    populateDropdownOptions(tableEl);
+                    // Dynamically populate dropdown filters based on table contents
+                    populateDynamicDropdowns(tableEl);
                 }
                 updateRowCount();
             } else {
-                container.innerHTML = `
-                    <div class="p-8 text-center text-slate-400">
-                        <i class="fa-solid fa-folder-open text-3xl mb-2 text-emerald-500"></i>
-                        <p class="text-xs">Showing preview for <strong>${sheetName}</strong>. Upload an Excel report to view actual rows.</p>
-                    </div>
-                `;
-                document.getElementById('row-count-badge').innerText = "1 row";
+                // Default fallback demo view
+                const defaultTableEl = container.querySelector('table');
+                if (defaultTableEl) {
+                    tableHeadersMap = {};
+                    const headerRow = defaultTableEl.querySelector('tr');
+                    if (headerRow) {
+                        const ths = headerRow.querySelectorAll('th, td');
+                        ths.forEach((th, idx) => {
+                            tableHeadersMap[th.innerText.trim().toLowerCase()] = idx;
+                        });
+                    }
+                    populateDynamicDropdowns(defaultTableEl);
+                }
+                updateRowCount();
             }
         }
-        function populateDropdownOptions(tableEl) {
-            const trs = tableEl.getElementsByTagName('tr');        
-            const categoryColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : -1;
-            const status1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : -1);
-            const status2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : -1);
+        function populateDynamicDropdowns(tableEl) {
+            const trs = tableEl.getElementsByTagName('tr');    
+            // Look up possible column indices flexibly
+            const catColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : 
+                              (tableHeadersMap['domain'] !== undefined ? tableHeadersMap['domain'] : 0);                           
+            const s1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : 
+                             (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : -1);                           
+            const s2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : 
+                             (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : -1);
             const categoriesSet = new Set();
             const status1Set = new Set();
             const status2Set = new Set();
-            // Extract unique values from rows (skip header row 0)
+            // Loop through data rows (skipping header at index 0)
             for (let i = 1; i < trs.length; i++) {
                 const tds = trs[i].getElementsByTagName('td');
-                if (categoryColIdx !== -1 && tds[categoryColIdx]) {
-                    const val = tds[categoryColIdx].innerText.trim();
+                if (catColIdx !== -1 && tds[catColIdx]) {
+                    const val = tds[catColIdx].innerText.trim();
                     if (val) categoriesSet.add(val);
                 }
-                if (status1ColIdx !== -1 && tds[status1ColIdx]) {
-                    const val = tds[status1ColIdx].innerText.trim();
+                if (s1ColIdx !== -1 && tds[s1ColIdx]) {
+                    const val = tds[s1ColIdx].innerText.trim();
                     if (val) status1Set.add(val);
                 }
-                if (status2ColIdx !== -1 && tds[status2ColIdx]) {
-                    const val = tds[status2ColIdx].innerText.trim();
+                if (s2ColIdx !== -1 && tds[s2ColIdx]) {
+                    const val = tds[s2ColIdx].innerText.trim();
                     if (val) status2Set.add(val);
                 }
             }
-            // Populate Category Select
+            // If no status found in table data, include standard default options
+            if (status1Set.size === 0) { ['PASS', 'FAIL', 'N/A'].forEach(v => status1Set.add(v)); }
+            if (status2Set.size === 0) { ['PASS', 'FAIL', 'N/A'].forEach(v => status2Set.add(v)); }
+            // Populate Category Filter Dropdown
             const catSelect = document.getElementById('category-filter-select');
             catSelect.innerHTML = '<option value="">All Categories</option>';
             Array.from(categoriesSet).sort().forEach(cat => {
                 catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
             });
-            // Populate Status 1 Select
-            const status1Select = document.getElementById('status1-filter-select');
-            status1Select.innerHTML = '<option value="">Status(Phase.01)</option>';
+            // Populate Status 1 Dropdown
+            const s1Select = document.getElementById('status1-filter-select');
+            s1Select.innerHTML = '<option value="">Status(Phase.01)</option>';
             Array.from(status1Set).sort().forEach(st => {
-                status1Select.innerHTML += `<option value="${st}">${st}</option>`;
+                s1Select.innerHTML += `<option value="${st}">${st}</option>`;
             });
-            // Populate Status 2 Select
-            const status2Select = document.getElementById('status2-filter-select');
-            status2Select.innerHTML = '<option value="">Status(Phase.02)</option>';
+            // Populate Status 2 Dropdown
+            const s2Select = document.getElementById('status2-filter-select');
+            s2Select.innerHTML = '<option value="">Status(Phase.02)</option>';
             Array.from(status2Set).sort().forEach(st => {
-                status2Select.innerHTML += `<option value="${st}">${st}</option>`;
+                s2Select.innerHTML += `<option value="${st}">${st}</option>`;
             });
         }
         function filterTable() {
             const categoryFilter = document.getElementById('category-filter-select').value.toLowerCase();
             const status1Filter = document.getElementById('status1-filter-select').value.toLowerCase();
             const status2Filter = document.getElementById('status2-filter-select').value.toLowerCase();
-            const keywordFilter = document.getElementById('table-filter-input').value.toLowerCase();           
+            const keywordFilter = document.getElementById('table-filter-input').value.toLowerCase();         
             const container = document.getElementById('table-view-container');
             const table = container.querySelector('table');
             if (!table) return;
             const trs = table.getElementsByTagName('tr');
             let visibleCount = 0;
-            const categoryColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : -1;
-            const status1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : -1);
-            const status2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : -1);
+            const catColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : 
+                              (tableHeadersMap['domain'] !== undefined ? tableHeadersMap['domain'] : 0);                            
+            const s1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : 
+                             (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : -1);                        
+            const s2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : 
+                             (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : -1);
             // Start from index 1 to skip header row
             for (let i = 1; i < trs.length; i++) {
                 let matchesCategory = true;
@@ -358,28 +378,34 @@
                 let matchesStatus2 = true;
                 let matchesKeyword = true;
                 const tds = trs[i].getElementsByTagName('td');
-                // 1. Category Filter check
-                if (categoryFilter !== '' && categoryColIdx !== -1) {
-                    if (tds[categoryColIdx]) {
-                        const cellVal = tds[categoryColIdx].innerText.trim().toLowerCase();
-                        if (cellVal !== categoryFilter) matchesCategory = false;
+                // 1. Category Filter Check
+                if (categoryFilter !== '' && catColIdx !== -1) {
+                    if (tds[catColIdx]) {
+                        const cellVal = tds[catColIdx].innerText.trim().toLowerCase();
+                        if (cellVal !== categoryFilter && !cellVal.includes(categoryFilter)) {
+                            matchesCategory = false;
+                        }
                     }
                 }
-                // 2. Status Phase 01 Filter check
-                if (status1Filter !== '' && status1ColIdx !== -1) {
-                    if (tds[status1ColIdx]) {
-                        const cellVal = tds[status1ColIdx].innerText.trim().toLowerCase();
-                        if (cellVal !== status1Filter) matchesStatus1 = false;
+                // 2. Status Phase 01 Filter Check
+                if (status1Filter !== '' && s1ColIdx !== -1) {
+                    if (tds[s1ColIdx]) {
+                        const cellVal = tds[s1ColIdx].innerText.trim().toLowerCase();
+                        if (cellVal !== status1Filter && !cellVal.includes(status1Filter)) {
+                            matchesStatus1 = false;
+                        }
                     }
                 }
-                // 3. Status Phase 02 Filter check
-                if (status2Filter !== '' && status2ColIdx !== -1) {
-                    if (tds[status2ColIdx]) {
-                        const cellVal = tds[status2ColIdx].innerText.trim().toLowerCase();
-                        if (cellVal !== status2Filter) matchesStatus2 = false;
+                // 3. Status Phase 02 Filter Check
+                if (status2Filter !== '' && s2ColIdx !== -1) {
+                    if (tds[s2ColIdx]) {
+                        const cellVal = tds[s2ColIdx].innerText.trim().toLowerCase();
+                        if (cellVal !== status2Filter && !cellVal.includes(status2Filter)) {
+                            matchesStatus2 = false;
+                        }
                     }
                 }
-                // 4. Keyword Search Filter check
+                // 4. Keyword Search Filter Check
                 if (keywordFilter !== '') {
                     let rowMatched = false;
                     for (let j = 0; j < tds.length; j++) {
