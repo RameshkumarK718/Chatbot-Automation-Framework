@@ -151,7 +151,7 @@
                     <div class="flex items-center space-x-2">
                         <i class="fa-solid fa-table text-emerald-500"></i>
                         <h3 id="current-sheet-title" class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Executive Dashboard</h3>
-                    </div>              
+                    </div>               
                     <!-- Fully Dynamic Filters Toolbar -->
                     <div class="flex flex-wrap items-center gap-2">
                         <!-- Dynamic Domain Category Dropdown Filter -->
@@ -160,7 +160,7 @@
                                 <option value="">All Categories</option>
                             </select>
                         </div>
-                        <!-- Dynamic Status Phase 01 Filter -->
+                        <!-- Dynamic Status Phase 01 Filter (Col K) -->
                         <div class="relative">
                             <select id="status1-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
                                 <option value="">Status(Phase.01)</option>
@@ -169,7 +169,7 @@
                                 <option value="N/A">N/A</option>
                             </select>
                         </div>
-                        <!-- Dynamic Status Phase 02 Filter -->
+                        <!-- Dynamic Status Phase 02 Filter (Col L) -->
                         <div class="relative">
                             <select id="status2-filter-select" onchange="filterTable()" class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200">
                                 <option value="">Status(Phase.02)</option>
@@ -185,7 +185,6 @@
                             </span>
                             <input type="text" id="table-filter-input" onkeyup="filterTable()" placeholder="Search keywords..." class="text-xs bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-700 rounded-lg pl-7 pr-3 py-1.5 focus:outline-none focus:border-emerald-500 dark:text-slate-200 w-32 sm:w-40">
                         </div>
-
                         <!-- Row Count Badge -->
                         <span id="row-count-badge" class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2.5 py-1.5 rounded">1 row</span>
                     </div>
@@ -198,8 +197,8 @@
                                 <tr class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                                     <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">CATEGORY</th>
                                     <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">TEST CASE DESCRIPTION</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.01)</th>
-                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.02)</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.01) [Col K]</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">STATUS(PHASE.02) [Col L]</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-mono text-[11px]">
@@ -263,7 +262,7 @@
         function switchTab(sheetName) {
             currentActiveSheetName = sheetName;
             document.getElementById('current-sheet-title').innerText = sheetName;          
-            document.getElementById('table-filter-input').value = '';       
+            document.getElementById('table-filter-input').value = '';         
             const container = document.getElementById('table-view-container');          
             if (globalWorkbook && globalWorkbook.Sheets[sheetName]) {
                 const worksheet = globalWorkbook.Sheets[sheetName];
@@ -274,7 +273,7 @@
                     tableEl.className = "w-full text-left text-xs border-collapse";
                     tableEl.querySelectorAll('th, td').forEach(cell => {
                         cell.className = "p-2 border border-slate-200 dark:border-slate-800";
-                    });                
+                    });                  
                     // Map column headers dynamically
                     tableHeadersMap = {};
                     const headerRow = tableEl.querySelector('tr');
@@ -284,12 +283,11 @@
                             tableHeadersMap[th.innerText.trim().toLowerCase()] = idx;
                         });
                     }
-                    // Dynamically populate dropdown filters based on table contents
+                    // Dynamically populate dropdown filters based on table contents and Columns K & L
                     populateDynamicDropdowns(tableEl);
                 }
                 updateRowCount();
             } else {
-                // Default fallback demo view
                 const defaultTableEl = container.querySelector('table');
                 if (defaultTableEl) {
                     tableHeadersMap = {};
@@ -306,17 +304,17 @@
             }
         }
         function populateDynamicDropdowns(tableEl) {
-            const trs = tableEl.getElementsByTagName('tr');    
-            // Look up possible column indices flexibly
+            const trs = tableEl.getElementsByTagName('tr');      
+            // Map columns: Category (flexible index or column 0/1), Status Phase 01 (Col K index 10 or header name), Status Phase 02 (Col L index 11 or header name)
             const catColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : 
-                              (tableHeadersMap['domain'] !== undefined ? tableHeadersMap['domain'] : 0);                           
+                              (tableHeadersMap['domain'] !== undefined ? tableHeadersMap['domain'] : 0);                          
             const s1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : 
-                             (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : -1);                           
+                             (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : 10);                         
             const s2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : 
-                             (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : -1);
+                             (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : 11);
             const categoriesSet = new Set();
-            const status1Set = new Set();
-            const status2Set = new Set();
+            const status1Set = new Set(['PASS', 'FAIL', 'N/A']); // Ensure PASS, FAIL, N/A are always available options
+            const status2Set = new Set(['PASS', 'FAIL', 'N/A']);
             // Loop through data rows (skipping header at index 0)
             for (let i = 1; i < trs.length; i++) {
                 const tds = trs[i].getElementsByTagName('td');
@@ -326,29 +324,26 @@
                 }
                 if (s1ColIdx !== -1 && tds[s1ColIdx]) {
                     const val = tds[s1ColIdx].innerText.trim();
-                    if (val) status1Set.add(val);
+                    if (val) status1Set.add(val.toUpperCase());
                 }
                 if (s2ColIdx !== -1 && tds[s2ColIdx]) {
                     const val = tds[s2ColIdx].innerText.trim();
-                    if (val) status2Set.add(val);
+                    if (val) status2Set.add(val.toUpperCase());
                 }
             }
-            // If no status found in table data, include standard default options
-            if (status1Set.size === 0) { ['PASS', 'FAIL', 'N/A'].forEach(v => status1Set.add(v)); }
-            if (status2Set.size === 0) { ['PASS', 'FAIL', 'N/A'].forEach(v => status2Set.add(v)); }
-            // Populate Category Filter Dropdown
+            // Populate Category Filter Dropdown dynamically
             const catSelect = document.getElementById('category-filter-select');
             catSelect.innerHTML = '<option value="">All Categories</option>';
             Array.from(categoriesSet).sort().forEach(cat => {
                 catSelect.innerHTML += `<option value="${cat}">${cat}</option>`;
             });
-            // Populate Status 1 Dropdown
+            // Populate Status 1 Dropdown dynamically (PASS, FAIL, N/A + any sheet values)
             const s1Select = document.getElementById('status1-filter-select');
             s1Select.innerHTML = '<option value="">Status(Phase.01)</option>';
             Array.from(status1Set).sort().forEach(st => {
                 s1Select.innerHTML += `<option value="${st}">${st}</option>`;
             });
-            // Populate Status 2 Dropdown
+            // Populate Status 2 Dropdown dynamically (PASS, FAIL, N/A + any sheet values)
             const s2Select = document.getElementById('status2-filter-select');
             s2Select.innerHTML = '<option value="">Status(Phase.02)</option>';
             Array.from(status2Set).sort().forEach(st => {
@@ -359,18 +354,18 @@
             const categoryFilter = document.getElementById('category-filter-select').value.toLowerCase();
             const status1Filter = document.getElementById('status1-filter-select').value.toLowerCase();
             const status2Filter = document.getElementById('status2-filter-select').value.toLowerCase();
-            const keywordFilter = document.getElementById('table-filter-input').value.toLowerCase();         
+            const keywordFilter = document.getElementById('table-filter-input').value.toLowerCase();        
             const container = document.getElementById('table-view-container');
             const table = container.querySelector('table');
             if (!table) return;
             const trs = table.getElementsByTagName('tr');
             let visibleCount = 0;
             const catColIdx = tableHeadersMap['category'] !== undefined ? tableHeadersMap['category'] : 
-                              (tableHeadersMap['domain'] !== undefined ? tableHeadersMap['domain'] : 0);                            
+                              (tableHeadersMap['domain'] !== undefined ? tableHeadersMap['domain'] : 0);                          
             const s1ColIdx = tableHeadersMap['status(phase.01)'] !== undefined ? tableHeadersMap['status(phase.01)'] : 
-                             (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : -1);                        
+                             (tableHeadersMap['status (phase.01)'] !== undefined ? tableHeadersMap['status (phase.01)'] : 10);                      
             const s2ColIdx = tableHeadersMap['status(phase.02)'] !== undefined ? tableHeadersMap['status(phase.02)'] : 
-                             (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : -1);
+                             (tableHeadersMap['status (phase.02)'] !== undefined ? tableHeadersMap['status (phase.02)'] : 11);
             // Start from index 1 to skip header row
             for (let i = 1; i < trs.length; i++) {
                 let matchesCategory = true;
@@ -387,7 +382,7 @@
                         }
                     }
                 }
-                // 2. Status Phase 01 Filter Check
+                // 2. Status Phase 01 Filter Check (Col K)
                 if (status1Filter !== '' && s1ColIdx !== -1) {
                     if (tds[s1ColIdx]) {
                         const cellVal = tds[s1ColIdx].innerText.trim().toLowerCase();
@@ -396,7 +391,7 @@
                         }
                     }
                 }
-                // 3. Status Phase 02 Filter Check
+                // 3. Status Phase 02 Filter Check (Col L)
                 if (status2Filter !== '' && s2ColIdx !== -1) {
                     if (tds[s2ColIdx]) {
                         const cellVal = tds[s2ColIdx].innerText.trim().toLowerCase();
@@ -444,6 +439,9 @@
                 { title: "5. Reporting", desc: "KPIs compiled", icon: "fa-chart-column", status: "Ready" }
             ];
             stepsContainer.innerHTML = '';
+            pipelineSteps.steps.forEach((step) => {
+                // handled below correctly
+            });
             pipelineSteps.forEach((step) => {
                 stepsContainer.innerHTML += `
                     <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
