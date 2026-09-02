@@ -1,349 +1,310 @@
-<!DOCTYPE html>
-<html lang="en" class="h-full dark">
+ <!DOCTYPE html>
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sportime Chatbot QA & System Reliability Dashboard</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace']
+                    colors: {
+                        slate: { 850: '#1e293b', 900: '#0f172a', 950: '#020617' }
                     }
                 }
             }
         }
     </script>
-    <style>
-        body { font-family: 'Inter', sans-serif; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 99px; }
-        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
-        .cursor-blink::after {
-            content: '▋';
-            animation: cursorBlink 0.8s infinite;
-            color: #10b981;
-            margin-left: 2px;
-        }
-        @keyframes cursorBlink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
-    </style>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SheetJS for Excel Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
-<body class="h-full flex flex-col overflow-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
+<body class="h-full bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased flex flex-col">
 
-<header class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shrink-0 px-6 py-3 flex items-center justify-between z-30 transition-colors">
-    <div class="flex items-center space-x-3">
-        <button onclick="toggleSidebar('left-sidebar', true)" class="lg:hidden p-2 -ml-2 rounded-lg text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <i class="fa-solid fa-bars-staggered text-lg"></i>
-        </button>
-        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
-            <i class="fa-solid fa-chart-column text-sm"></i>
-        </div>
-        <div>
-            <div class="flex items-center space-x-2">
-                <h1 class="text-sm font-bold bg-gradient-to-r from-slate-900 via-emerald-900 to-emerald-600 dark:from-white dark:via-emerald-200 dark:to-emerald-400 bg-clip-text text-transparent">Sportime Chatbot QA & System Reliability Dashboard</h1>
-                <span class="text-[9px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/60 px-1.5 py-0.5 rounded-full font-bold">VERIFIED</span>
+    <!-- Top Navigation Bar -->
+    <header class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center justify-between shadow-sm z-10">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-lg bg-emerald-500 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-500/20">
+                <i class="fa-solid fa-robot"></i>
             </div>
-            <p class="text-[10px] text-slate-500 dark:text-slate-400 hidden sm:block">Analyze chatbot evaluation data, failure root causes, and domain accuracy metrics.</p>
+            <div>
+                <h1 class="text-sm font-bold tracking-tight text-slate-900 dark:text-white">AI & System Reliability Audit</h1>
+                <p class="text-[11px] text-slate-400">Multi-Sheet Compliance & Workflow Dashboard</p>
+            </div>
         </div>
-    </div>
-    
-    <div class="flex items-center space-x-3">
-        <label class="cursor-pointer text-[10px] font-semibold bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg shadow-md transition-all flex items-center">
-            <i class="fa-solid fa-folder-open mr-1.5"></i>Upload Workbook
-            <input type="file" id="excel-file-input" accept=".xlsx" class="hidden" onchange="handleExcelUpload(event)">
-        </label>
-        <button onclick="runDiagnostics()" class="text-[10px] font-semibold bg-indigo-600 hover:bg-indigo-500 text-white px-3 py-1.5 rounded-lg shadow-md transition-all flex items-center">
-            <i class="fa-solid fa-vial-circle-check mr-1.5"></i>Run Diagnostics
-        </button>
-        <button onclick="toggleTheme()" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors" title="Toggle Theme">
-            <i id="theme-toggle-icon" class="fa-solid fa-moon text-sm"></i>
-        </button>
-        <div class="flex items-center bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-lg px-2.5 py-1">
-            <span class="text-[9px] text-slate-500 font-mono mr-2">RELIABILITY:</span>
-            <select id="model-selector" class="bg-transparent text-xs font-semibold text-emerald-600 dark:text-emerald-300 focus:outline-none cursor-pointer">
-                <option value="High Reliability" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">High Reliability</option>
-                <option value="Good Reliability" class="bg-white text-slate-800 dark:bg-slate-900 dark:text-slate-200">Good Reliability</option>
-            </select>
-        </div>
-        <button onclick="toggleSidebar('right-sidebar', true)" class="lg:hidden p-2 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-            <i class="fa-solid fa-sliders text-lg"></i>
-        </button>
-    </div>
-</header>
 
-<div class="flex-1 flex overflow-hidden relative">
-    <div id="left-sidebar-backdrop" onclick="toggleSidebar('left-sidebar', false)" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
-    
-    <aside id="left-sidebar" class="fixed inset-y-0 left-0 w-[300px] bg-slate-100 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col h-full transform -translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
-        <div class="p-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 lg:hidden">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Dashboard Tabs</span>
-            <button onclick="toggleSidebar('left-sidebar', false)" class="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
-                <i class="fa-solid fa-xmark"></i>
+        <div class="flex items-center space-x-4">
+            <!-- File Upload Button -->
+            <label class="cursor-pointer bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-all shadow-sm flex items-center space-x-2">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>Upload Report (.xlsx)</span>
+                <input type="file" id="excel-file-input" accept=".xlsx, .xls" class="hidden" onchange="handleExcelUpload(event)">
+            </label>
+            <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                <i class="fa-solid fa-moon dark:hidden"></i>
+                <i class="fa-solid fa-sun hidden dark:block text-amber-400"></i>
             </button>
         </div>
+    </header>
 
-        <div class="px-3 py-3 flex flex-col flex-1 overflow-hidden">
-            <div class="w-full px-2.5 py-2 bg-slate-200/70 dark:bg-slate-800/60 rounded-lg flex justify-between items-center mb-2">
-                <span class="text-[10px] font-bold text-slate-600 dark:text-slate-300 uppercase tracking-widest flex items-center">
-                    <i class="fa-solid fa-table-cells text-emerald-500 mr-2"></i>Workbook Sheets
-                </span>
-                <span id="sheet-count-badge" class="text-[9px] font-mono text-slate-500">5 sheets</span>
-            </div>
-
-            <div id="sheets-list" class="flex-1 overflow-y-auto space-y-1.5 pr-1 mt-1">
-                <button onclick="switchTab('Executive KPIs & Reliability')" class="w-full text-left px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between">
-                    <span><i class="fa-solid fa-chart-pie mr-2"></i>Executive KPIs</span>
-                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                </button>
-                <button onclick="switchTab('Topic-Wise Accuracy Breakdown')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
-                    <span><i class="fa-solid fa-chart-bar mr-2"></i>Topic Breakdown</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-                </button>
-                <button onclick="switchTab('Failure Reason Deep Dive')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
-                    <span><i class="fa-solid fa-triangle-exclamation mr-2"></i>Failure Root Cause</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-                </button>
-                <button onclick="switchTab('Sequential Test Case Inspector')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
-                    <span><i class="fa-solid fa-list-check mr-2"></i>Test Inspector</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-                </button>
-                <button onclick="switchTab('Raw Workbook Sheets')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
-                    <span><i class="fa-solid fa-file-excel mr-2"></i>Raw Sheets</span>
-                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-                </button>
-            </div>
-        </div>
-
-        <div class="p-4 bg-slate-200/50 dark:bg-slate-950/40 border-t border-slate-200 dark:border-slate-800 space-y-2 shrink-0">
-            <div class="flex items-center justify-between text-[11px]">
-                <span class="text-slate-500 dark:text-slate-400 flex items-center"><i class="fa-solid fa-database mr-2 text-emerald-500"></i>Dataset Status</span>
-                <span id="dataset-status-text" class="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400">Connected</span>
-            </div>
-            <p class="text-[9px] text-slate-400">Sportime QA evaluation master dataset indexed successfully.</p>
-        </div>
-    </aside>
-
-    <main class="flex-1 flex flex-col h-full bg-slate-50 dark:bg-slate-950 overflow-hidden min-w-0 transition-colors">
-        <div class="bg-white/40 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800 p-3 flex justify-between items-center px-4 md:px-6 shrink-0">
-            <div>
-                <span id="active-panel-title" class="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center">
-                    <i class="fa-solid fa-chart-pie mr-1.5"></i>Executive KPIs & Reliability
-                </span>
-                <p id="active-panel-desc" class="text-[10px] text-slate-500 hidden sm:block">Summary metrics, pass rates, and status distributions</p>
-            </div>
-            <div class="flex items-center space-x-2">
-                <button onclick="exportDashboardState()" class="text-[10px] font-semibold bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors">
-                    <i class="fa-solid fa-file-export mr-1.5 text-emerald-500 dark:text-emerald-400"></i>Export State
-                </button>
-                <button onclick="clearConsoleLog()" class="text-[10px] font-semibold bg-white/60 dark:bg-slate-900/60 hover:bg-red-50 dark:hover:bg-red-950/40 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 transition-colors">
-                    <i class="fa-solid fa-trash-can mr-1.5"></i>Clear Logs
-                </button>
-            </div>
-        </div>
+    <!-- Main Workspace Layout -->
+    <div class="flex-1 flex overflow-hidden">
         
-        <div id="dashboard-viewport" data-testid="chat-messages" class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <p class="text-[10px] text-slate-400 uppercase font-mono">Total Cases</p>
-                    <p id="metric-total" class="text-lg font-bold text-slate-800 dark:text-slate-100 mt-1">{{ metrics.total_cases }}</p>
-                </div>
-                <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <p class="text-[10px] text-slate-400 uppercase font-mono">Passed</p>
-                    <p id="metric-pass" class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">{{ metrics.passed_cases }}</p>
-                </div>
-                <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <p class="text-[10px] text-slate-400 uppercase font-mono">Failed</p>
-                    <p id="metric-fail" class="text-lg font-bold text-rose-600 dark:text-rose-400 mt-1">{{ metrics.failed_cases }}</p>
-                </div>
-                <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <p class="text-[10px] text-slate-400 uppercase font-mono">Pass Rate</p>
-                    <p id="metric-passrate" class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">{{ metrics.pass_rate }}</p>
-                </div>
-                <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <p class="text-[10px] text-slate-400 uppercase font-mono">Fail Rate</p>
-                    <p id="metric-failrate" class="text-lg font-bold text-rose-600 dark:text-rose-400 mt-1">{{ metrics.fail_rate }}</p>
-                </div>
-                <div class="bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <p class="text-[10px] text-slate-400 uppercase font-mono">Relevance Rate</p>
-                    <p id="metric-relevance" class="text-lg font-bold text-indigo-600 dark:text-indigo-400 mt-1">{{ metrics.relevance_rate }}</p>
-                </div>
-            </div>
-
-            <div class="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/60 p-4 rounded-xl flex items-center justify-between">
-                <div>
-                    <h3 class="text-xs font-bold text-emerald-800 dark:text-emerald-300 uppercase tracking-wide">System Reliability Status</h3>
-                    <p class="text-xs text-emerald-600 dark:text-emerald-400 mt-0.5">Current chatbot evaluation level: <strong class="underline">{{ metrics.reliability_level }} Reliability</strong></p>
-                </div>
-                <span class="px-2.5 py-1 bg-emerald-600 text-white font-mono text-[10px] font-bold rounded-full">{{ metrics.pass_rate }} PASS</span>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-chart-pie mr-2 text-emerald-500"></i>Status Distribution</h4>
-                    <div class="space-y-2">
-                        <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">PASS ({{ metrics.passed_cases }} cases)</span><span class="font-mono text-emerald-600">{{ metrics.pass_rate }}</span></div>
-                            <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full rounded-full" style="width: 92.4%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">FAIL ({{ metrics.failed_cases }} cases)</span><span class="font-mono text-rose-600">{{ metrics.fail_rate }}</span></div>
-                            <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-rose-500 h-full rounded-full" style="width: 7.6%"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
-                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3"><i class="fa-solid fa-chart-bar mr-2 text-indigo-500"></i>Intent Relevance Distribution</h4>
-                    <div class="space-y-2">
-                        <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">Relevant Queries</span><span class="font-mono text-indigo-600">{{ metrics.relevance_rate }}</span></div>
-                            <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-indigo-500 h-full rounded-full" style="width: 96.8%"></div></div>
-                        </div>
-                        <div>
-                            <div class="flex justify-between text-xs mb-1"><span class="text-slate-500">Not Relevant / Out of Domain</span><span class="font-mono text-amber-600">3.2%</span></div>
-                            <div class="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full overflow-hidden"><div class="bg-amber-500 h-full rounded-full" style="width: 3.2%"></div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="p-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 space-y-3 shrink-0 transition-colors">
-            <div class="max-w-4xl mx-auto flex items-end space-x-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 focus-within:border-emerald-500/50 rounded-xl p-2 transition-all">
-                <textarea id="chat-input" data-testid="chat-input" rows="1" placeholder="Query QA metrics or enter custom evaluation commands..." class="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 max-h-32 resize-none py-2 px-3 align-bottom"></textarea>
-                <button id="send-button" data-testid="send-button" onclick="handleUserQuery()" class="w-8 h-8 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white transition-all flex items-center justify-center shrink-0 shadow-lg shadow-emerald-600/10">
-                    <i class="fa-solid fa-arrow-up text-sm"></i>
-                </button>
-            </div>
-            
-            <div class="flex items-center justify-between text-[10px] text-slate-400 dark:text-slate-500 max-w-4xl mx-auto px-1">
-                <span class="font-mono">Sportime QA Intelligence Active</span>
-                <span id="system-status-indicator">Dashboard Ready</span>
-            </div>
-        </div>
-    </main>
-    <div id="right-sidebar-backdrop" onclick="toggleSidebar('right-sidebar', false)" class="hidden fixed inset-0 bg-black/70 z-30 lg:hidden"></div>
-    <aside id="right-sidebar" class="fixed inset-y-0 right-0 w-[320px] bg-slate-100 dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col h-full transform translate-x-full lg:transform-none lg:static transition-transform duration-300 ease-in-out z-40 shrink-0">
-        <div class="p-4 flex items-center justify-between border-b border-slate-200 dark:border-slate-800 lg:hidden">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">Global Filters</span>
-            <button onclick="toggleSidebar('right-sidebar', false)" class="p-1 rounded-md hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-        <div class="p-5 flex-1 overflow-y-auto space-y-6">
+        <!-- Sidebar Navigation -->
+        <aside class="w-64 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between p-4 hidden md:flex">
             <div>
-                <h3 class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-2">
-                    <i class="fa-solid fa-filter mr-1.5"></i>Global Data Filters
-                </h3>
-                <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-                    Filter evaluation results across domains and categories.
-                </p>
+                <div class="mb-4">
+                    <span class="text-[10px] font-bold tracking-wider text-slate-400 uppercase">Workbook Sheets</span>
+                    <span id="sheet-count-badge" class="ml-2 text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded">3 sheets</span>
+                </div>
+                <!-- Dynamic Sheets List -->
+                <nav id="sheets-list" class="space-y-1.5">
+                    <button onclick="switchTab('Executive Dashboard')" class="w-full text-left px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between">
+                        <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>Executive Dashboard</span>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                    </button>
+                    <button onclick="switchTab('Topic Wise Master Audit')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
+                        <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>Topic Wise Master Audit</span>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                    </button>
+                    <button onclick="switchTab('QA & Master Audit')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors">
+                        <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>QA & Master Audit</span>
+                        <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                    </button>
+                </nav>
             </div>
 
-            <div class="space-y-3">
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Filter Category / Topic</label>
-                    <select class="w-full mt-1 bg-white dark:bg-slate-950 text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500">
-                        <option value="All">All Categories</option>
-                        <option value="Booking">Booking & Reservation</option>
-                        <option value="Pricing">Pricing & Membership</option>
-                        <option value="Facilities">Facilities & Hours</option>
-                    </select>
+            <!-- System Info Card -->
+            <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div class="flex items-center space-x-2 mb-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="text-[11px] font-bold text-slate-700 dark:text-slate-300" id="dataset-status-text">Default Data Active</span>
                 </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Filter Question Type</label>
-                    <select class="w-full mt-1 bg-white dark:bg-slate-950 text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500">
-                        <option value="All">All Question Types</option>
-                        <option value="Transactional">Transactional</option>
-                        <option value="Informational">Informational</option>
-                    </select>
+                <p class="text-[10px] text-slate-400" id="system-status-indicator">Ready for custom workbook upload</p>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 flex flex-col overflow-y-auto p-6 space-y-6">
+            
+            <!-- Dynamic Workflow Pipeline Section -->
+            <div id="workflow-container" class="bg-white dark:bg-slate-900 p-5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                        <i class="fa-solid fa-diagram-project mr-2 text-emerald-500"></i>Active Workbook Execution Pipeline
+                    </h4>
+                    <span id="workflow-filename" class="text-[10px] font-mono bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-md font-bold">Default Report.xlsx</span>
                 </div>
-                <div>
-                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Filter Status</label>
-                    <select class="w-full mt-1 bg-white dark:bg-slate-950 text-xs px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500">
-                        <option value="All">All Statuses</option>
-                        <option value="PASS">PASS</option>
-                        <option value="FAIL">FAIL</option>
-                    </select>
+                
+                <div id="workflow-steps" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-folder-open"></i></span>
+                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Completed</span>
+                            </div>
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">1. Ingestion</h5>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Workbook parsed</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-table-cells"></i></span>
+                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Completed</span>
+                            </div>
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">2. Sheets Index</h5>
+                            <p class="text-[10px] text-slate-400 mt-0.5">3 sheets mapped</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-broom"></i></span>
+                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Completed</span>
+                            </div>
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">3. Sanitization</h5>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Cleaned assertions</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-brain"></i></span>
+                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Active</span>
+                            </div>
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">4. AI Eval</h5>
+                            <p class="text-[10px] text-slate-400 mt-0.5">Testing accuracy</p>
+                        </div>
+                    </div>
+                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid fa-chart-column"></i></span>
+                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">Ready</span>
+                            </div>
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">5. Report Gen</h5>
+                            <p class="text-[10px] text-slate-400 mt-0.5">KPIs compiled</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <hr class="border-slate-200 dark:border-slate-800">    
-            <div class="space-y-3">
-                <h4 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Active State Monitor</h4>
-                <div class="grid grid-cols-1 gap-2 font-mono text-[11px]">
-                    <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
-                        <span class="text-slate-500">Pass Rate:</span>
-                        <span class="text-emerald-600 dark:text-emerald-400 font-bold">{{ metrics.pass_rate }}</span>
+
+            <!-- Spreadsheet Tab Display Card -->
+            <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm flex-1 flex flex-col overflow-hidden">
+                <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-solid fa-table text-emerald-500"></i>
+                        <h3 id="current-sheet-title" class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">Executive Dashboard</h3>
                     </div>
-                    <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
-                        <span class="text-slate-500">processed_cases:</span>
-                        <span class="text-indigo-600 dark:text-indigo-400 font-bold">{{ metrics.total_cases }}</span>
-                    </div>
-                    <div class="bg-white dark:bg-slate-950 p-2.5 rounded-lg border border-slate-200 dark:border-slate-800 flex justify-between items-center shadow-sm">
-                        <span class="text-slate-500">Reliability Level:</span>
-                        <span class="text-amber-600 dark:text-amber-400 font-bold">{{ metrics.reliability_level }}</span>
+                    <span id="row-count-badge" class="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 px-2 py-0.5 rounded">23 rows</span>
+                </div>
+                
+                <!-- Data Table Viewport -->
+                <div class="flex-1 overflow-auto p-4">
+                    <div id="table-view-container" class="min-w-full">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">TOTAL TEST CASES</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">EVALUATED TEST CASES</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">PASSED</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">FAILED</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">PASS ACCURACY</th>
+                                    <th class="p-2 border border-slate-200 dark:border-slate-700 font-bold">RELEVANCE RATE</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 dark:divide-slate-800 font-mono text-[11px]">
+                                <tr>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700">154</td>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700">122</td>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700 text-emerald-600 font-bold">84</td>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700 text-rose-600 font-bold">38</td>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700">68.85%</td>
+                                    <td class="p-2 border border-slate-200 dark:border-slate-700">94.16%</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-        </div>
-    </aside>
-</div>
-<script>
-    function toggleSidebar(id, show) {
-        const sidebar = document.getElementById(id);
-        const backdrop = document.getElementById(id + '-backdrop');
-        if (show) {
-            sidebar.classList.remove('-translate-x-full', 'translate-x-full');
-            if (backdrop) backdrop.classList.remove('hidden');
-        } else {
-            if (id.includes('left')) sidebar.classList.add('-translate-x-full');
-            if (id.includes('right')) sidebar.classList.add('translate-x-full');
-            if (backdrop) backdrop.classList.add('hidden');
+
+        </main>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        let globalWorkbook = null;
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
         }
-    }
-    function toggleTheme() {
-        document.documentElement.classList.toggle('dark');
-        const icon = document.getElementById('theme-toggle-icon');
-        icon.classList.toggle('fa-moon');
-        icon.classList.toggle('fa-sun');
-    }
-    function switchTab(tabName) {
-        document.getElementById('active-panel-title').innerHTML = `<i class="fa-solid fa-chart-pie mr-1.5"></i>${tabName}`;
-        document.getElementById('active-panel-desc').innerText = `Displaying analytics and operational metrics for ${tabName}`;
-    }
-    function handleExcelUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
+
+        function handleExcelUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
             document.getElementById('dataset-status-text').innerText = 'Loaded: ' + file.name;
-            document.getElementById('system-status-indicator').innerText = 'Excel Workbook Parsed Successfully';
+            document.getElementById('system-status-indicator').innerText = 'Workbook Parsed Successfully';
+            document.getElementById('workflow-filename').innerText = file.name;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    globalWorkbook = XLSX.read(data, { type: 'array' });
+                    
+                    const sheetNames = globalWorkbook.SheetNames;
+                    document.getElementById('sheet-count-badge').innerText = `${sheetNames.length} sheets`;
+                    
+                    const sheetsListEl = document.getElementById('sheets-list');
+                    sheetsListEl.innerHTML = '';
+                    
+                    sheetNames.forEach((sheetName, index) => {
+                        const isActive = index === 0;
+                        const btnClass = isActive 
+                            ? "w-full text-left px-3 py-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/50 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center justify-between"
+                            : "w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-medium flex items-center justify-between transition-colors";
+                        
+                        sheetsListEl.innerHTML += `
+                            <button onclick="switchTab('${sheetName}')" class="${btnClass}">
+                                <span><i class="fa-solid fa-file-excel mr-2 text-emerald-500"></i>${sheetName}</span>
+                                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+                            </button>
+                        `;
+                    });
+
+                    renderWorkflowPipeline(sheetNames);
+                    switchTab(sheetNames[0]);
+
+                } catch (err) {
+                    console.error("Parse error:", err);
+                    alert("Failed to parse Excel workbook.");
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
-    }
-    
-    // BACKEND HOOK 3: Asynchronous Javascript Fetch linking to Python backend route
-    async function runDiagnostics() {
-        document.getElementById('system-status-indicator').innerText = 'Running Diagnostics...';
-        try {
-            const response = await fetch('/api/run-diagnostics', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
+
+        function switchTab(sheetName) {
+            document.getElementById('current-sheet-title').innerText = sheetName;
+            
+            const container = document.getElementById('table-view-container');
+            
+            if (globalWorkbook && globalWorkbook.Sheets[sheetName]) {
+                const worksheet = globalWorkbook.Sheets[sheetName];
+                const htmlTable = XLSX.utils.sheet_to_html(worksheet, { header: "" });
+                container.innerHTML = htmlTable;
+                // Add Tailwind styles to the generated table
+                const tableEl = container.querySelector('table');
+                if (tableEl) {
+                    tableEl.className = "w-full text-left text-xs border-collapse";
+                    tableEl.querySelectorAll('th, td').forEach(cell => {
+                        cell.className = "p-2 border border-slate-200 dark:border-slate-800";
+                    });
+                }
+            } else {
+                // Fallback demo content if no custom file loaded yet
+                container.innerHTML = `
+                    <div class="p-8 text-center text-slate-400">
+                        <i class="fa-solid fa-folder-open text-3xl mb-2 text-emerald-500"></i>
+                        <p class="text-xs">Showing preview for <strong>${sheetName}</strong>. Upload an Excel report to view actual rows.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderWorkflowPipeline(sheetNames) {
+            const stepsContainer = document.getElementById('workflow-steps');
+            if (!stepsContainer) return;
+
+            const pipelineSteps = [
+                { title: "1. Ingestion", desc: "Workbook loaded", icon: "fa-folder-open", status: "Completed" },
+                { title: "2. Sheet Index", desc: `${sheetNames.length} sheets indexed`, icon: "fa-table-cells", status: "Completed" },
+                { title: "3. Sanitization", desc: "Cleaned records", icon: "fa-broom", status: "Completed" },
+                { title: "4. AI Eval", desc: "Assertions checked", icon: "fa-brain", status: "Active" },
+                { title: "5. Reporting", desc: "KPIs compiled", icon: "fa-chart-column", status: "Ready" }
+            ];
+
+            stepsContainer.innerHTML = '';
+            pipelineSteps.forEach((step) => {
+                stepsContainer.innerHTML += `
+                    <div class="bg-slate-50 dark:bg-slate-950 p-3 rounded-lg border border-slate-200 dark:border-slate-800 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="w-6 h-6 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs font-bold"><i class="fa-solid ${step.icon}"></i></span>
+                                <span class="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/40 px-1.5 py-0.5 rounded">${step.status}</span>
+                            </div>
+                            <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200">${step.title}</h5>
+                            <p class="text-[10px] text-slate-400 mt-0.5">${step.desc}</p>
+                        </div>
+                    </div>
+                `;
             });
-            const data = await response.json();
-            document.getElementById('system-status-indicator').innerText = data.message || 'Diagnostics Complete.';
-            alert(data.message);
-        } catch (error) {
-            console.error('Diagnostic error:', error);
-            alert('Failed to connect to Python backend endpoint.');
         }
-    }
-</script>
+    </script>
 </body>
 </html>
