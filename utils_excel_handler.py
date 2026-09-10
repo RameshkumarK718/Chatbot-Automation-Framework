@@ -1,4 +1,3 @@
-cat << 'EOF' > utils/excel_handler.py
 import openpyxl
 class ExcelHandler:
     def __init__(self, file_path: str):
@@ -28,8 +27,4 @@ class ExcelHandler:
         self.sheet.cell(row=row, column=10, value=eval_res.get("evaluation_reason"))
         self.sheet.cell(row=row, column=11, value=eval_res.get("remarks"))
     def save(self):
-<<<<<<< HEAD
         self.workbook.save(self.file_path)
-EOF
-=======
->>>>>>> 98c8d0b (Add core framework files: Page objects, Excel handler, and AI evaluator)
