@@ -1,27 +1,12 @@
 .project/n.classpath/n.settings//ntarget//nbin//n
-
-
 # Java/Maven
-
 target/
-
 *.class
-
-
-
 # Python
-
 __pycache__/
-
 *.pyc
-
 .pytest_cache/
-
 venv/
-
-
-
 # Editor
-
 *.swp
 
