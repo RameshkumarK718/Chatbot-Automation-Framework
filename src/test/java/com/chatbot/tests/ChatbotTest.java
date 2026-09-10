@@ -49,7 +49,7 @@ public class ChatbotTest {
             Row row = sheet.getRow(3); 
             if (row != null) {
                 Cell userCell = row.getCell(0); 
-                Cell passCell = row.getCell(1);                            
+                Cell passCell = row.getCell(1);                             
                 username = userCell != null ? getCellStringValue(userCell) : "";
                 password = passCell != null ? getCellStringValue(passCell) : "";  
             }      
@@ -88,16 +88,14 @@ public class ChatbotTest {
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");                             
         
         ChromeOptions options = new ChromeOptions();
-        options.setCapability("se:cdpEnabled", false);    
-        options.addArguments("--guest");         
-
-        // Headless settings required for CI/CD environments (GitHub Actions)
+        
+        // Essential configuration for local execution and headless pipeline runners (GitHub Actions)
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
-
+        
         driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);        
@@ -110,7 +108,7 @@ public class ChatbotTest {
             
             WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
             passwordInput.clear();
-            passwordInput.sendKeys(password);                                    
+            passwordInput.sendKeys(password);                                     
             
             WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
             loginButton.click();                                            
@@ -146,14 +144,9 @@ public class ChatbotTest {
         System.out.println("Successfully fetched questions from GitHub. Total rows: " + csvData.size());                     
         
         for (int i = 1; i < csvData.size(); i++) {      
-            if (driver != null) {
-                driver.quit();
-            }
-            initializeDriverAndLogin();        
-            
             String[] row = csvData.get(i);      
             String testCase = row[COL_TESTCASE];
-            String question = row[COL_QUESTION];                       
+            String question = row[COL_QUESTION];                    
             
             if (question == null || question.trim().isEmpty()) {
                 System.out.println("--> Skipping row " + (i + 1) + ": Question column is empty.");
@@ -162,15 +155,15 @@ public class ChatbotTest {
             if (testCase == null || testCase.trim().isEmpty()) {
                 testCase = String.format("TC-%03d", i);
                 row[COL_TESTCASE] = testCase; 
-            }                                    
+            }                                           
             
             System.out.println("\n--- Processing [" + testCase + "] (Row " + (i + 1) + " of " + (csvData.size() - 1) + ") ---");
             System.out.println("Question: " + question);                    
             
             String chatbotResponse = askQuestion(question);             
-            System.out.println("Chatbot Response: " + chatbotResponse);                               
+            System.out.println("Chatbot Response: " + chatbotResponse);                                     
             
-            row[COL_RESPONSE] = chatbotResponse;               
+            row[COL_RESPONSE] = chatbotResponse;            
             saveResultsToCsv(csvData);
             
             if (i < csvData.size() - 1) {
@@ -190,13 +183,13 @@ public class ChatbotTest {
             chatInput.click();
             chatInput.sendKeys(Keys.CONTROL + "a", Keys.BACK_SPACE);    
             chatInput.sendKeys(question);          
-            chatInput.sendKeys(Keys.ENTER);                                                           
+            chatInput.sendKeys(Keys.ENTER);                                                                                                     
             try {
                 WebElement sendButton = driver.findElement(By.xpath("//button[normalize-space()='Send'] | //button[contains(@class, 'send')] | //button[@type='submit']"));
                 if (sendButton.isDisplayed() && sendButton.isEnabled()) {
                     sendButton.click();
                 }
-            } catch (Exception ignored) {}                           
+            } catch (Exception ignored) {}                            
             return waitForCompleteResponse();
         } catch (Exception e) {
             System.err.println("Error asking question: " + e.getMessage());
@@ -212,23 +205,23 @@ public class ChatbotTest {
             int initialCount = initialResponses.size();
             WebDriverWait longWait = new WebDriverWait(driver, Duration.ofSeconds(60));                                     
             final String[] lastKnownText = {""};
-            final int[] stableCounter = {0};                                          
+            final int[] stableCounter = {0};                                     
             String finalAnswer = longWait.until(driverInstance -> {
                 List<WebElement> currentResponses = driverInstance.findElements(By.xpath(
                     "//div[contains(@class, 'bot')] | //div[contains(@class, 'message-response')] | //div[contains(@class, 'chat-bubble')] | //div[contains(@class, 'response')] | //p[contains(@class, 'answer')]"
-                ));                                        
+                ));                                                                 
                 
                 if (currentResponses.size() > initialCount) {
                     WebElement latestResponse = currentResponses.get(currentResponses.size() - 1);
                     String text = latestResponse.getText().trim();
-                    String lowerText = text.toLowerCase();                                        
+                    String lowerText = text.toLowerCase();                                                      
                     
                     boolean isFiller = lowerText.contains("reading that up") || 
                                        lowerText.contains("looking that up") || 
                                        lowerText.contains("checking") || 
                                        lowerText.contains("thinking") || 
                                        lowerText.equals("...") || 
-                                       lowerText.isEmpty();                                                                                                                                                                             
+                                       lowerText.isEmpty();                                                                                                                                                                                                                                                                                                                                            
                     if (!isFiller && text.length() > 2) {
                         if (text.equals(lastKnownText[0])) {
                             stableCounter[0]++;
@@ -274,7 +267,7 @@ public class ChatbotTest {
                     while ((line = br.readLine()) != null) {
                         String[] parts = line.split(",(?=([^\"]*\"[^\"]*\")*[^\"]*$)");
                         String[] paddedRow = new String[TOTAL_COLUMNS];
-                        Arrays.fill(paddedRow, "");                           
+                        Arrays.fill(paddedRow, "");                            
                         
                         for (int i = 0; i < parts.length && i < TOTAL_COLUMNS; i++) {
                             paddedRow[i] = parts[i].replaceAll("^\"|\"$", "").replace("\"\"", "\"").trim();
@@ -308,6 +301,7 @@ public class ChatbotTest {
             System.err.println("Error saving results to CSV file: " + e.getMessage());
         }
     }
+
     private void sleep(long millis) {
         try {
             Thread.sleep(millis);
@@ -315,6 +309,7 @@ public class ChatbotTest {
             Thread.currentThread().interrupt();
         }
     }
+
     @AfterMethod
     public void tearDown() {
         if (driver != null) {
