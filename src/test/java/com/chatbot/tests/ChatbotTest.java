@@ -90,6 +90,14 @@ public class ChatbotTest {
         ChromeOptions options = new ChromeOptions();
         options.setCapability("se:cdpEnabled", false);    
         options.addArguments("--guest");         
+
+        // Headless settings required for CI/CD environments (GitHub Actions)
+        options.addArguments("--headless=new");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
+
         driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);        
@@ -300,7 +308,6 @@ public class ChatbotTest {
             System.err.println("Error saving results to CSV file: " + e.getMessage());
         }
     }
-
     private void sleep(long millis) {
         try {
             Thread.sleep(millis);
@@ -308,7 +315,6 @@ public class ChatbotTest {
             Thread.currentThread().interrupt();
         }
     }
-
     @AfterMethod
     public void tearDown() {
         if (driver != null) {
