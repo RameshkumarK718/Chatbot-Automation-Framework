@@ -16,7 +16,7 @@ def run_framework():
     # Setup Chrome options
     options = webdriver.ChromeOptions()
     # Remove or comment out "--headless=new" if you want to watch the browser execute
-    options.add_argument("--headless=new")    
+    options.add_argument("--headless=new")
     driver = webdriver.Chrome(options=options)
     driver.maximize_window()
     driver.get(CHATBOT_URL)
@@ -28,7 +28,7 @@ def run_framework():
     os.makedirs(os.path.join(PROJECT_ROOT, "reports", "screenshots"), exist_ok=True)
     # Execute test suite loop
     for tc in excel.read_test_cases():
-        print(f"[RUNNING] {tc['id']}: {tc['question']}")      
+        print(f"[RUNNING] {tc['id']}: {tc['question']}")
         try:
             chatbot.send_question(tc["question"])
             actual_answer = chatbot.get_latest_response()
