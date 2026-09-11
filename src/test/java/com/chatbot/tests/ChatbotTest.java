@@ -104,22 +104,28 @@ public class ChatbotTest {
             return val;
         }
     }
-    @BeforeMethod
+   @BeforeMethod
     public void setUp() {
         initializeDriverAndLogin();
     }
+
     private void initializeDriverAndLogin() {
         String[] credentials = getCredentialsFromExcel();
         String memberId = credentials[0];
         String password = credentials[1];      
         Assert.assertFalse(memberId.isBlank(), "Member ID is missing from Cloud Excel.");
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");                                
+        
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");   
+        options.addArguments("--window-size=1920,1080");
+        
+        // Add this line to prevent DevTools from initializing / warning
+        options.setExperimentalOption("useAutomationExtension", false); 
+        
         driver = new ChromeDriver(options);
         driver.manage().window().maximize();
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);            
