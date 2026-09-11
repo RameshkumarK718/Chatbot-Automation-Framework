@@ -9,58 +9,56 @@ jobs:
   run-automation:
     runs-on: ubuntu-latest
     steps:
-      # 1. Checkout Repository
+      # Checkout source code
       - name: Checkout Repository
         uses: actions/checkout@v4
-      # 2. Set up JDK 21
+      # Set up Java 21
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: "21"
           distribution: "temurin"
           cache: maven
-      # 3. Set up Chrome Browser
+      # Set up Chrome
       - name: Set up Chrome Browser
         uses: browser-actions/setup-chrome@v2
-      # 4. Verify Java, Maven and Chrome
+      # Verify required tools
       - name: Verify Environment
         run: |
           java -version
           mvn -version
           google-chrome --version
-      # 5. Run Java Selenium Automation Tests
-      - name: Run Java Maven Automation Tests
-        run: |
-          mvn clean test -Dtest=ChatbotTest
-      # 6. Set up Python
+      # Run Selenium automation tests
+      - name: Run Selenium Automation Tests
+        run: mvn clean test -Dtest=ChatbotTest
+      # Set up Python 3.11
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
           cache: "pip"
-      # 7. Verify Python
+      # Verify Python
       - name: Verify Python
         run: |
           python --version
           pip --version
-      # 8. Install Python Dependencies
+      # Install Python dependencies
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      # 9. Run AI Evaluation
+      # Run AI-based evaluation
       - name: Run AI Evaluation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python AIEvaluator.py
-      # 10. Upload Automation Results and Reports
+        run: python AIEvaluator.py
+      # Upload test results and reports
       - name: Upload Test Results and Reports
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: automation-reports
           path: |
-            FrameworkQA.csv
+            Frameworks_Results.xlsx
             *.xlsx
             target/surefire-reports/
