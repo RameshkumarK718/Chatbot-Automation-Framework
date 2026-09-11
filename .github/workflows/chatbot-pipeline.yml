@@ -9,24 +9,24 @@ jobs:
   run-automation:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout Repository
-      uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v5
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
-    - name: Set up Chrome Browser
-      uses: browser-actions/setup-chrome@v2
-    - name: Run Java Maven Automation Tests
-      run: mvn clean test -Dtest=ChatbotTest
-    - name: Upload Test Results and Reports
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: automation-reports
-        path: |
-          FrameworkQA.csv
-          *.xlsx
-          target/surefire-reports/
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+      - name: Set up Chrome Browser
+        uses: browser-actions/setup-chrome@v2
+      - name: Run Java Maven Automation Tests
+        run: mvn clean test -Dtest=ChatbotTest
+      - name: Upload Test Results and Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: automation-reports
+          path: |
+            FrameworkQA.csv
+            *.xlsx
+            target/surefire-reports/
