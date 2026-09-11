@@ -12,9 +12,9 @@ jobs:
       # Checkout source code
       - name: Checkout Repository
         uses: actions/checkout@v4
-      # Set up Java 21
+      # Set up Java 21 (Updated to v5 to clear the warning)
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "21"
           distribution: "temurin"
