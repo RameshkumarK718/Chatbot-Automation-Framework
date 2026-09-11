@@ -147,7 +147,6 @@
                     </div>
                 </div>
             </div>
-
         </main>
     </div>
     <!-- JavaScript Automation Simulator & Table Renderer -->
@@ -173,7 +172,7 @@
             try {
                 const response = await fetch(githubUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const text = await response.text();               
+                const text = await response.text();                
                 parseCsvText(text);
                 logToConsole(`Successfully parsed CSV! Total rows loaded: ${csvRows.length - 1}`, "success");
                 renderTable();
@@ -188,7 +187,6 @@
             csvRows = [];
             for (let line of lines) {
                 if (!line.trim()) continue;
-                // Simple CSV regex parser handling quoted fields
                 const row = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(val => 
                     val.replace(/^"|"$/g, '').replace(/""/g, '"').trim()
                 );
@@ -260,7 +258,6 @@
                 if (!question) continue;
                 logToConsole(`Processing [${tc}] (Row ${i} of ${csvRows.length - 1})`, "step");
                 logToConsole(`Question (Col 4): "${question}"`, "info");       
-                // Simulate network latency & chatbot response
                 await new Promise(r => setTimeout(r, 1200));
                 let chatbotResponse = `Hello! I am your AI assistant. Regarding your query about "${question}", everything is operating normally.`;
                 if (expected && expected.toLowerCase().includes("balance")) {
