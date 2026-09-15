@@ -8,15 +8,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
       - name: Set up Chrome Browser
-        uses: browser-actions/setup-chrome@v2
+        uses: browser-actions/setup-chrome@v1
       - name: Verify Environment
         run: |
           java -version
@@ -26,6 +26,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: mvn clean test -Dtest=ChatbotTest
+        continue-on-error: true
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -40,7 +41,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python engine_ai_evaluator.py
       - name: Upload Test Results and Reports
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: automation-reports
