@@ -1,64 +1,39 @@
-name: Chatbot Automation Pipeline
+name: Chatbot End-to-End Automation & AI Audit
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main"]
+    branches: [ main, master ]
   workflow_dispatch:
 jobs:
-  run-automation:
+  run-automation-and-eval:
     runs-on: ubuntu-latest
     steps:
-      # Checkout source code
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      # Set up Java 21 (Updated to v5 to clear the warning)
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: "21"
-          distribution: "temurin"
-          cache: maven
-      # Set up Chrome
-      - name: Set up Chrome Browser
-        uses: browser-actions/setup-chrome@v2
-      # Verify required tools
-      - name: Verify Environment
-        run: |
-          java -version
-          mvn -version
-          google-chrome --version
-      # Run Selenium automation tests
-      - name: Run Selenium Automation Tests
-        run: mvn clean test -Dtest=ChatbotTest
-      # Set up Python 3.11
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-          cache: "pip"
-      # Verify Python
-      - name: Verify Python
-        run: |
-          python --version
-          pip --version
-      # Install Python dependencies
-      - name: Install Python Dependencies
-        run: |
-          python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      # Run AI-based evaluation
-      - name: Run AI Evaluation
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python AIEvaluator.py
-      # Upload test results and reports
-      - name: Upload Test Results and Reports
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: automation-reports
-          path: |
-            Frameworks.xlsx
-            *.xlsx
-            target/surefire-reports/
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas openpyxl openai requests
+    - name: Run Selenium Tests via Maven
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        mvn test -Dtest=ChatbotTest
+    - name: Run AI Evaluator Script
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        python engine_ai_evaluator.py
+    - name: Upload Final Audit Report Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Frameworks_Results
+        path: Frameworks_Results.xlsx
