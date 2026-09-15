@@ -1,4 +1,5 @@
 import os
+import json
 import pandas as pd
 from openai import OpenAI
 class AIEvaluator:
@@ -28,7 +29,6 @@ class AIEvaluator:
                 response_format={"type": "json_object"},
                 temperature=0.0
             )
-            import json
             return json.loads(response.choices[0].message.content)
         except Exception as e:
             return {
@@ -37,46 +37,46 @@ class AIEvaluator:
                 "hallucination": True,
                 "feedback": f"Evaluation Error: {str(e)}"
             }
-def process_excel_framework(excel_path: str = "Frameworks.xlsx"):
+def process_excel_framework(excel_path: str = "Frameworks_Results.xlsx"):
     if not os.path.exists(excel_path):
         print(f"Error: {excel_path} not found. Run your Java Selenium tests first.")
-        return 
-    evaluator = AIEvaluator()      
+        return         
+    evaluator = AIEvaluator()          
     # Read all sheets from the Excel file
     excel_file = pd.ExcelFile(excel_path)
     sheet_names = excel_file.sheet_names  
-    print(f"Loaded Excel sheets for AI evaluation: {sheet_names}")    
+    print(f"Loaded Excel sheets for AI evaluation: {sheet_names}")        
     with pd.ExcelWriter(excel_path, engine='openpyxl', mode='w') as writer:
         for sheet_name in sheet_names:
-            df = pd.read_excel(excel_file, sheet_name=sheet_name)                  
+            df = pd.read_excel(excel_file, sheet_name=sheet_name)                       
             if len(df.columns) < 10:
                 print(f"Skipping sheet {sheet_name}: Unexpected column structure.")
                 df.to_excel(writer, sheet_name=sheet_name, index=False)
-                continue              
+                continue                
             print(f"\nEvaluating sheet: [{sheet_name}] ({len(df)} rows)...")              
             for index, row in df.iterrows():
                 question = str(row.iloc[4]) if pd.notna(row.iloc[4]) else ""
-                expected = str(row.iloc[5]) if pd.notna(row.iloc[5]) else "Provide an accurate response."               
+                expected = str(row.iloc[5]) if pd.notna(row.iloc[5]) else "Provide an accurate response."                          
                 # Safely handle missing/NaN chatbot answers
                 raw_actual = row.iloc[6]
-                actual = str(raw_actual) if pd.notna(raw_actual) else ""               
+                actual = str(raw_actual) if pd.notna(raw_actual) else ""                       
                 if not question.strip():
-                    continue                  
+                    continue                        
                 # Skip evaluation if actual answer is empty, NaN, or starts with ERROR
                 if not actual.strip() or actual.lower() == "nan" or actual.startswith("ERROR"):
-                    df.iloc[index, 7] = "Low" # Relevance
-                    df.iloc[index, 8] = "Fail" # Status
-                    df.iloc[index, 9] = "Skipped evaluation due to missing chatbot answer or execution error."
-                    continue             
+                    df.iloc[index, 7] = "Score: 0.0" # Score column
+                    df.iloc[index, 8] = "Fail" # Status column
+                    df.iloc[index, 9] = "Skipped evaluation due to missing chatbot answer or execution error." # Feedback column
+                    continue                       
                 print(f"  -> Evaluating Row {index + 1}: {question[:35]}...")
-                result = evaluator.evaluate_advanced(question, expected, actual)                          
+                result = evaluator.evaluate_advanced(question, expected, actual)                                      
                 score = result.get("score", 0.0)
                 passed = result.get("pass", False)
-                feedback = result.get("feedback", "")                     
+                feedback = result.get("feedback", "")                          
                 df.iloc[index, 7] = f"Score: {score}"
                 df.iloc[index, 8] = "Pass" if passed else "Fail"
-                df.iloc[index, 9] = feedback            
-            df.to_excel(writer, sheet_name=sheet_name, index=False)           
+                df.iloc[index, 9] = feedback                   
+            df.to_excel(writer, sheet_name=sheet_name, index=False)                    
     print(f"\nAI Evaluation complete! Results saved back to {excel_path}")
 if __name__ == "__main__":
     process_excel_framework()
