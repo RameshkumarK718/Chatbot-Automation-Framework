@@ -3,3 +3,4 @@ com\chatbot\ChatbotAutomationFramework\ContextStateManager.class
 com\chatbot\ChatbotAutomationFramework\AppTest.class
 com\chatbot\ChatbotAutomationFramework\ChatbotTestRunner.class
 com\chatbot\ChatbotAutomationFramework\ExcelUtils.class
+com\chatbot\tests\ChatbotTest$TestRowData.class

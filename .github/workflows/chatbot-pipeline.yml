@@ -7,6 +7,7 @@ jobs:
   run-automation-and-eval:
     runs-on: ubuntu-latest
     steps:
+<<<<<<< HEAD
     - name: Checkout Repository
       uses: actions/checkout@v4
     - name: Set up JDK 21
@@ -38,3 +39,58 @@ jobs:
         name: Frameworks_Results
         path: Frameworks_Results.xlsx
         if-no-files-found: ignore
+=======
+      # Checkout source code
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      # Set up Java 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: maven
+      # Set up Chrome
+      - name: Set up Chrome Browser
+        uses: browser-actions/setup-chrome@v2
+      # Verify required tools
+      - name: Verify Environment
+        run: |
+          java -version
+          mvn -version
+          google-chrome --version
+      # Run Selenium automation tests
+      - name: Run Selenium Automation Tests
+        run: mvn clean test -Dtest=ChatbotTest
+      # Set up Python 3.11
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      # Verify Python
+      - name: Verify Python
+        run: |
+          python --version
+          pip --version
+      # Install Python dependencies
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      # Run AI-based evaluation
+      - name: Run AI Evaluation
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python engine_ai_evaluator.py
+      # Upload test results and reports
+      - name: Upload Test Results and Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: automation-reports
+          path: |
+            Frameworks_Results.xlsx
+            *.xlsx
+            target/surefire-reports/
+>>>>>>> c9fef0c (Fix syntax error in ChatbotTest)
