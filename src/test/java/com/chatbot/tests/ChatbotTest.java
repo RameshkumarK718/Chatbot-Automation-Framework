@@ -75,7 +75,7 @@ public class ChatbotTest {
             Row row = sheet.getRow(3); 
             if (row != null) {
                 Cell userCell = row.getCell(0); 
-                Cell passCell = row.getCell(1);                           
+                Cell passCell = row.getCell(1);                     
                 username = userCell != null ? getCellStringValue(userCell) : "";
                 password = passCell != null ? getCellStringValue(passCell) : "";  
             }      
@@ -109,39 +109,39 @@ public class ChatbotTest {
         String memberId = credentials[0];
         String password = credentials[1];          
         Assert.assertFalse(memberId.isBlank(), "Member ID is missing from Cloud Excel.");
-        Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");                                       
+        Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");                                        
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
-        options.setExperimentalOption("useAutomationExtension", false);      
+        options.setExperimentalOption("useAutomationExtension", false);            
         driver = new ChromeDriver(options);
         driver.manage().window().maximize();
-        wait = new WebDriverWait(driver, WAIT_TIMEOUT);                
+        wait = new WebDriverWait(driver, WAIT_TIMEOUT);                       
         try {
             driver.get(APP_URL);
             WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
             memberInput.clear();
-            memberInput.sendKeys(memberId);                                  
+            memberInput.sendKeys(memberId);                                     
             WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
             passwordInput.clear();
-            passwordInput.sendKeys(password);                                           
+            passwordInput.sendKeys(password);                                              
             WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
-            loginButton.click();                                                        
+            loginButton.click();                                                                          
             wait.until(ExpectedConditions.or(
                 ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
                 ExpectedConditions.visibilityOfElementLocated(By.xpath("//span[contains(normalize-space(), 'Conversational AI')]"))
-            ));                   
+            ));                                
             WebElement conversationalAILink = wait.until(
                 ExpectedConditions.elementToBeClickable(
                     By.xpath("//span[contains(normalize-space(), 'Conversational AI')]/ancestor::a | //a[contains(., 'Conversational AI')] | //a[contains(@href, 'javascript:void(0)')]")
                 )
-            );                         
+            );                                 
             JavascriptExecutor js = (JavascriptExecutor) driver;
             js.executeScript("arguments[0].click();", conversationalAILink);                         
-            System.out.println("Successfully logged in using Member ID: " + memberId);                                                                            
+            System.out.println("Successfully logged in using Member ID: " + memberId);                                                                                                                                                                              
             wait.until(
                 ExpectedConditions.elementToBeClickable(
                     By.xpath("//input[@placeholder='Ask a question...'] | //textarea[@placeholder='Ask a question...'] | //input[contains(@placeholder, 'Ask')] | //div[@contenteditable='true']")
@@ -155,11 +155,11 @@ public class ChatbotTest {
     public void runAutomationFramework() {
         List<TestRowData> testDataList = fetchExcelDataFromGitHub(frameworkExcelPath);
         Assert.assertFalse(testDataList.isEmpty(), "Failed to fetch Excel data from GitHub or file is empty!");
-        System.out.println("Successfully fetched questions from GitHub Excel. Total test cases: " + testDataList.size());                          
+        System.out.println("Successfully fetched questions from GitHub Excel. Total test cases: " + testDataList.size());                               
         for (int i = 0; i < testDataList.size(); i++) {      
             TestRowData rowData = testDataList.get(i);      
             String testCaseId = rowData.testCaseId;
-            String question = rowData.question;                          
+            String question = rowData.question;                                
             if (question == null || question.trim().isEmpty()) {
                 System.out.println("--> Skipping [" + rowData.sheetName + "] Row " + (rowData.rowIndex + 1) + ": Question column is empty.");
                 continue;
@@ -167,66 +167,78 @@ public class ChatbotTest {
             if (testCaseId == null || testCaseId.trim().isEmpty()) {
                 testCaseId = String.format("TC-%03d", i + 1);
                 rowData.testCaseId = testCaseId;
-            }                                                                                    
+            }                                                                                                                                                                                                                                               
             System.out.println("\n--- Processing [" + rowData.sheetName + "] (" + testCaseId + ") ---");
-            System.out.println("Question: " + question);                                   
-            String chatbotResponse = askQuestion(question);             
-            System.out.println("Chatbot Response: " + chatbotResponse);                                                                   
+            System.out.println("Question: " + question);                                         
+            
+            String chatbotResponse = askQuestion(question);              
+            System.out.println("Chatbot Response: " + chatbotResponse);                                                                                                                                                               
+            
             rowData.chatbotAnswer = chatbotResponse; 
             rowData.status = "Executed";                      
-            saveResultsToExcel(frameworkExcelPath, testDataList);            
+            saveResultsToExcel(frameworkExcelPath, testDataList);           
+            
             if (i < testDataList.size() - 1) {
                 sleep(2000); 
             }
         }
         System.out.println("\nAll questions processed successfully and stored in local Frameworks_Results.xlsx!");
     }
+
     private String askQuestion(String question) {
         try {
             WebElement chatInput = wait.until(
                 ExpectedConditions.elementToBeClickable(
                     By.xpath("//input[@placeholder='Ask a question...'] | //textarea[@placeholder='Ask a question...'] | //input[contains(@placeholder, 'Ask')] | //div[@contenteditable='true']")
                 )
-            );                   
+            );                    
+            
             chatInput.click();
             chatInput.sendKeys(Keys.CONTROL + "a", Keys.BACK_SPACE);    
-            chatInput.sendKeys(question);           
-            chatInput.sendKeys(Keys.ENTER);                                                                                                                                                                                                                                                                                                                                      
+            chatInput.sendKeys(question);            
+            chatInput.sendKeys(Keys.ENTER);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
+            
             try {
                 WebElement sendButton = driver.findElement(By.xpath("//button[normalize-space()='Send'] | //button[contains(@class, 'send')] | //button[@type='submit']"));
                 if (sendButton.isDisplayed() && sendButton.isEnabled()) {
                     sendButton.click();
                 }
             } catch (Exception ignored) {}                                        
+            
             return waitForCompleteResponse();
         } catch (Exception e) {
             System.err.println("Error asking question: " + e.getMessage());
             return "ERROR: Response timeout or element not found";
         }
     }
+
     private String waitForCompleteResponse() {
         try {
             List<WebElement> initialResponses = driver.findElements(By.xpath(
                 "//div[contains(@class, 'bot')] | //div[contains(@class, 'message-response')] | //div[contains(@class, 'chat-bubble')] | //div[contains(@class, 'response')] | //p[contains(@class, 'answer')]"
             ));
             int initialCount = initialResponses.size();
-            WebDriverWait longWait = new WebDriverWait(driver, Duration.ofSeconds(60));                                      
+            WebDriverWait longWait = new WebDriverWait(driver, Duration.ofSeconds(60));                                     
+            
             final String[] lastKnownText = {""};
-            final int[] stableCounter = {0};                                
+            final int[] stableCounter = {0};                          
+            
             return longWait.until(driverInstance -> {
                 List<WebElement> currentResponses = driverInstance.findElements(By.xpath(
                     "//div[contains(@class, 'bot')] | //div[contains(@class, 'message-response')] | //div[contains(@class, 'chat-bubble')] | //div[contains(@class, 'response')] | //p[contains(@class, 'answer')]"
-                ));                                                                                                                                                                                                                                                                                                                                                               
+                ));                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
                 if (currentResponses.size() > initialCount) {
                     WebElement latestResponse = currentResponses.get(currentResponses.size() - 1);
                     String text = latestResponse.getText().trim();
-                    String lowerText = text.toLowerCase();                                      
+                    String lowerText = text.toLowerCase();                                     
+                    
                     boolean isFiller = lowerText.contains("reading that up") || 
                                        lowerText.contains("looking that up") || 
                                        lowerText.contains("checking") || 
                                        lowerText.contains("thinking") || 
                                        lowerText.equals("...") || 
-                                       lowerText.isEmpty();                                      
+                                       lowerText.isEmpty();                                     
+                    
                     if (!isFiller && !text.equals(lastKnownText[0])) {
                         lastKnownText[0] = text;
                         stableCounter[0] = 0;
@@ -243,9 +255,10 @@ public class ChatbotTest {
             return "ERROR: Timeout waiting for complete response stream";
         }
     }
+
     private List<TestRowData> fetchExcelDataFromGitHub(String fileUrl) {
         List<TestRowData> list = new ArrayList<>();
-        String rawUrl = fileUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");     
+        String rawUrl = fileUrl.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");      
         try (InputStream is = new URL(rawUrl).openStream();
              Workbook workbook = new XSSFWorkbook(is)) {            
             for (int s = 0; s < workbook.getNumberOfSheets(); s++) {
@@ -253,14 +266,17 @@ public class ChatbotTest {
                 String sheetName = sheet.getSheetName();          
                 for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                     Row row = sheet.getRow(r);
-                    if (row == null) continue;               
+                    if (row == null) continue;                
+                    
                     String category = getCellStringValue(row.getCell(COL_CATEGORY));
                     String subcategory = getCellStringValue(row.getCell(COL_SUBCATEGORY));
                     String testCaseId = getCellStringValue(row.getCell(COL_TESTCASE_ID));
                     String questionType = getCellStringValue(row.getCell(COL_QUESTION_TYPE));
                     String question = getCellStringValue(row.getCell(COL_QUESTION));
                     String expectedAnswer = getCellStringValue(row.getCell(COL_EXPECTED));              
-                    if (question.isEmpty()) continue;                   
+                    
+                    if (question.isEmpty()) continue;                    
+                    
                     list.add(new TestRowData(sheetName, r, category, subcategory, testCaseId, 
                                              questionType, question, expectedAnswer, "", "", "", ""));
                 }
@@ -270,6 +286,7 @@ public class ChatbotTest {
         }
         return list;
     }
+
     private void saveResultsToExcel(String templatePath, List<TestRowData> dataList) {
         String localFilePath = "Frameworks_Results.xlsx";
         File file = new File(localFilePath);       
@@ -278,14 +295,16 @@ public class ChatbotTest {
             for (TestRowData data : dataList) {
                 Sheet sheet = workbook.getSheet(data.sheetName);
                 if (sheet == null) continue;              
+                
                 Row row = sheet.getRow(data.rowIndex);
                 if (row == null) row = sheet.createRow(data.rowIndex);                
+                
                 Cell respCell = row.getCell(COL_RESPONSE, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                 respCell.setCellValue(data.chatbotAnswer);
                 
                 Cell statusCell = row.getCell(COL_STATUS, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                 statusCell.setCellValue(data.status);
-            }            
+            }          
             try (FileOutputStream fos = new FileOutputStream(localFilePath)) {
                 workbook.write(fos);
             }
@@ -293,11 +312,13 @@ public class ChatbotTest {
             System.err.println("Error saving results to local Excel file: " + e.getMessage());
         }
     }
+
     private void sleep(long millis) {
         try {
             Thread.sleep(millis);
         } catch (InterruptedException ignored) {}
     }
+
     @AfterMethod
     public void tearDown() {
         if (driver != null) {
