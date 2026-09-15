@@ -65,7 +65,7 @@ public class ChatbotTest {
     private static final String APP_URL = "https://d3rl0fkw0q6ssb.cloudfront.net/";
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);         
     private final String credentialsExcelPath = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials.xlsx"; 
-    private final String frameworkExcelPath = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks.xlsx";
+    private final String frameworkExcelPath = "https://github.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/Frameworks.xlsx";
     private WebDriver driver;
     private WebDriverWait wait;
     private String[] getCredentialsFromExcel() {
