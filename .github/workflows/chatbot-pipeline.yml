@@ -37,3 +37,4 @@ jobs:
       with:
         name: Frameworks_Results
         path: Frameworks_Results.xlsx
+        if-no-files-found: ignore
