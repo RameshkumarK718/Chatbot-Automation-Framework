@@ -45,6 +45,8 @@ jobs:
         if: always()
         with:
           name: automation-reports
+          if-no-files-found: ignore
           path: |
             Frameworks_Results.xlsx
+            Frameworks_Results_Evaluated.xlsx
             target/surefire-reports/
