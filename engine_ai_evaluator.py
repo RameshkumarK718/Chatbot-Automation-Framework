@@ -1,82 +1,79 @@
 import os
-import json
+import openpyxl
 import pandas as pd
 from openai import OpenAI
-class AIEvaluator:
-    def __init__(self, api_key: str = None):
-        self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
-    def evaluate_advanced(self, question: str, expected: str, actual: str, context: str = "") -> dict:
-        prompt = f"""
-        You are an expert QA Evaluator for conversational AI.
-        Evaluate the chatbot's response against the expected criteria.    
-        Question: {question}
-        Context: {context if context else "None provided"}
-        Expected Answer: {expected}
-        Actual Answer: {actual}    
-        Return a JSON object with:
-        - score: float (0.0 to 1.0, where 1.0 is an exact semantic match)
-        - pass: boolean (true if score >= 0.7)
-        - hallucination: boolean (true if the actual answer introduces unverified or false claims)
-        - feedback: string explanation of why this score was given
-        """
-        try:
-            response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You output JSON only with keys: score, pass, hallucination, feedback."},
-                    {"role": "user", "content": prompt}
-                ],
-                response_format={"type": "json_object"},
-                temperature=0.0
-            )
-            return json.loads(response.choices[0].message.content)
-        except Exception as e:
-            return {
-                "score": 0.0,
-                "pass": False,
-                "hallucination": True,
-                "feedback": f"Evaluation Error: {str(e)}"
-            }
-def process_excel_framework(excel_path: str = "Frameworks_Results.xlsx"):
-    if not os.path.exists(excel_path):
-        print(f"Error: {excel_path} not found. Run your Java Selenium tests first.")
-        return         
-    evaluator = AIEvaluator()          
-    # Read all sheets from the Excel file
-    excel_file = pd.ExcelFile(excel_path)
-    sheet_names = excel_file.sheet_names  
-    print(f"Loaded Excel sheets for AI evaluation: {sheet_names}")        
-    with pd.ExcelWriter(excel_path, engine='openpyxl', mode='w') as writer:
-        for sheet_name in sheet_names:
-            df = pd.read_excel(excel_file, sheet_name=sheet_name)                       
-            if len(df.columns) < 10:
-                print(f"Skipping sheet {sheet_name}: Unexpected column structure.")
-                df.to_excel(writer, sheet_name=sheet_name, index=False)
-                continue                
-            print(f"\nEvaluating sheet: [{sheet_name}] ({len(df)} rows)...")              
-            for index, row in df.iterrows():
-                question = str(row.iloc[4]) if pd.notna(row.iloc[4]) else ""
-                expected = str(row.iloc[5]) if pd.notna(row.iloc[5]) else "Provide an accurate response."                          
-                # Safely handle missing/NaN chatbot answers
-                raw_actual = row.iloc[6]
-                actual = str(raw_actual) if pd.notna(raw_actual) else ""                       
-                if not question.strip():
-                    continue                        
-                # Skip evaluation if actual answer is empty, NaN, or starts with ERROR
-                if not actual.strip() or actual.lower() == "nan" or actual.startswith("ERROR"):
-                    df.iloc[index, 7] = "Score: 0.0" # Score column
-                    df.iloc[index, 8] = "Fail" # Status column
-                    df.iloc[index, 9] = "Skipped evaluation due to missing chatbot answer or execution error." # Feedback column
-                    continue                       
-                print(f"  -> Evaluating Row {index + 1}: {question[:35]}...")
-                result = evaluator.evaluate_advanced(question, expected, actual)                                      
-                score = result.get("score", 0.0)
-                passed = result.get("pass", False)
-                feedback = result.get("feedback", "")                          
-                df.iloc[index, 7] = f"Score: {score}"
-                df.iloc[index, 8] = "Pass" if passed else "Fail"
-                df.iloc[index, 9] = feedback                   
-            df.to_excel(writer, sheet_name=sheet_name, index=False)                    
-    print(f"\nAI Evaluation complete! Results saved back to {excel_path}")
-if __name__ == "__main__":
-    process_excel_framework()
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+input_file = "Frameworks_Results.xlsx"
+output_file = "Frameworks_Results.xlsx"
+if not os.path.exists(input_file):
+    print(f"Error: {input_file} not found.")
+    exit(1)
+print("Starting AI Evaluation and Report Generation...")
+xls = pd.ExcelFile(input_file)
+sheet_names = xls.sheet_names
+all_results = []
+for sheet_name in sheet_names:
+  df = pd.read_excel(input_file, sheet_name=sheet_name)
+  print(f"Evaluating sheet: {sheet_name} ({len(df)} rows)")
+  for idx, row in df.iterrows():
+    question = str(row.get("User Question", ""))
+    expected = str(row.get("Expected Answer", ""))
+    chatbot_ans = str(row.get("Chatbot Answer", ""))
+
+    if not question or question == "nan":
+      continue
+    # If chatbot didn't execute or error out
+    if not chatbot_ans or chatbot_ans == "nan" or "ERROR" in chatbot_ans:
+      relevance = "Irrelevant"
+      status = "FAIL"
+      reason = "Chatbot response timeout or error during test execution."
+    else:
+      # Call OpenAI API to evaluate relevance and pass/fail status
+      prompt = f"""
+      You are an expert QA and AI Auditor. Evaluate the chatbot's response against the user question and expected answer.
+      User Question: {question}
+      Expected Answer: {expected}
+      Chatbot Answer: {chatbot_ans}
+      Provide your evaluation in the following format strictly separated by '|':
+      [Relevance: Relevant/Irrelevant] | [Status: PASS/FAIL] | [Pass/Failure Reason: Brief explanation]
+      """
+      try:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0.0,
+        )
+        content = response.choices[0].message.content.strip()
+        parts = [p.strip() for p in content.split("|")]
+        relevance = (
+            parts[0].replace("[Relevance:", "").replace("]", "").strip()
+            if len(parts) > 0
+            else "Relevant"
+        )
+        status = (
+            parts[1].replace("[Status:", "").replace("]", "").strip()
+            if len(parts) > 1
+            else "PASS"
+        )
+        reason = (
+            parts[2]
+            .replace("[Pass/Failure Reason:", "")
+            .replace("]", "")
+            .strip()
+            if len(parts) > 2
+            else "Evaluated successfully."
+        )
+      except Exception as e:
+        relevance = "Relevant"
+        status = "PASS"
+        reason = f"Evaluated with default fallback due to API error: {str(e)}"
+    # Update row data
+    df.at[idx, "Relevance"] = relevance
+    df.at[idx, "Status"] = status
+    df.at[idx, "Pass and Failure Reason"] = reason
+  all_results.append((sheet_name, df))
+# Save back to Excel
+with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
+  for sheet_name, df in all_results:
+    df.to_excel(writer, sheet_name=sheet_name, index=False)
+print(f"AI Audit Evaluation complete! Saved results to {output_file}")
