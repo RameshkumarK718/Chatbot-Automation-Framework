@@ -1,0 +1,43 @@
+name: Chatbot Automation Java CI with Maven
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4  
+    - name: Set up JDK 21
+      uses: actions/setup-java@v5
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+    - name: Set up Chrome Browser
+      uses: browser-actions/setup-chrome@v2
+    - name: Build and Run Tests via Maven
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: mvn clean test -Dsurefire.suiteXmlFiles=""
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install Python Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas openpyxl openai requests
+    - name: Run AI Evaluation
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: python engine_ai_evaluator.py
+    - name: Upload Test Results and Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: automation-reports
+        path: |
+          Frameworks_Results.xlsx
+          target/surefire-reports/
