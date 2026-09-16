@@ -12,11 +12,13 @@ if not os.path.exists(input_file):
     print(f"Warning: {input_file} not found. Skipping AI evaluation.")
     pd.DataFrame({"Status": ["Skipped - Missing Input File"]}).to_excel(output_file, index=False)
     exit(0)
+
 api_key = os.environ.get("OPENAI_API_KEY")
 if not api_key:
     print("Warning: OPENAI_API_KEY is not set. Skipping AI evaluation.")
     pd.DataFrame({"Status": ["Skipped - Missing API Key"]}).to_excel(output_file, index=False)
     exit(0)
+
 client = OpenAI(api_key=api_key)
 print("Starting AI Evaluation and Report Generation...")
 
@@ -33,8 +35,14 @@ for sheet_name in sheet_names:
     df = pd.read_excel(input_file, sheet_name=sheet_name)
     print(f"Evaluating sheet: {sheet_name} ({len(df)} rows)")
 
+    # FIX: Ensure evaluation columns exist and are explicitly cast as string/object type 
+    # to prevent Pandas float64 TypeError when writing text strings.
+    for col in ["Relevance", "Status", "Pass and Failure Reason"]:
+        if col not in df.columns:
+            df[col] = ""
+        df[col] = df[col].fillna("").astype(str)
+
     for idx, row in df.iterrows():
-        # Compatible column lookup
         question = get_text(row.get("User Question") or row.get("Question"))
         expected = get_text(row.get("Expected Answer"))
         chatbot_ans = get_text(row.get("Chatbot Answer") or row.get("Response") or row.get("Chatbot Response"))
