@@ -320,6 +320,3 @@ public class ChatbotTest {
         }
     }
 }
-public class chat {
-
-}
