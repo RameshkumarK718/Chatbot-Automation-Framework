@@ -253,9 +253,8 @@ public class ChatbotTest {
         generateDetailedEnterpriseReport(executedResults);
     }
 
-    /**
-     * Programmatically builds a detailed, structured enterprise audit report.
-     */
+     // Programmatically builds a detailed, structured enterprise audit report.
+     
     private void generateDetailedEnterpriseReport(List<TestRowData> results) {
         int total = results.size();
         int passed = 0;
