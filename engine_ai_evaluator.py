@@ -3,121 +3,139 @@ import json
 import pandas as pd
 from openai import OpenAI
 
-# Updated input file name
-input_file = "Frameworks.xlsx"
-output_file = "Frameworks-Result.xlsx"
+class AIEvaluator:
+    def __init__(self, api_key: str = None):
+        # Automatically picks up OPENAI_API_KEY environment variable if not passed explicitly
+        self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
 
-# Validate input file without failing build
-if not os.path.exists(input_file):
-    print(f"Warning: {input_file} not found. Skipping AI evaluation.")
-    pd.DataFrame({"Status": ["Skipped - Missing Input File"]}).to_excel(output_file, index=False)
-    exit(0)
+    def evaluate_advanced(self, question: str, expected: str, actual: str, context: str = "") -> dict:
+        prompt = f"""
+You are an expert QA Evaluator and AI Response Auditor for conversational AI.
+Evaluate the chatbot's response against the user’s question, relevant conversation context, and expected answer.
 
-api_key = os.environ.get("OPENAI_API_KEY")
-if not api_key:
-    print("Warning: OPENAI_API_KEY is not set. Skipping AI evaluation.")
-    pd.DataFrame({"Status": ["Skipped - Missing API Key"]}).to_excel(output_file, index=False)
-    exit(0)
-
-client = OpenAI(api_key=api_key)
-print("Starting AI Evaluation and Report Generation...")
-
-xls = pd.ExcelFile(input_file)
-sheet_names = xls.sheet_names
-all_results = []
-
-def get_text(value):
-    if pd.isna(value):
-        return ""
-    return str(value).strip()
-
-for sheet_name in sheet_names:
-    df = pd.read_excel(input_file, sheet_name=sheet_name)
-    print(f"Evaluating sheet: {sheet_name} ({len(df)} rows)")
-
-    # FIX: Ensure evaluation columns exist and are explicitly cast as string/object type 
-    # to prevent Pandas float64 TypeError when writing text strings.
-    for col in ["Relevance", "Status", "Pass and Failure Reason"]:
-        if col not in df.columns:
-            df[col] = ""
-        df[col] = df[col].fillna("").astype(str)
-
-    for idx, row in df.iterrows():
-        question = get_text(row.get("User Question") or row.get("Question"))
-        expected = get_text(row.get("Expected Answer"))
-        chatbot_ans = get_text(row.get("Chatbot Answer") or row.get("Response") or row.get("Chatbot Response"))
-        
-        if not question:
-            continue
-            
-        if not chatbot_ans or "error" in chatbot_ans.lower():
-            relevance = "Irrelevant"
-            status = "FAIL"
-            reason = "Chatbot response was empty or contained an error."
-        else:
-            prompt = f"""
-User Question / Context:
-{question}
-
-You are an QA Engineer and AI Response Auditor.
-Evaluate the chatbot response against the user’s question, relevant conversation context, and expected answer.
-Determine whether the response correctly understands and uses the relevant context to answer the question accurately and consistently.
+Question: {question}
+Context: {context if context else "None provided"}
+Expected Answer: {expected}
+Actual Answer: {actual}
 
 Evaluation rules:
 1. Relevance:
-   - Relevant = the chatbot directly addresses the user's question.
-   - Irrelevant = the chatbot does not address the question.
+   - "Relevant" = the chatbot directly addresses the user's question.
+   - "Irrelevant" = the chatbot does not address the question or failed.
 
-2. Status:
-   - PASS = correct, relevant, and sufficiently satisfies the expected answer.
-   - FAIL = incorrect, irrelevant, critically incomplete, or contradictory.
+2. Hallucination:
+   - true = the chatbot introduces false facts, incorrect external information, or completely contradicts/goes beyond the scope of the expected answer in a misleading way.
+   - false = the chatbot sticks strictly to truthful facts relevant to the domain/expected answer without fabricating info.
 
-Expected Answer:
-{expected}
+3. Status & Score:
+   - score: float (0.0 to 1.0, where 1.0 is an exact semantic match)
+   - pass: boolean (true if score >= 0.7, relevant, and non-hallucinated; otherwise false)
+   - reason: string explanation covering correctness, relevance, and hallucination check.
 
-Chatbot Answer:
-{chatbot_ans}
-
-Return JSON:
+Return a JSON object strictly with these keys:
 {{
   "relevance": "Relevant",
-  "status": "PASS",
+  "hallucination": false,
+  "score": 0.95,
+  "pass": true,
   "reason": "Brief explanation"
 }}
 """
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    response_format={"type": "json_object"},
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0
-                )
-                
-                content = response.choices[0].message.content.strip()
-                result = json.loads(content)       
-                
-                relevance = result.get("relevance", "Irrelevant")
-                status = result.get("status", "FAIL")
-                reason = result.get("reason", "No evaluation reason provided.")
-                
-                if relevance not in ["Relevant", "Irrelevant"]:
-                    relevance = "Irrelevant"
-                if status not in ["PASS", "FAIL"]:
-                    status = "FAIL"
-            except Exception as e:
-                relevance = "Unknown"
-                status = "ERROR"
-                reason = f"AI evaluation failed: {str(e)}"
-                
-        df.at[idx, "Relevance"] = relevance
-        df.at[idx, "Status"] = status
-        df.at[idx, "Pass and Failure Reason"] = reason
-        
-    all_results.append((sheet_name, df))
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You output JSON only."},
+                    {"role": "user", "content": prompt}
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.0
+            )
+            content = response.choices[0].message.content
+            return json.loads(content)
+        except Exception as e:
+            return {
+                "relevance": "Irrelevant",
+                "hallucination": True,
+                "score": 0.0,
+                "pass": False,
+                "reason": f"AI Evaluation Error: {str(e)}"
+            }
 
-with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-    for sheet_name, df in all_results:
-        df.to_excel(writer, sheet_name=sheet_name, index=False)
+def process_qa_framework_excel(input_file: str = "Frameworks.xlsx", output_file: str = "Frameworks-Result.xlsx"):
+    # Validate input file without failing build
+    if not os.path.exists(input_file):
+        print(f"Warning: {input_file} not found. Skipping AI evaluation.")
+        pd.DataFrame({"Status": ["Skipped - Missing Input File"]}).to_excel(output_file, index=False)
+        return
 
-print("\nAI Audit Evaluation complete!")
-print(f"Saved results to: {output_file}")
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        print("Warning: OPENAI_API_KEY is not set. Skipping AI evaluation.")
+        pd.DataFrame({"Status": ["Skipped - Missing API Key"]}).to_excel(output_file, index=False)
+        return
+
+    evaluator = AIEvaluator(api_key=api_key)
+    print("Starting AI Evaluation, Hallucination Check, and Report Generation...")
+
+    xls = pd.ExcelFile(input_file)
+    sheet_names = xls.sheet_names
+    all_results = []
+
+    def get_text(value):
+        if pd.isna(value):
+            return ""
+        return str(value).strip()
+
+    for sheet_name in sheet_names:
+        df = pd.read_excel(input_file, sheet_name=sheet_name)
+        print(f"Evaluating sheet: {sheet_name} ({len(df)} rows)")
+
+        # Ensure required evaluation columns exist and are cast as string type
+        for col in ["Relevance", "Hallucination", "Status", "Pass and Failure Reason"]:
+            if col not in df.columns:
+                df[col] = ""
+            df[col] = df[col].fillna("").astype(str)
+
+        for idx, row in df.iterrows():
+            question = get_text(row.get("User Question") or row.get("Question"))
+            expected = get_text(row.get("Expected Answer"))
+            chatbot_ans = get_text(row.get("Chatbot Answer") or row.get("Response") or row.get("Chatbot Response"))
+            
+            if not question:
+                continue
+                
+            if not chatbot_ans or "error" in chatbot_ans.lower():
+                df.at[idx, "Relevance"] = "Irrelevant"
+                df.at[idx, "Hallucination"] = "True"
+                df.at[idx, "Status"] = "FAIL"
+                df.at[idx, "Pass and Failure Reason"] = "Chatbot response was empty or contained an error."
+                continue
+
+            print(f"Evaluating [{row.get('Test Case ID', f'Row {idx}')}]: {question[:40]}...")
+            result = evaluator.evaluate_advanced(question, expected, chatbot_ans)
+            
+            relevance = result.get("relevance", "Relevant" if result.get("pass") else "Irrelevant")
+            is_hallucinated = result.get("hallucination", False)
+            hallucination_str = "Yes" if is_hallucinated else "No"
+            
+            # Determine Pass/Fail status
+            passed = result.get("pass", False)
+            status = "PASS" if (passed and not is_hallucinated) else "FAIL"
+            reason = result.get("reason", "No evaluation reason provided.")
+
+            df.at[idx, "Relevance"] = relevance
+            df.at[idx, "Hallucination"] = hallucination_str
+            df.at[idx, "Status"] = status
+            df.at[idx, "Pass and Failure Reason"] = reason
+            
+        all_results.append((sheet_name, df))
+
+    with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
+        for sheet_name, df in all_results:
+            df.to_excel(writer, sheet_name=sheet_name, index=False)
+
+    print(f"\nAI Audit Evaluation complete! Detailed metrics saved back to {output_file}")
+
+if __name__ == "__main__":
+    process_qa_framework_excel()
