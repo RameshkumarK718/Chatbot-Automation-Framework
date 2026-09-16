@@ -19,14 +19,14 @@
 
     <dependencies>
 
-        <!-- Selenium -->
+        <!-- Selenium Java -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>4.49.0</version>
         </dependency>
 
-        <!-- Apache POI -->
+        <!-- Apache POI for Excel Handling -->
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
@@ -60,7 +60,7 @@
     <build>
         <plugins>
 
-            <!-- Maven Compiler -->
+            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -70,7 +70,7 @@
                 </configuration>
             </plugin>
 
-            <!-- Maven Surefire -->
+            <!-- Maven Surefire Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
