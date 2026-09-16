@@ -15,23 +15,28 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
           cache: maven
+
       - name: Set up Chrome Browser
         uses: browser-actions/setup-chrome@v2
+
       - name: Verify Environment
         run: |
           java -version
           mvn -version
           google-chrome --version
+
       - name: Run Selenium Automation Tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: mvn clean test -Dtest=ChatbotTest
         continue-on-error: true
+
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
           python-version: '3.11'
           cache: 'pip'
+
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
@@ -40,10 +45,23 @@ jobs:
           else
             pip install pandas openpyxl openai requests
           fi
+
+      - name: Check AI Evaluator Files
+        run: |
+          echo "Current directory:"
+          pwd
+          echo "Repository files:"
+          ls -la
+          echo "Python files:"
+          ls -la *.py || true
+          echo "Excel files:"
+          ls -la *.xlsx || true
+
       - name: Run AI Evaluation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python engine_ai_evaluator.py
+
       - name: Upload Test Results and Reports
         uses: actions/upload-artifact@v4
         if: always()
@@ -54,3 +72,4 @@ jobs:
             Frameworks_Results.xlsx
             Frameworks_Results_Evaluated.xlsx
             target/surefire-reports/
+```
