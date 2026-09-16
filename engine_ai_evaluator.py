@@ -1,5 +1,6 @@
 import os
 import json
+import difflib
 import pandas as pd
 from openai import OpenAI
 
@@ -76,7 +77,7 @@ def process_qa_framework_excel(input_file: str = "Frameworks.xlsx", output_file:
         return
 
     evaluator = AIEvaluator(api_key=api_key)
-    print("Starting AI Evaluation, Hallucination Check, and Report Generation...")
+    print("Starting AI Evaluation, Match Percentage Calculation, and Report Generation...")
 
     xls = pd.ExcelFile(input_file)
     sheet_names = xls.sheet_names
@@ -92,7 +93,7 @@ def process_qa_framework_excel(input_file: str = "Frameworks.xlsx", output_file:
         print(f"Evaluating sheet: {sheet_name} ({len(df)} rows)")
 
         # Ensure required evaluation columns exist and are cast as string type
-        for col in ["Relevance", "Hallucination", "Status", "Pass and Failure Reason"]:
+        for col in ["Match Percentage", "Relevance", "Hallucination", "Status", "Pass and Failure Reason"]:
             if col not in df.columns:
                 df[col] = ""
             df[col] = df[col].fillna("").astype(str)
@@ -105,25 +106,43 @@ def process_qa_framework_excel(input_file: str = "Frameworks.xlsx", output_file:
             if not question:
                 continue
                 
+            # Calculate text match percentage using SequenceMatcher
+            if not expected and not chatbot_ans:
+                match_pct = 100.0
+            elif not expected or not chatbot_ans:
+                match_pct = 0.0
+            else:
+                match_pct = round(difflib.SequenceMatcher(None, expected, chatbot_ans).ratio() * 100, 2)
+
+            match_pct_str = f"{match_pct}%"
+
             if not chatbot_ans or "error" in chatbot_ans.lower():
+                df.at[idx, "Match Percentage"] = match_pct_str
                 df.at[idx, "Relevance"] = "Irrelevant"
                 df.at[idx, "Hallucination"] = "True"
                 df.at[idx, "Status"] = "FAIL"
                 df.at[idx, "Pass and Failure Reason"] = "Chatbot response was empty or contained an error."
                 continue
 
-            print(f"Evaluating [{row.get('Test Case ID', f'Row {idx}')}]: {question[:40]}...")
+            print(f"Evaluating [{row.get('Test Case ID', f'Row {idx}')}] (Match: {match_pct_str}): {question[:40]}...")
             result = evaluator.evaluate_advanced(question, expected, chatbot_ans)
             
-            relevance = result.get("relevance", "Relevant" if result.get("pass") else "Irrelevant")
+            relevance = result.get("relevance", "Relevant" if match_pct >= 70.0 else "Irrelevant")
             is_hallucinated = result.get("hallucination", False)
             hallucination_str = "Yes" if is_hallucinated else "No"
             
-            # Determine Pass/Fail status
-            passed = result.get("pass", False)
-            status = "PASS" if (passed and not is_hallucinated) else "FAIL"
-            reason = result.get("reason", "No evaluation reason provided.")
+            # Strict Threshold Rule: Below 70% is FAIL, 70% and above is PASS
+            if match_pct >= 70.0 and not is_hallucinated:
+                status = "PASS"
+                reason = f"Match percentage is {match_pct_str} (>= 70%), meeting the threshold successfully."
+            else:
+                status = "FAIL"
+                if match_pct < 70.0:
+                    reason = f"Match percentage is {match_pct_str} (< 70% threshold required for passing)."
+                else:
+                    reason = result.get("reason", "Failed due to hallucination or mismatch.")
 
+            df.at[idx, "Match Percentage"] = match_pct_str
             df.at[idx, "Relevance"] = relevance
             df.at[idx, "Hallucination"] = hallucination_str
             df.at[idx, "Status"] = status
