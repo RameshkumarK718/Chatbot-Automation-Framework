@@ -5,7 +5,7 @@ from openai import OpenAI
 
 # Updated input file name
 input_file = "Frameworks.xlsx"
-output_file = "Frameworks_Results_Evaluated.xlsx"
+output_file = "Frameworks-Result.xlsx"
 
 # Validate input file without failing build
 if not os.path.exists(input_file):
