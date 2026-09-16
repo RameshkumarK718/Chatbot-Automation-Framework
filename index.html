@@ -44,6 +44,7 @@
             </div>
         </div>
     </header>
+
     <!-- Main Workspace -->
     <div class="flex-1 flex overflow-hidden">       
         <!-- Sidebar Controls & Console -->
@@ -73,11 +74,12 @@
                 </div>
                 <div id="console-logs" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-y-auto custom-scrollbar space-y-1">
                     <div class="text-slate-500">[INFO] Initializing ChromeDriver with --guest & --headless flags...</div>
-                    <div class="text-slate-500">[INFO] Loaded Credentials from Cloud Excel | Member ID: Loaded successfully.</div>
+                    <div class="text-slate-500">[INFO] Loaded Credentials from Cloud Excel | TestNG Suite initialized successfully.</div>
                     <div class="text-indigo-400">[READY] Click "Load GitHub CSV" or "Run Suite" to begin test execution.</div>
                 </div>
             </div>
         </aside>
+
         <!-- Main Content Area: Metrics & Test Table -->
         <main class="flex-1 flex flex-col bg-slate-950 overflow-hidden">            
             <!-- Metric Cards Bar -->
@@ -111,6 +113,7 @@
                     <div class="p-3 bg-cyan-500/10 text-cyan-400 rounded-lg border border-cyan-500/20"><i class="fa-solid fa-chart-pie"></i></div>
                 </div>
             </div>
+
             <!-- Test Result Table Container -->
             <div class="flex-1 p-6 pt-4 flex flex-col overflow-hidden">
                 <div class="bg-slate-900 border border-slate-800 rounded-xl flex-1 flex flex-col overflow-hidden shadow-xl">
@@ -149,10 +152,12 @@
             </div>
         </main>
     </div>
+
     <!-- JavaScript Automation Simulator & Table Renderer -->
     <script>
         let csvRows = [];
         const githubUrl = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Framework.csv";
+        
         function logToConsole(message, type = "info") {
             const consoleDiv = document.getElementById('console-logs');
             const time = new Date().toLocaleTimeString();
@@ -164,9 +169,11 @@
             consoleDiv.innerHTML += `<div class="${colorClass}">[${time}] ${message}</div>`;
             consoleDiv.scrollTop = consoleDiv.scrollHeight;
         }
+
         function clearConsole() {
             document.getElementById('console-logs').innerHTML = "";
         }
+
         async function loadGithubCsvData() {
             logToConsole("Fetching CSV dataset from GitHub URL...", "step");
             try {
@@ -182,6 +189,7 @@
                 loadFallbackData();
             }
         }
+
         function parseCsvText(text) {
             const lines = text.split('\n');
             csvRows = [];
@@ -193,6 +201,7 @@
                 csvRows.push(row);
             }
         }
+
         function loadFallbackData() {
             csvRows = [
                 ["Category", "Subcategory", "TestCase", "QuestionType", "Question", "ExpectedAnswer", "ChatbotResponse", "Status", "Reason"],
@@ -204,6 +213,7 @@
             updateMetrics();
             logToConsole("Fallback test records loaded successfully.", "success");
         }
+
         function renderTable() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = "";          
@@ -221,12 +231,14 @@
                 const response = row[6] || "-";
                 const status = row[7] || "PENDING";
                 const reason = row[8] || "Not executed yet.";
-                let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">PENDING</span>`;
+                
+                let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25">PENDING</span>`;
                 if (status === "PASS") {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">PASS</span>`;
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">PASS</span>`;
                 } else if (status === "FAIL") {
-                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">FAIL</span>`;
+                    statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/25">FAIL</span>`;
                 }
+                
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-900/50 transition";
                 tr.innerHTML = `
@@ -241,32 +253,39 @@
                 tbody.appendChild(tr);
             }
         }
+
         async function runSimulatedAutomation() {
             if (csvRows.length <= 1) {
                 loadFallbackData();
             }          
             logToConsole("--- Starting TestNG Automation Suite Run ---", "step");
             logToConsole("Connecting to https://d3rl0fkw0q6ssb.cloudfront.net/ via ChromeDriver...", "info");      
+            
             const runBtn = document.getElementById('run-btn');
             runBtn.disabled = true;
             runBtn.classList.add('opacity-50');
+
             for (let i = 1; i < csvRows.length; i++) {
                 const row = csvRows[i];
                 const tc = row[2];
                 const question = row[4];
                 const expected = row[5];
                 if (!question) continue;
+
                 logToConsole(`Processing [${tc}] (Row ${i} of ${csvRows.length - 1})`, "step");
                 logToConsole(`Question (Col 4): "${question}"`, "info");       
-                await new Promise(r => setTimeout(r, 1200));
+                await new Promise(r => setTimeout(r, 1000));
+
                 let chatbotResponse = `Hello! I am your AI assistant. Regarding your query about "${question}", everything is operating normally.`;
                 if (expected && expected.toLowerCase().includes("balance")) {
                     chatbotResponse = "Your current account balance is $4,850.25 as of today.";
                 } else if (expected && expected.toLowerCase().includes("support")) {
                     chatbotResponse = "You can reach customer support via email at support@chatbot-ai.com or call our hotline.";
                 }
+
                 row[6] = chatbotResponse;
                 logToConsole(`Chatbot Response (Col 6): "${chatbotResponse}"`, "success");
+
                 if (expected && expected !== "[None]") {
                     const match = chatbotResponse.toLowerCase().includes(expected.toLowerCase());
                     if (match) {
@@ -283,10 +302,12 @@
                 renderTable();
                 updateMetrics();
             }
-            logToConsole("All test questions processed successfully. Report saved to FrameworkQA_Report.csv!", "success");
+
+            logToConsole("All test questions processed successfully. Report ready to export!", "success");
             runBtn.disabled = false;
             runBtn.classList.remove('opacity-50');
         }
+
         function updateMetrics() {
             if (csvRows.length <= 1) return;
             const total = csvRows.length - 1;
@@ -302,6 +323,7 @@
             document.getElementById('stat-fail').innerText = failed;
             document.getElementById('stat-rate').innerText = passRate + '%';
         }
+
         function exportReportCsv() {
             if (csvRows.length <= 1) {
                 alert("No test data available to export!");
@@ -320,6 +342,7 @@
             document.body.removeChild(link);
             logToConsole("Successfully exported report to local FrameworkQA_Report.csv", "success");
         }
+
         function filterTable() {
             const input = document.getElementById('search-input').value.toLowerCase();
             const tbody = document.getElementById('table-body');
