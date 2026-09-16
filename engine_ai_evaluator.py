@@ -51,8 +51,9 @@ for sheet_name in sheet_names:
 User Question / Context:
 {question}
 
-You are an expert QA engineer and AI response auditor.
-Evaluate the chatbot answer against the user question and expected answer.
+I am  an QA Engineer and AI Response Auditor.
+Evaluate the chatbot response against the user’s question, relevant conversation context, and expected answer.
+Determine whether the response correctly understands and uses the relevant context to answer the question accurately and consistently.
 
 Evaluation rules:
 1. Relevance:
