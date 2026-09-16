@@ -47,35 +47,42 @@ for sheet_name in sheet_names:
             status = "FAIL"
             reason = "Chatbot response was empty or contained an error."
         else:
-            prompt = f"""
+        prompt = f"""
+User Question / Context:
+{question}
+
 You are an expert QA engineer and AI response auditor.
 Evaluate the chatbot answer against the user question and expected answer.
+
 Evaluation rules:
 1. Relevance:
    - Relevant = the chatbot directly addresses the user's question.
    - Irrelevant = the chatbot does not address the question.
+
 2. Status:
-   - PASS = the answer is correct, relevant, and sufficiently satisfies the expected answer.
-   - FAIL = the answer is incorrect, irrelevant, incomplete in a critical way, or contradicts the expected answer.
-User Question:
-{question}
+   - PASS = correct, relevant, and sufficiently satisfies the expected answer.
+   - FAIL = incorrect, irrelevant, critically incomplete, or contradictory.
+
 Expected Answer:
 {expected}
+
 Chatbot Answer:
 {chatbot_ans}
-Return JSON in this format:
+
+Return JSON:
 {{
   "relevance": "Relevant",
   "status": "PASS",
   "reason": "Brief explanation"
 }}
 """
-            try:
+             try:
                 response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    response_format={"type": "json_object"},
-                    messages=[{"role": "user", "content": prompt}],
-                    temperature=0
+                model="gpt-4o-mini",
+                response_format={"type": "json_object"},
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0
+                )
                 )         
                 content = response.choices[0].message.content.strip()
                 result = json.loads(content)              
