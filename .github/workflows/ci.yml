@@ -72,4 +72,3 @@ jobs:
             Frameworks_Results.xlsx
             Frameworks_Results_Evaluated.xlsx
             target/surefire-reports/
-```
