@@ -5,156 +5,206 @@ import pandas as pd
 from openai import OpenAI
 
 class AIEvaluator:
-    def __init__(self, api_key: str = None):
-        # Automatically picks up OPENAI_API_KEY environment variable if not passed explicitly
-        self.client = OpenAI(api_key=api_key or os.getenv("OPENAI_API_KEY"))
+    def __init__(self, api_key=None):
+        self.api_key = api_key or os.getenv("OPENAI_API_KEY")
+        if not self.api_key:
+            raise ValueError("OPENAI_API_KEY is not set.")
+        self.client = OpenAI(api_key=self.api_key)
 
-    def evaluate_advanced(self, question: str, expected: str, actual: str, context: str = "") -> dict:
+    def evaluate_advanced(self, question, expected, actual, context=""):
         prompt = f"""
-You are an expert QA Evaluator and AI Response Auditor for conversational AI.
-Evaluate the chatbot's response against the user’s question, relevant conversation context, and expected answer.
+You are an expert QA engineer and AI response auditor.
 
-Question: {question}
-Context: {context if context else "None provided"}
-Expected Answer: {expected}
-Actual Answer: {actual}
+Evaluate the chatbot response against the user question and expected answer.
+
+User Question:
+{question}
+
+Expected Answer:
+{expected}
+
+Chatbot Answer:
+{actual}
+
+Context:
+{context}
 
 Evaluation rules:
 1. Relevance:
-   - "Relevant" = the chatbot directly addresses the user's question.
-   - "Irrelevant" = the chatbot does not address the question or failed.
+- "Relevant" if the chatbot directly addresses the user's question.
+- "Irrelevant" if it does not answer the question, is unrelated, or fails to address the requested information.
 
 2. Hallucination:
-   - true = the chatbot introduces false facts, incorrect external information, or completely contradicts/goes beyond the scope of the expected answer in a misleading way.
-   - false = the chatbot sticks strictly to truthful facts relevant to the domain/expected answer without fabricating info.
+- true if the chatbot contains factually incorrect, fabricated, or misleading information.
+- false if the response is factually correct.
+- Additional valid information should NOT be considered hallucination simply because it is not present in the expected answer.
 
-3. Status & Score:
-   - score: float (0.0 to 1.0, where 1.0 is an exact semantic match)
-   - pass: boolean (true if score >= 0.7, relevant, and non-hallucinated; otherwise false)
-   - reason: string explanation covering correctness, relevance, and hallucination check.
+3. Semantic Score:
+- Give a score between 0.0 and 1.0.
+- 1.0 means the response fully satisfies the question and expected answer.
+- 0.0 means it does not satisfy the question.
 
-Return a JSON object strictly with these keys:
+4. AI Pass:
+- Pass only when:
+  - semantic score >= 0.70
+  - relevance is Relevant
+  - hallucination is false
+
+Return ONLY valid JSON in this format:
 {{
-  "relevance": "Relevant",
-  "hallucination": false,
-  "score": 0.95,
-  "pass": true,
-  "reason": "Brief explanation"
+    "relevance": "Relevant",
+    "hallucination": false,
+    "score": 0.85,
+    "pass": true,
+    "reason": "The response directly answers the question and contains no hallucinated information."
 }}
 """
         try:
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
-                    {"role": "system", "content": "You output JSON only."},
+                    {"role": "system", "content": "You are a QA evaluator. Return valid JSON only."},
                     {"role": "user", "content": prompt}
                 ],
                 response_format={"type": "json_object"},
                 temperature=0.0
             )
-            content = response.choices[0].message.content
-            return json.loads(content)
+            return json.loads(response.choices[0].message.content)
         except Exception as e:
             return {
                 "relevance": "Irrelevant",
                 "hallucination": True,
                 "score": 0.0,
                 "pass": False,
-                "reason": f"AI Evaluation Error: {str(e)}"
+                "reason": f"AI evaluation failed: {str(e)}"
             }
 
-def process_qa_framework_excel(input_file: str = "Frameworks.xlsx", output_file: str = "Frameworks-Result.xlsx"):
-    # Validate input file without failing build
+def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Frameworks-Result.xlsx"):
     if not os.path.exists(input_file):
-        print(f"Warning: {input_file} not found. Skipping AI evaluation.")
+        print(f"Input file not found: {input_file}")
         pd.DataFrame({"Status": ["Skipped - Missing Input File"]}).to_excel(output_file, index=False)
         return
 
-    api_key = os.environ.get("OPENAI_API_KEY")
+    api_key = os.getenv("OPENAI_API_KEY")
     if not api_key:
-        print("Warning: OPENAI_API_KEY is not set. Skipping AI evaluation.")
+        print("OPENAI_API_KEY is not set.")
         pd.DataFrame({"Status": ["Skipped - Missing API Key"]}).to_excel(output_file, index=False)
         return
 
-    evaluator = AIEvaluator(api_key=api_key)
-    print("Starting AI Evaluation, Match Percentage Calculation, and Report Generation...")
+    evaluator = AIEvaluator(api_key)
+    excel_file = pd.ExcelFile(input_file)
+    results = {}
 
-    xls = pd.ExcelFile(input_file)
-    sheet_names = xls.sheet_names
-    all_results = []
-
-    def get_text(value):
-        if pd.isna(value):
-            return ""
-        return str(value).strip()
-
-    for sheet_name in sheet_names:
+    for sheet_name in excel_file.sheet_names:
+        print(f"Processing sheet: {sheet_name}")
         df = pd.read_excel(input_file, sheet_name=sheet_name)
-        print(f"Evaluating sheet: {sheet_name} ({len(df)} rows)")
 
-        # Ensure required evaluation columns exist and are cast as string type
-        for col in ["Match Percentage", "Relevance", "Hallucination", "Status", "Pass and Failure Reason"]:
-            if col not in df.columns:
-                df[col] = ""
-            df[col] = df[col].fillna("").astype(str)
+        def get_first_text(row, columns):
+            for column in columns:
+                if column in row.index:
+                    value = row[column]
+                    if pd.notna(value):
+                        value = str(value).strip()
+                        if value:
+                            return value
+            return ""
 
-        for idx, row in df.iterrows():
-            question = get_text(row.get("User Question") or row.get("Question"))
-            expected = get_text(row.get("Expected Answer"))
-            chatbot_ans = get_text(row.get("Chatbot Answer") or row.get("Response") or row.get("Chatbot Response"))
-            
-            if not question:
-                continue
-                
-            # Calculate text match percentage using SequenceMatcher
-            if not expected and not chatbot_ans:
+        result_columns = [
+            "Match Percentage",
+            "Relevance",
+            "Hallucination",
+            "Status",
+            "Pass and Failure Reason"
+        ]
+
+        for column in result_columns:
+            if column not in df.columns:
+                df[column] = ""
+
+        for index, row in df.iterrows():
+            question = get_first_text(row, ["User Question", "Question"])
+            expected = get_first_text(row, ["Expected Answer"])
+            chatbot_answer = get_first_text(row, ["Chatbot Answer", "Response", "Chatbot Response"])
+            context = get_first_text(row, ["Context", "Conversation Context"])
+
+            if not expected and not chatbot_answer:
                 match_pct = 100.0
-            elif not expected or not chatbot_ans:
+            elif not expected or not chatbot_answer:
                 match_pct = 0.0
             else:
-                match_pct = round(difflib.SequenceMatcher(None, expected, chatbot_ans).ratio() * 100, 2)
+                similarity = difflib.SequenceMatcher(None, expected, chatbot_answer).ratio()
+                match_pct = round(similarity * 100, 2)
 
-            match_pct_str = f"{match_pct}%"
+            match_pct_str = f"{match_pct:.2f}%"
 
-            if not chatbot_ans or "error" in chatbot_ans.lower():
-                df.at[idx, "Match Percentage"] = match_pct_str
-                df.at[idx, "Relevance"] = "Irrelevant"
-                df.at[idx, "Hallucination"] = "True"
-                df.at[idx, "Status"] = "FAIL"
-                df.at[idx, "Pass and Failure Reason"] = "Chatbot response was empty or contained an error."
+            if not chatbot_answer or chatbot_answer.lower().startswith("error"):
+                df.at[index, "Match Percentage"] = match_pct_str
+                df.at[index, "Relevance"] = "Irrelevant"
+                df.at[index, "Hallucination"] = "Yes"
+                df.at[index, "Status"] = "FAIL"
+                df.at[index, "Pass and Failure Reason"] = "Chatbot response was empty or contained an error."
                 continue
 
-            print(f"Evaluating [{row.get('Test Case ID', f'Row {idx}')}] (Match: {match_pct_str}): {question[:40]}...")
-            result = evaluator.evaluate_advanced(question, expected, chatbot_ans)
-            
-            relevance = result.get("relevance", "Relevant" if match_pct >= 70.0 else "Irrelevant")
-            is_hallucinated = result.get("hallucination", False)
-            hallucination_str = "Yes" if is_hallucinated else "No"
-            
-            # Strict Threshold Rule: Below 70% is FAIL, 70% and above is PASS
-            if match_pct >= 70.0 and not is_hallucinated:
+            result = evaluator.evaluate_advanced(
+                question=question,
+                expected=expected,
+                actual=chatbot_answer,
+                context=context
+            )
+
+            relevance = str(result.get("relevance", "Irrelevant")).strip()
+            hallucination = result.get("hallucination", False)
+
+            if isinstance(hallucination, str):
+                is_hallucinated = hallucination.lower() in ["true", "yes", "1"]
+            else:
+                is_hallucinated = bool(hallucination)
+
+            if match_pct >= 70.0 and relevance.lower() == "relevant" and not is_hallucinated:
                 status = "PASS"
-                reason = f"Match percentage is {match_pct_str} (>= 70%), meeting the threshold successfully."
+                reason = (
+                    f"Match percentage is {match_pct_str} (>= 70%), "
+                    "the response is relevant, and no hallucination was detected."
+                )
             else:
                 status = "FAIL"
+
                 if match_pct < 70.0:
                     reason = f"Match percentage is {match_pct_str} (< 70% threshold required for passing)."
+                elif relevance.lower() != "relevant":
+                    reason = "Chatbot response was classified as irrelevant."
+                elif is_hallucinated:
+                    reason = result.get(
+                        "reason",
+                        "Chatbot response contains hallucinated or misleading information."
+                    )
                 else:
-                    reason = result.get("reason", "Failed due to hallucination or mismatch.")
+                    reason = result.get(
+                        "reason",
+                        "Response did not satisfy the evaluation criteria."
+                    )
 
-            df.at[idx, "Match Percentage"] = match_pct_str
-            df.at[idx, "Relevance"] = relevance
-            df.at[idx, "Hallucination"] = hallucination_str
-            df.at[idx, "Status"] = status
-            df.at[idx, "Pass and Failure Reason"] = reason
-            
-        all_results.append((sheet_name, df))
+            df.at[index, "Match Percentage"] = match_pct_str
+            df.at[index, "Relevance"] = relevance
+            df.at[index, "Hallucination"] = "Yes" if is_hallucinated else "No"
+            df.at[index, "Status"] = status
+            df.at[index, "Pass and Failure Reason"] = reason
+
+            print(
+                f"Row {index + 1}: {status} | "
+                f"Match: {match_pct_str} | "
+                f"Relevance: {relevance} | "
+                f"Hallucination: {is_hallucinated}"
+            )
+
+        results[sheet_name] = df
 
     with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
-        for sheet_name, df in all_results:
-            df.to_excel(writer, sheet_name=sheet_name, index=False)
+        for sheet_name, result_df in results.items():
+            result_df.to_excel(writer, sheet_name=sheet_name, index=False)
 
-    print(f"\nAI Audit Evaluation complete! Detailed metrics saved back to {output_file}")
+    print("Evaluation completed successfully.")
+    print(f"Output file: {output_file}")
 
 if __name__ == "__main__":
     process_qa_framework_excel()
