@@ -113,7 +113,6 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
         updated_rows = []
 
         for index, row in df.iterrows():
-            # Convert original row items to a regular dictionary
             row_dict = row.to_dict()
 
             question = get_first_text(row, ["User Question", "Question"])
@@ -193,8 +192,25 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
                 f"Hallucination: {is_hallucinated}"
             )
 
-        # Rebuild DataFrame cleanly from dictionary records (avoids pandas dtype block errors)
-        results[sheet_name] = pd.DataFrame(updated_rows)
+        # Define the exact target column order matching your schema
+        target_columns = [
+            "Test Case ID",
+            "Category",
+            "Subcategory",
+            "User Question",
+            "Expected Answer",
+            "Chatbot Answer",
+            "Relevance",
+            "Status",
+            "Pass and Failure Reason"
+        ]
+        
+        # Rebuild DataFrame and ensure columns follow the exact order
+        result_df = pd.DataFrame(updated_rows)
+        existing_columns = [col for col in target_columns if col in result_df.columns]
+        leftover_columns = [col for col in result_df.columns if col not in target_columns]
+        
+        results[sheet_name] = result_df[existing_columns + leftover_columns]
 
     with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
         for sheet_name, result_df in results.items():
@@ -205,4 +221,3 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
 
 if __name__ == "__main__":
     process_qa_framework_excel()
-
