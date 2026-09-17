@@ -64,6 +64,9 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git status
+          # Stash any unexpected or leftover unstaged changes (like Frameworks.xlsx)
+          git stash || true
           git add Frameworks-Result.xlsx
           git commit -m "chore: update dynamically generated AI evaluation report [skip ci]" \
             || echo "No changes to commit"
