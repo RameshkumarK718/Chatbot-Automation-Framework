@@ -1,5 +1,4 @@
 package com.chatbot.tests;
-
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -16,7 +15,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -26,9 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 public class ChatbotTest {
-
     // TEST DATA MODEL
     public static class TestRowData {
         public String sheetName;
