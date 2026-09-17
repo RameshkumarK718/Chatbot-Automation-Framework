@@ -119,6 +119,7 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             chatbot_answer = get_first_text(row, ["Chatbot Answer", "Response", "Chatbot Response"])
             context = get_first_text(row, ["Context", "Conversation Context"])
 
+            # Calculate string similarity ratio just as a reference metric
             if not expected and not chatbot_answer:
                 match_pct = 100.0
             elif not expected or not chatbot_answer:
@@ -129,8 +130,10 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
 
             match_pct_str = f"{match_pct:.2f}%"
 
+            # Handle empty or error responses immediately
             if not chatbot_answer or chatbot_answer.lower() == "nan" or chatbot_answer.lower().startswith("error"):
                 row_dict["Match Percentage"] = match_pct_str
+                row_dict["Semantic Score"] = "0.00"
                 row_dict["Relevance"] = "Irrelevant"
                 row_dict["Hallucination"] = "Yes"
                 row_dict["Status"] = "FAIL"
@@ -138,6 +141,7 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
                 updated_rows.append(row_dict)
                 continue
 
+            # Call OpenAI Advanced Evaluator
             result = evaluator.evaluate_advanced(
                 question=question,
                 expected=expected,
@@ -147,22 +151,24 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
 
             relevance = str(result.get("relevance", "Irrelevant")).strip()
             hallucination = result.get("hallucination", False)
+            ai_score = float(result.get("score", 0.0))
 
             if isinstance(hallucination, str):
                 is_hallucinated = hallucination.lower() in ["true", "yes", "1"]
             else:
                 is_hallucinated = bool(hallucination)
 
-            if match_pct >= 70.0 and relevance.lower() == "relevant" and not is_hallucinated:
+            # Updated Pass/Fail condition using Semantic Score instead of rigid text matching
+            if ai_score >= 0.70 and relevance.lower() == "relevant" and not is_hallucinated:
                 status = "PASS"
                 reason = (
-                    f"Match percentage is {match_pct_str} (>= 70%), "
+                    f"Semantic score is {ai_score:.2f} (>= 0.70), "
                     "the response is relevant, and no hallucination was detected."
                 )
             else:
                 status = "FAIL"
-                if match_pct < 70.0:
-                    reason = f"Match percentage is {match_pct_str} (< 70% threshold required for passing)."
+                if ai_score < 0.70:
+                    reason = f"Semantic score is {ai_score:.2f} (< 0.70 threshold required for passing)."
                 elif relevance.lower() != "relevant":
                     reason = "Chatbot response was classified as irrelevant."
                 elif is_hallucinated:
@@ -177,6 +183,7 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
                     )
 
             row_dict["Match Percentage"] = match_pct_str
+            row_dict["Semantic Score"] = f"{ai_score:.2f}"
             row_dict["Relevance"] = relevance
             row_dict["Hallucination"] = "Yes" if is_hallucinated else "No"
             row_dict["Status"] = status
@@ -186,9 +193,9 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
 
             print(
                 f"Row {index + 1}: {status} | "
+                f"Semantic Score: {ai_score:.2f} | "
                 f"Match: {match_pct_str} | "
-                f"Relevance: {relevance} | "
-                f"Hallucination: {is_hallucinated}"
+                f"Relevance: {relevance}"
             )
 
         target_columns = [
@@ -198,6 +205,8 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             "User Question",
             "Expected Answer",
             "Chatbot Answer",
+            "Match Percentage",
+            "Semantic Score",
             "Relevance",
             "Status",
             "Pass and Failure Reason"
