@@ -99,15 +99,12 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
         print(f"Processing sheet: {sheet_name}")
         df = pd.read_excel(input_file, sheet_name=sheet_name)
 
-        def get_first_text(row, columns):
-            for column in columns:
-                if column in row.index:
-                    value = row[column]
-                    if pd.notna(value):
-                        value = str(value).strip()
-                        if value:
-                            return value
-            return ""
+        # -------------------------------------------------------------
+        # CRITICAL FIX: Convert *entire* DataFrame columns to string dtype 
+        # immediately upon reading to prevent pandas TypeError on assignment
+        # -------------------------------------------------------------
+        for col in df.columns:
+            df[col] = df[col].astype(str)
 
         result_columns = [
             "Match Percentage",
@@ -117,12 +114,21 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             "Pass and Failure Reason"
         ]
 
-        # Ensure result columns exist and are explicitly cast to string type
-        # to prevent pandas TypeError (e.g., assigning text to a float64 column)
+        # Ensure all result columns exist and are string-typed
         for column in result_columns:
             if column not in df.columns:
                 df[column] = ""
             df[column] = df[column].astype(str)
+
+        def get_first_text(row, columns):
+            for column in columns:
+                if column in row.index:
+                    value = row[column]
+                    if pd.notna(value) and value != "nan":
+                        value = str(value).strip()
+                        if value:
+                            return value
+            return ""
 
         for index, row in df.iterrows():
             question = get_first_text(row, ["User Question", "Question"])
@@ -140,7 +146,7 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
 
             match_pct_str = f"{match_pct:.2f}%"
 
-            if not chatbot_answer or chatbot_answer.lower().startswith("error"):
+            if not chatbot_answer or chatbot_answer.lower() == "nan" or chatbot_answer.lower().startswith("error"):
                 df.loc[index, "Match Percentage"] = match_pct_str
                 df.loc[index, "Relevance"] = "Irrelevant"
                 df.loc[index, "Hallucination"] = "Yes"
