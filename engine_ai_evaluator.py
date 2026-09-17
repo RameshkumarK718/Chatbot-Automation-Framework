@@ -117,9 +117,12 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             "Pass and Failure Reason"
         ]
 
+        # Ensure result columns exist and are explicitly cast to string type
+        # to prevent pandas TypeError (e.g., assigning text to a float64 column)
         for column in result_columns:
             if column not in df.columns:
                 df[column] = ""
+            df[column] = df[column].astype(str)
 
         for index, row in df.iterrows():
             question = get_first_text(row, ["User Question", "Question"])
@@ -138,11 +141,11 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             match_pct_str = f"{match_pct:.2f}%"
 
             if not chatbot_answer or chatbot_answer.lower().startswith("error"):
-                df.at[index, "Match Percentage"] = match_pct_str
-                df.at[index, "Relevance"] = "Irrelevant"
-                df.at[index, "Hallucination"] = "Yes"
-                df.at[index, "Status"] = "FAIL"
-                df.at[index, "Pass and Failure Reason"] = "Chatbot response was empty or contained an error."
+                df.loc[index, "Match Percentage"] = match_pct_str
+                df.loc[index, "Relevance"] = "Irrelevant"
+                df.loc[index, "Hallucination"] = "Yes"
+                df.loc[index, "Status"] = "FAIL"
+                df.loc[index, "Pass and Failure Reason"] = "Chatbot response was empty or contained an error."
                 continue
 
             result = evaluator.evaluate_advanced(
@@ -184,11 +187,11 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
                         "Response did not satisfy the evaluation criteria."
                     )
 
-            df.at[index, "Match Percentage"] = match_pct_str
-            df.at[index, "Relevance"] = relevance
-            df.at[index, "Hallucination"] = "Yes" if is_hallucinated else "No"
-            df.at[index, "Status"] = status
-            df.at[index, "Pass and Failure Reason"] = reason
+            df.loc[index, "Match Percentage"] = match_pct_str
+            df.loc[index, "Relevance"] = relevance
+            df.loc[index, "Hallucination"] = "Yes" if is_hallucinated else "No"
+            df.loc[index, "Status"] = status
+            df.loc[index, "Pass and Failure Reason"] = reason
 
             print(
                 f"Row {index + 1}: {status} | "
