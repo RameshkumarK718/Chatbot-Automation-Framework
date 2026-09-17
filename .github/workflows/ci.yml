@@ -1,8 +1,10 @@
 name: Chatbot Automation Pipeline
+
 on:
   push:
     branches: [ main, master ]
   workflow_dispatch:
+
 jobs:
   run-automation-and-eval:
     runs-on: ubuntu-latest
@@ -65,7 +67,8 @@ jobs:
           git add Frameworks-Result.xlsx
           git commit -m "chore: update dynamically generated AI evaluation report [skip ci]" \
             || echo "No changes to commit"
-          git push
+          git pull origin main --rebase
+          git push origin main
       - name: Upload Test Results and Reports
         uses: actions/upload-artifact@v7
         if: always()
