@@ -48,7 +48,7 @@
     </header>
 
     <!-- Main Workspace -->
-    <div class="flex-1 flex overflow-hidden">       
+    <div class="flex-1 flex overflow-hidden">        
         <!-- Sidebar Controls & Console -->
         <aside class="w-96 bg-slate-900/60 border-r border-slate-800 flex flex-col shrink-0">
             <!-- Controls Section -->
@@ -202,9 +202,9 @@
 
         function loadFallbackData() {
             excelRows = [
-                ["Category", "Subcategory", "Test Case ID", "Question Type", "User Question", "Expected Answer", "Chatbot Answer", "Relevance", "Status", "Pass and Failure Reason"],
-                ["General / Club Information", "General Information", "TC-001", "Initial", "I want to know about Sportme club can you explain what are the Sports activity conducted here?", "Sportime offers a variety of sports and activities...", "", "", "", ""],
-                ["General / Club Information", "General Information", "TC-002", "Direct", "for trial session?", "Trial sessions are available by providing your name...", "", "", "", ""]
+                ["Category", "Subcategory", "Test Case ID", "User Question", "Expected Answer", "Chatbot Answer", "Relevance", "Status", "Pass and Failure Reason"],
+                ["General / Club Information", "General Information", "TC-001", "I want to know about Sportme club can you explain what are the Sports activity conducted here?", "Sportime offers a variety of sports and activities...", "", "", "", ""],
+                ["General / Club Information", "General Information", "TC-002", "for trial session?", "Trial sessions are available by providing your name...", "", "", "", ""]
             ];
             renderTable();
             updateMetrics();
@@ -226,12 +226,12 @@
                 const subcategory = row[1] || "-";
                 const tcId = row[2] || `TC-${String(i).padStart(3, '0')}`;
                 row[2] = tcId;
-                const question = row[4] || "";
-                const expected = row[5] || "[None]";
-                const chatbotAnswer = row[6] || "-";
-                const relevance = row[7] || "-";
-                const status = row[8] || "PENDING";
-                const reason = row[9] || "Not executed yet.";
+                const question = row[3] || "";
+                const expected = row[4] || "[None]";
+                const chatbotAnswer = row[5] || "-";
+                const relevance = row[6] || "-";
+                const status = row[7] || "PENDING";
+                const reason = row[8] || "Not executed yet.";
                 
                 let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25">PENDING</span>`;
                 if (status === "PASS") {
@@ -272,8 +272,8 @@
                 const row = excelRows[i];
                 if (!row) continue;
                 const tcId = row[2];
-                const question = row[4];
-                const expected = row[5];
+                const question = row[3];
+                const expected = row[4];
                 if (!question) continue;
 
                 logToConsole(`Processing [${tcId}] (Row ${i} of ${excelRows.length - 1})`, "step");
@@ -285,22 +285,22 @@
                     chatbotResponse = "Trial sessions are available by providing your name, contact details, preferred activity, and availability to the front desk.";
                 }
 
-                row[6] = chatbotResponse; // Chatbot Answer
-                row[7] = "Relevant"; // Relevance
+                row[5] = chatbotResponse; // Chatbot Answer (Index 5)
+                row[6] = "Relevant";      // Relevance (Index 6)
                 logToConsole(`Chatbot Answer: "${chatbotResponse}"`, "success");
 
                 if (expected && expected !== "[None]") {
                     const match = chatbotResponse.toLowerCase().includes("trial") || chatbotResponse.toLowerCase().includes("sportime") || chatbotResponse.length > 10;
                     if (match) {
-                        row[8] = "PASS"; // Status
-                        row[9] = "Chatbot response matches expected answer baseline successfully."; // Reason
+                        row[7] = "PASS"; // Status (Index 7)
+                        row[8] = "Chatbot response matches expected answer baseline successfully."; // Reason (Index 8)
                     } else {
-                        row[8] = "FAIL";
-                        row[9] = "Chatbot response did not match expected answer baseline.";
+                        row[7] = "FAIL";
+                        row[8] = "Chatbot response did not match expected answer baseline.";
                     }
                 } else {
-                    row[8] = "PASS";
-                    row[9] = "Executed successfully.";
+                    row[7] = "PASS";
+                    row[8] = "Executed successfully.";
                 }
                 renderTable();
                 updateMetrics();
@@ -317,8 +317,8 @@
             let passed = 0;
             let failed = 0;
             for (let i = 1; i < excelRows.length; i++) {
-                if (excelRows[i] && excelRows[i][8] === "PASS") passed++;
-                if (excelRows[i] && excelRows[i][8] === "FAIL") failed++;
+                if (excelRows[i] && excelRows[i][7] === "PASS") passed++;
+                if (excelRows[i] && excelRows[i][7] === "FAIL") failed++;
             }
             const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
             document.getElementById('stat-total').innerText = total;
