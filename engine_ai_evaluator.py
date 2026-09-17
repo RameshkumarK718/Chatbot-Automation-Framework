@@ -14,7 +14,6 @@ class AIEvaluator:
     def evaluate_advanced(self, question, expected, actual, context=""):
         prompt = f"""
 You are an expert QA engineer and AI response auditor.
-
 Evaluate the chatbot response against the user question and expected answer.
 
 User Question:
