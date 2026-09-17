@@ -97,14 +97,12 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
 
     for sheet_name in excel_file.sheet_names:
         print(f"Processing sheet: {sheet_name}")
-        df = pd.read_excel(input_file, sheet_name=sheet_name)
+        
+        # FIX: Force read everything as string to prevent float64 type inference errors
+        df = pd.read_excel(input_file, sheet_name=sheet_name, dtype=str)
 
-        # -------------------------------------------------------------
-        # CRITICAL FIX: Convert *entire* DataFrame columns to string dtype 
-        # immediately upon reading to prevent pandas TypeError on assignment
-        # -------------------------------------------------------------
-        for col in df.columns:
-            df[col] = df[col].astype(str)
+        # Drop columns that are completely unnamed/empty NaN headers if any crept in
+        df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
 
         result_columns = [
             "Match Percentage",
@@ -118,13 +116,14 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
         for column in result_columns:
             if column not in df.columns:
                 df[column] = ""
-            df[column] = df[column].astype(str)
+            else:
+                df[column] = df[column].fillna("").astype(str)
 
         def get_first_text(row, columns):
             for column in columns:
                 if column in row.index:
                     value = row[column]
-                    if pd.notna(value) and value != "nan":
+                    if pd.notna(value) and str(value).strip().lower() != "nan":
                         value = str(value).strip()
                         if value:
                             return value
