@@ -52,6 +52,8 @@ jobs:
           ls -la *.py || true
           echo "Excel files:"
           ls -la *.xlsx || true
+      - name: Grant execution permission
+        run: chmod +x engine_ai_evaluator.py
       - name: Run AI Evaluation
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
