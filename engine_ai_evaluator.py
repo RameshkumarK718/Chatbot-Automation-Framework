@@ -97,27 +97,8 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
 
     for sheet_name in excel_file.sheet_names:
         print(f"Processing sheet: {sheet_name}")
-        
-        # FIX: Force read everything as string to prevent float64 type inference errors
         df = pd.read_excel(input_file, sheet_name=sheet_name, dtype=str)
-
-        # Drop columns that are completely unnamed/empty NaN headers if any crept in
         df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
-
-        result_columns = [
-            "Match Percentage",
-            "Relevance",
-            "Hallucination",
-            "Status",
-            "Pass and Failure Reason"
-        ]
-
-        # Ensure all result columns exist and are string-typed
-        for column in result_columns:
-            if column not in df.columns:
-                df[column] = ""
-            else:
-                df[column] = df[column].fillna("").astype(str)
 
         def get_first_text(row, columns):
             for column in columns:
@@ -129,7 +110,12 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
                             return value
             return ""
 
+        updated_rows = []
+
         for index, row in df.iterrows():
+            # Convert original row items to a regular dictionary
+            row_dict = row.to_dict()
+
             question = get_first_text(row, ["User Question", "Question"])
             expected = get_first_text(row, ["Expected Answer"])
             chatbot_answer = get_first_text(row, ["Chatbot Answer", "Response", "Chatbot Response"])
@@ -146,11 +132,12 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             match_pct_str = f"{match_pct:.2f}%"
 
             if not chatbot_answer or chatbot_answer.lower() == "nan" or chatbot_answer.lower().startswith("error"):
-                df.loc[index, "Match Percentage"] = match_pct_str
-                df.loc[index, "Relevance"] = "Irrelevant"
-                df.loc[index, "Hallucination"] = "Yes"
-                df.loc[index, "Status"] = "FAIL"
-                df.loc[index, "Pass and Failure Reason"] = "Chatbot response was empty or contained an error."
+                row_dict["Match Percentage"] = match_pct_str
+                row_dict["Relevance"] = "Irrelevant"
+                row_dict["Hallucination"] = "Yes"
+                row_dict["Status"] = "FAIL"
+                row_dict["Pass and Failure Reason"] = "Chatbot response was empty or contained an error."
+                updated_rows.append(row_dict)
                 continue
 
             result = evaluator.evaluate_advanced(
@@ -176,7 +163,6 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
                 )
             else:
                 status = "FAIL"
-
                 if match_pct < 70.0:
                     reason = f"Match percentage is {match_pct_str} (< 70% threshold required for passing)."
                 elif relevance.lower() != "relevant":
@@ -192,11 +178,13 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
                         "Response did not satisfy the evaluation criteria."
                     )
 
-            df.loc[index, "Match Percentage"] = match_pct_str
-            df.loc[index, "Relevance"] = relevance
-            df.loc[index, "Hallucination"] = "Yes" if is_hallucinated else "No"
-            df.loc[index, "Status"] = status
-            df.loc[index, "Pass and Failure Reason"] = reason
+            row_dict["Match Percentage"] = match_pct_str
+            row_dict["Relevance"] = relevance
+            row_dict["Hallucination"] = "Yes" if is_hallucinated else "No"
+            row_dict["Status"] = status
+            row_dict["Pass and Failure Reason"] = reason
+            
+            updated_rows.append(row_dict)
 
             print(
                 f"Row {index + 1}: {status} | "
@@ -205,7 +193,8 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
                 f"Hallucination: {is_hallucinated}"
             )
 
-        results[sheet_name] = df
+        # Rebuild DataFrame cleanly from dictionary records (avoids pandas dtype block errors)
+        results[sheet_name] = pd.DataFrame(updated_rows)
 
     with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
         for sheet_name, result_df in results.items():
