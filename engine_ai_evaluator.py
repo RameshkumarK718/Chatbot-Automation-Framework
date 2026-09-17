@@ -192,7 +192,6 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
                 f"Hallucination: {is_hallucinated}"
             )
 
-        # Define the exact target column order matching your schema
         target_columns = [
             "Test Case ID",
             "Category",
@@ -205,7 +204,6 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             "Pass and Failure Reason"
         ]
         
-        # Rebuild DataFrame and ensure columns follow the exact order
         result_df = pd.DataFrame(updated_rows)
         existing_columns = [col for col in target_columns if col in result_df.columns]
         leftover_columns = [col for col in result_df.columns if col not in target_columns]
