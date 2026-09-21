@@ -119,7 +119,7 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             chatbot_answer = get_first_text(row, ["Chatbot Answer", "Response", "Chatbot Response"])
             context = get_first_text(row, ["Context", "Conversation Context"])
 
-            # Calculate string similarity ratio just as a reference metric
+            # Calculate string similarity ratio as a reference metric
             if not expected and not chatbot_answer:
                 match_pct = 100.0
             elif not expected or not chatbot_answer:
@@ -158,7 +158,7 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             else:
                 is_hallucinated = bool(hallucination)
 
-            # Updated Pass/Fail condition using Semantic Score instead of rigid text matching
+            # Pass/Fail condition using Semantic Score
             if ai_score >= 0.70 and relevance.lower() == "relevant" and not is_hallucinated:
                 status = "PASS"
                 reason = (
@@ -210,20 +210,15 @@ def process_qa_framework_excel(input_file="Frameworks.xlsx", output_file="Framew
             "Relevance",
             "Status",
             "Pass and Failure Reason"
-        ]
-        
+        ]      
         result_df = pd.DataFrame(updated_rows)
         existing_columns = [col for col in target_columns if col in result_df.columns]
-        leftover_columns = [col for col in result_df.columns if col not in target_columns]
-        
+        leftover_columns = [col for col in result_df.columns if col not in target_columns]       
         results[sheet_name] = result_df[existing_columns + leftover_columns]
-
     with pd.ExcelWriter(output_file, engine="openpyxl") as writer:
         for sheet_name, result_df in results.items():
             result_df.to_excel(writer, sheet_name=sheet_name, index=False)
-
     print("Evaluation completed successfully.")
     print(f"Output file: {output_file}")
-
 if __name__ == "__main__":
     process_qa_framework_excel()
