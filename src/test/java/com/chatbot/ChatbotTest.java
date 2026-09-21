@@ -1,4 +1,9 @@
+<<<<<<< Updated upstream
 package com.chatbot.tests;
+=======
+package com.chatbot;
+
+>>>>>>> Stashed changes
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -72,6 +77,7 @@ public class ChatbotTest {
     private static final String FRAMEWORK_EXCEL_FILE = "Frameworks.xlsx";
     private WebDriver driver;
     private WebDriverWait wait;
+<<<<<<< Updated upstream
     // GET EXCEL INPUT STREAM
     private InputStream openUrlStream(String fileUrl) throws Exception {
         URL url = new URL(fileUrl);
@@ -93,6 +99,11 @@ public class ChatbotTest {
     }
     // READ CREDENTIALS FROM EXCEL
     private String[] getCredentialsFromExcel() {
+=======
+
+    @SuppressWarnings("deprecation")
+	private String[] getCredentialsFromExcel() {
+>>>>>>> Stashed changes
         String username = "";
         String password = "";
         try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
@@ -516,3 +527,9 @@ public class ChatbotTest {
         System.out.println("========================================================================================");
     }
 }
+<<<<<<< Updated upstream
+=======
+class chat {
+
+}
+>>>>>>> Stashed changes

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<<<<<<< Updated upstream
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
@@ -81,3 +82,152 @@
     </build>
 
 </project>
+=======
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                          http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<modelVersion>4.0.0</modelVersion>
+
+<!-- Project Information -->
+<groupId>com.chatbot</groupId>
+<artifactId>ChatbotAutomationFramework</artifactId>
+<version>0.0.1-SNAPSHOT</version>
+
+<name>ChatbotAutomationFramework</name>
+<url>http://www.example.com</url>
+
+<!-- Project Properties -->
+<properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+</properties>
+
+<!-- Dependencies -->
+<dependencies>
+
+    <!-- Selenium WebDriver -->
+    <dependency>
+        <groupId>org.seleniumhq.selenium</groupId>
+        <artifactId>selenium-java</artifactId>
+        <version>4.29.0</version>
+    </dependency>
+
+    <!-- Apache POI - Excel Support -->
+    <dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi</artifactId>
+        <version>5.2.3</version>
+    </dependency>
+
+    <dependency>
+        <groupId>org.apache.poi</groupId>
+        <artifactId>poi-ooxml</artifactId>
+        <version>5.2.3</version>
+    </dependency>
+
+    <!-- TestNG -->
+    <dependency>
+        <groupId>org.testng</groupId>
+        <artifactId>testng</artifactId>
+        <version>7.8.0</version>
+        <scope>test</scope>
+    </dependency>
+
+    <!-- WebDriverManager -->
+    <dependency>
+        <groupId>io.github.bonigarcia</groupId>
+        <artifactId>webdrivermanager</artifactId>
+        <version>5.6.3</version>
+        <scope>test</scope>
+    </dependency>
+
+</dependencies>
+
+<!-- Build Configuration -->
+<build>
+
+    <!-- Plugin Versions -->
+    <pluginManagement>
+        <plugins>
+
+            <!-- Clean Plugin -->
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>3.4.0</version>
+            </plugin>
+
+            <!-- Resources Plugin -->
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+            </plugin>
+
+            <!-- Compiler Plugin -->
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+            </plugin>
+
+            <!-- Surefire Plugin -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.3.0</version>
+            </plugin>
+
+            <!-- JAR Plugin -->
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+            </plugin>
+
+            <!-- Install Plugin -->
+            <plugin>
+                <artifactId>maven-install-plugin</artifactId>
+                <version>3.12.1</version>
+            </plugin>
+
+            <!-- Deploy Plugin -->
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>3.12.1</version>
+            </plugin>
+
+            <!-- Site Plugin -->
+            <plugin>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.12.1</version>
+            </plugin>
+
+            <!-- Project Info Plugin -->
+            <plugin>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.6.1</version>
+            </plugin>
+
+        </plugins>
+    </pluginManagement>
+
+    <!-- Active Plugins -->
+    <plugins>
+
+        <!-- Run TestNG Suite -->
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.3.0</version><!--$NO-MVN-MAN-VER$-->
+
+            <configuration>
+                <suiteXmlFiles>
+                    <suiteXmlFile>testng.xml</suiteXmlFile>
+                </suiteXmlFiles>
+            </configuration>
+
+        </plugin>
+
+    </plugins>
+
+</build>
+</project>
+>>>>>>> Stashed changes
