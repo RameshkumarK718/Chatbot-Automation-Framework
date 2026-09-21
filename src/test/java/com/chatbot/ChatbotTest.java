@@ -1,9 +1,6 @@
 <<<<<<< Updated upstream
 package com.chatbot.tests;
-=======
 package com.chatbot;
-
->>>>>>> Stashed changes
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -527,9 +524,3 @@ public class ChatbotTest {
         System.out.println("========================================================================================");
     }
 }
-<<<<<<< Updated upstream
-=======
-class chat {
-
-}
->>>>>>> Stashed changes
