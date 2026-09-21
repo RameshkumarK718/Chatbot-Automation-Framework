@@ -87,7 +87,7 @@
                 </div>
                 <div id="console-logs" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-y-auto custom-scrollbar space-y-1">
                     <div class="text-slate-500">[INFO] Initializing ChromeDriver with --headless=new flags...</div>
-                    <div class="text-slate-500">[INFO] EFI.xlsx workbook loaded successfully | TestNG Suite initialized.</div>
+                    <div class="text-slate-500">[INFO] Target: Column J (Actual Result) mapping locked.</div>
                     <div class="text-indigo-400">[READY] Click "Load EFI.xlsx First" to populate navigation buttons.</div>
                 </div>
             </div>
@@ -146,16 +146,18 @@
                                     <th class="py-3 px-4">Set #</th>
                                     <th class="py-3 px-4">Set Name</th>
                                     <th class="py-3 px-4">Q #</th>
-                                    <th class="py-3 px-4">Question / Input</th>
-                                    <th class="py-3 px-4">Entry Point</th>
-                                    <th class="py-3 px-4">Expected Result</th>
-                                    <th class="py-3 px-4">Actual Result</th>
-                                    <th class="py-3 px-4">Pass / Fail</th>
+                                    <th class="py-3 px-4">Question / Input to enter</th>
+                                    <th class="py-3 px-4">Entry point</th>
+                                    <th class="py-3 px-4">Expected result</th>
+                                    <th class="py-3 px-4">Expected source</th>
+                                    <th class="py-3 px-4">Runnable?</th>
+                                    <th class="py-3 px-4 text-indigo-400 font-bold">Actual result (Col J)</th>
+                                    <th class="py-3 px-4">Pass / Fail (Col K)</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="divide-y divide-slate-800/60 text-slate-300">
                                 <tr>
-                                    <td colspan="9" class="text-center py-12 text-slate-500">
+                                    <td colspan="11" class="text-center py-12 text-slate-500">
                                         <i class="fa-solid fa-file-excel text-3xl mb-2 block text-slate-600"></i>
                                         Click <strong>"Load EFI.xlsx First"</strong> above to load test sheets and generate navigation buttons.
                                     </td>
@@ -304,8 +306,9 @@
 
             const headers = rows[0];
             let headerHtml = "";
-            headers.forEach(h => {
-                headerHtml += `<th class="py-3 px-4">${h || ''}</th>`;
+            headers.forEach((h, idx) => {
+                let highlightClass = idx === 9 ? "text-indigo-400 font-bold" : "";
+                headerHtml += `<th class="py-3 px-4 ${highlightClass}">${h || ''}</th>`;
             });
             theadRow.innerHTML = headerHtml;
             document.getElementById('table-title').innerHTML = `<i class="fa-solid fa-table text-indigo-400"></i> EFI.xlsx &gt; ${currentSheetName} (${rows.length - 1} test rows)`;
@@ -321,6 +324,9 @@
                 for (let c = 0; c < headers.length; c++) {
                     let val = row[c] !== undefined ? row[c] : "";
                     
+                    // Highlight Column J (index 9) or Status/Pass-Fail columns
+                    let tdClass = c === 9 ? "py-3 px-4 text-indigo-300 font-mono max-w-xs truncate bg-indigo-950/20" : "py-3 px-4 text-slate-300 max-w-xs truncate";
+
                     if (headers[c] && (headers[c].includes("Pass / Fail") || headers[c].includes("Status"))) {
                         if (val === "PASS") {
                             val = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">PASS</span>`;
@@ -331,7 +337,7 @@
                         }
                     }
 
-                    rowHtml += `<td class="py-3 px-4 text-slate-300 max-w-xs truncate" title="${row[c] || ''}">${val}</td>`;
+                    rowHtml += `<td class="${tdClass}" title="${row[c] || ''}">${val}</td>`;
                 }
                 tr.innerHTML = rowHtml;
                 tbody.appendChild(tr);
@@ -363,24 +369,25 @@
                 logToConsole(`Processing Row ${i} of ${rows.length - 1} | Question: "${question}"`, "step");
                 await new Promise(r => setTimeout(r, 600));
 
-                let simulatedAnswer = `EFI IT Agent response: Successfully retrieved KB documentation and resolved query regarding "${question}".`;
+                let simulatedAnswer = `EFI AI Assistant response: Successfully retrieved KB documentation and resolved query regarding "${question}".`;
                 if (isJiraSheet) {
                     simulatedAnswer = `Jira query executed: Table of issues returned with status and assignees for query: "${question}".`;
                 }
 
+                // Explicitly save to Column J (index 9) and update Status (index 10 or col K)
                 if (isJiraSheet) {
                     row[3] = simulatedAnswer; 
                     row[4] = "PASS";          
                 } else {
-                    row[9] = simulatedAnswer; 
-                    row[10] = "PASS";         
+                    row[9] = simulatedAnswer; // Column J (Actual result)
+                    row[10] = "PASS";        // Column K (Pass / Fail)
                 }
 
                 renderTable();
                 updateMetrics();
             }
 
-            logToConsole(`Execution completed for sheet [${currentSheetName}]. Report ready!`, "success");
+            logToConsole(`Execution completed for sheet [${currentSheetName}]. Column J updated successfully!`, "success");
             runBtn.disabled = false;
             runBtn.classList.remove('opacity-50');
         }
@@ -418,7 +425,7 @@
                 XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
             }
             XLSX.writeFile(workbook, "EFI_Execution_Report.xlsx");
-            logToConsole("Successfully exported multi-sheet report to local EFI_Execution_Report.xlsx", "success");
+            logToConsole("Successfully exported multi-sheet report with preserved Column J to EFI_Execution_Report.xlsx", "success");
         }
 
         function filterTable() {
