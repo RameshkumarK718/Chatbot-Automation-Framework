@@ -1,0 +1,38 @@
+name: EFI Chatbot QA Automation CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Install Google Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+
+    - name: Run TestNG Suite with Maven
+      run: mvn clean test
+
+    - name: Upload Execution Report Artifact
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: EFI_Execution_Report
+        path: EFI.xlsx
