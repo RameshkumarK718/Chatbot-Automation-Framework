@@ -55,19 +55,21 @@
             <div class="p-5 border-b border-slate-800 space-y-4">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Framework Execution</h2>         
                 
-                <!-- Sheet Selector -->
+                <!-- Individual Sheet Buttons Container -->
                 <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Select Test Sheet / Role</label>
-                    <select id="sheet-select" onchange="switchSheet()" class="w-full bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500">
-                        <option value="">-- Load Excel First --</option>
-                    </select>
+                    <label class="block text-xs font-medium text-slate-400 mb-2">Select Sheet / Role View</label>
+                    <div id="sheet-buttons-container" class="space-y-1.5">
+                        <button onclick="loadGithubExcelData()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-excel"></i> Load EFI.xlsx First
+                        </button>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
-                    <button onclick="loadGithubExcelData()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-file-excel"></i> Load EFI.xlsx
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button onclick="loadGithubExcelData()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
+                        <i class="fa-solid fa-sync"></i> Refresh Data
                     </button>
-                    <button onclick="runSimulatedAutomation()" id="run-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">
+                    <button onclick="runSimulatedAutomation()" id="run-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-play"></i> Run Suite
                     </button>
                 </div>
@@ -86,7 +88,7 @@
                 <div id="console-logs" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-y-auto custom-scrollbar space-y-1">
                     <div class="text-slate-500">[INFO] Initializing ChromeDriver with --headless=new flags...</div>
                     <div class="text-slate-500">[INFO] EFI.xlsx workbook loaded successfully | TestNG Suite initialized.</div>
-                    <div class="text-indigo-400">[READY] Click "Load EFI.xlsx" to begin test execution.</div>
+                    <div class="text-indigo-400">[READY] Click "Load EFI.xlsx First" to populate navigation buttons.</div>
                 </div>
             </div>
         </aside>
@@ -155,7 +157,7 @@
                                 <tr>
                                     <td colspan="9" class="text-center py-12 text-slate-500">
                                         <i class="fa-solid fa-file-excel text-3xl mb-2 block text-slate-600"></i>
-                                        Click <strong>"Load EFI.xlsx"</strong> above to load test sheets from your repository.
+                                        Click <strong>"Load EFI.xlsx First"</strong> above to load test sheets and generate navigation buttons.
                                     </td>
                                 </tr>
                             </tbody>
@@ -168,7 +170,7 @@
 
     <!-- JavaScript Automation Simulator & Table Renderer -->
     <script>
-        let workbookData = {}; // Stores all sheets { sheetName: arrayOfRows }
+        let workbookData = {}; 
         let sheetNamesList = [];
         let currentSheetName = "";
         const githubExcelUrl = "https://raw.githubusercontent.com/RameshkumarK718/EFIProject/main/EFI.xlsx";
@@ -205,19 +207,10 @@
                     workbookData[name] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 });
 
-                // Populate Sheet Dropdown
-                const select = document.getElementById('sheet-select');
-                select.innerHTML = "";
-                sheetNamesList.forEach(name => {
-                    const opt = document.createElement('option');
-                    opt.value = name;
-                    opt.innerText = name;
-                    select.appendChild(opt);
-                });
+                buildSheetButtons();
 
                 if (sheetNamesList.length > 0) {
                     currentSheetName = sheetNamesList[0];
-                    select.value = currentSheetName;
                 }
 
                 logToConsole(`Successfully parsed EFI.xlsx! Sheets found: ${sheetNamesList.join(', ')}`, "success");
@@ -230,11 +223,23 @@
         }
 
         function loadFallbackData() {
-            sheetNamesList = ["End User", "PMO Jira"];
+            sheetNamesList = ["End User", "L1 Engineer", "SDM", "PMO", "PMO Jira"];
             workbookData = {
                 "End User": [
                     ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
                     ["End User", 1, "Information from KB", 1, "How do I install Cisco AnyConnect VPN on my Mac?", "Chat", "Chat replies with VPN steps and cites source.", "VPN KB", "Yes", "", ""]
+                ],
+                "L1 Engineer": [
+                    ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
+                    ["L1 Engineer", 1, "Domain Add", 1, "How do I add a computer to the EFI domain?", "Chat", "Ask panel returns answer with steps.", "Staff KB", "Yes", "", ""]
+                ],
+                "SDM": [
+                    ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
+                    ["SDM", 1, "Policy", 1, "What does the EFI password policy require?", "Chat", "Password policy details.", "Password KB", "Yes", "", ""]
+                ],
+                "PMO": [
+                    ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
+                    ["PMO", 1, "SAP Access", 1, "How do I access the SAP Web GUI?", "Chat", "SAP Web GUI link and SSO instructions.", "SAP KB", "Yes", "", ""]
                 ],
                 "PMO Jira": [
                     ["#", "Question", "What it tests / expected answer", "Actual Result", "Status"],
@@ -242,28 +247,46 @@
                 ]
             };
 
-            const select = document.getElementById('sheet-select');
-            select.innerHTML = "";
-            sheetNamesList.forEach(name => {
-                const opt = document.createElement('option');
-                opt.value = name;
-                opt.innerText = name;
-                select.appendChild(opt);
-            });
+            buildSheetButtons();
             currentSheetName = sheetNamesList[0];
-            select.value = currentSheetName;
-
             renderTable();
             updateMetrics();
             logToConsole("Fallback EFI test records loaded successfully.", "success");
         }
 
-        function switchSheet() {
-            const select = document.getElementById('sheet-select');
-            currentSheetName = select.value;
+        function buildSheetButtons() {
+            const container = document.getElementById('sheet-buttons-container');
+            container.innerHTML = "";
+            sheetNamesList.forEach(name => {
+                const btn = document.createElement('button');
+                btn.id = `btn-${name.replace(/\s+/g, '-')}`;
+                btn.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white";
+                btn.innerHTML = `<span><i class="fa-solid fa-file-lines text-indigo-400 mr-2"></i>${name}</span> <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">${(workbookData[name] || []).length - 1} rows</span>`;
+                btn.onclick = () => switchSheet(name);
+                container.appendChild(btn);
+            });
+            highlightActiveButton();
+        }
+
+        function switchSheet(sheetName) {
+            currentSheetName = sheetName;
+            highlightActiveButton();
             renderTable();
             updateMetrics();
             logToConsole(`Switched active view to sheet: ${currentSheetName}`, "info");
+        }
+
+        function highlightActiveButton() {
+            sheetNamesList.forEach(name => {
+                const btn = document.getElementById(`btn-${name.replace(/\s+/g, '-')}`);
+                if (btn) {
+                    if (name === currentSheetName) {
+                        btn.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between bg-indigo-600/20 border border-indigo-500/40 text-white shadow-sm";
+                    } else {
+                        btn.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white";
+                    }
+                }
+            });
         }
 
         function renderTable() {
@@ -279,7 +302,6 @@
             const rows = workbookData[currentSheetName];
             if (rows.length === 0) return;
 
-            // Render Headers based on sheet type
             const headers = rows[0];
             let headerHtml = "";
             headers.forEach(h => {
@@ -299,7 +321,6 @@
                 for (let c = 0; c < headers.length; c++) {
                     let val = row[c] !== undefined ? row[c] : "";
                     
-                    // Highlight Pass/Fail column
                     if (headers[c] && (headers[c].includes("Pass / Fail") || headers[c].includes("Status"))) {
                         if (val === "PASS") {
                             val = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">PASS</span>`;
@@ -340,20 +361,19 @@
                 if (!question) continue;
 
                 logToConsole(`Processing Row ${i} of ${rows.length - 1} | Question: "${question}"`, "step");
-                await new Promise(r => setTimeout(r, 800));
+                await new Promise(r => setTimeout(r, 600));
 
                 let simulatedAnswer = `EFI IT Agent response: Successfully retrieved KB documentation and resolved query regarding "${question}".`;
                 if (isJiraSheet) {
                     simulatedAnswer = `Jira query executed: Table of issues returned with status and assignees for query: "${question}".`;
                 }
 
-                // Update columns based on sheet structure
                 if (isJiraSheet) {
-                    row[3] = simulatedAnswer; // Actual Result
-                    row[4] = "PASS";          // Status
+                    row[3] = simulatedAnswer; 
+                    row[4] = "PASS";          
                 } else {
-                    row[9] = simulatedAnswer; // Actual result
-                    row[10] = "PASS";         // Pass / Fail
+                    row[9] = simulatedAnswer; 
+                    row[10] = "PASS";         
                 }
 
                 renderTable();
