@@ -1,4 +1,4 @@
-name: EFI Chatbot QA Automation CI
+name: EFI  QA Automation CI
 
 on:
   push:
