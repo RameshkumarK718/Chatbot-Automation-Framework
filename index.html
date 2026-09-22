@@ -48,7 +48,7 @@
     </header>
 
     <!-- Main Workspace -->
-    <div class="flex-1 flex overflow-hidden">        
+    <div class="flex-1 flex overflow-hidden">       
         <!-- Sidebar Controls & Console -->
         <aside class="w-96 bg-slate-900/60 border-r border-slate-800 flex flex-col shrink-0">
             <!-- Controls Section -->
@@ -384,7 +384,6 @@
                 logToConsole(`Processing Row ${i} of ${rows.length - 1}: "${question}"`, "info");
                 await new Promise(r => setTimeout(r, 600));
 
-                // Simulated response mapping
                 row[9] = `Successfully fetched response from EFI KB for: "${question}"`;
                 row[10] = "PASS";
                 logToConsole(`Result: PASS`, "success");
