@@ -1,0 +1,130 @@
+name: Chatbot Advanced Automation Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-automation-and-eval:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Set up Chrome Browser
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+
+      - name: Verify Core Environment
+        run: |
+          echo "========================================"
+          echo "Environment Validation"
+          echo "========================================"
+          java -version
+          mvn -version
+          google-chrome --version
+
+      - name: Run Selenium Automation Tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          mvn clean test -Dtest=ChatbotTest -Dheadless=true
+        continue-on-error: true
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Cache Python Dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install pandas openpyxl openai requests
+          fi
+
+      - name: Inspect Workspace Structure
+        run: |
+          echo "Working Directory: $(pwd)"
+          ls -la
+          if [ -f "engine_ai_evaluator.py" ]; then
+            echo "engine_ai_evaluator.py found."
+            chmod +x engine_ai_evaluator.py
+          else
+            echo "ERROR: engine_ai_evaluator.py missing!"
+            exit 1
+          fi
+
+      - name: Execute AI Evaluation Engine
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python engine_ai_evaluator.py
+
+      - name: Commit and Push Dynamically Generated Report
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "Target Branch: $BRANCH_NAME"
+
+          git status --short
+          
+          if [ ! -f "Frameworks-Result.xlsx" ]; then
+            echo "Frameworks-Result.xlsx not generated. Skipping commit."
+            exit 0
+          fi
+
+          git add Frameworks-Result.xlsx
+
+          if git diff --staged --quiet; then
+            echo "No changes detected in Frameworks-Result.xlsx."
+            exit 0
+          fi
+
+          git commit -m "chore: update advanced AI evaluation report [skip ci]"
+          git pull origin "$BRANCH_NAME" --rebase
+          git push origin "$BRANCH_NAME"
+          echo "Successfully updated and pushed Frameworks-Result.xlsx."
+
+      - name: Upload Enterprise Artifact Bundle
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: enterprise-automation-reports
+          if-no-files-found: warn
+          path: |
+            Frameworks-Result.xlsx
+            target/surefire-reports/
