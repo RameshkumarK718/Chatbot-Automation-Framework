@@ -73,7 +73,6 @@ public class ChatbotTest {
     private static final String FRAMEWORK_EXCEL_FILE = "Frameworks.xlsx";
     private WebDriver driver;
     private WebDriverWait wait;
-<<<<<<< Updated upstream
     // GET EXCEL INPUT STREAM
     private InputStream openUrlStream(String fileUrl) throws Exception {
         URL url = new URL(fileUrl);
@@ -95,11 +94,10 @@ public class ChatbotTest {
     }
     // READ CREDENTIALS FROM EXCEL
     private String[] getCredentialsFromExcel() {
-=======
+
 
     @SuppressWarnings("deprecation")
 	private String[] getCredentialsFromExcel() {
->>>>>>> Stashed changes
         String username = "";
         String password = "";
         try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
