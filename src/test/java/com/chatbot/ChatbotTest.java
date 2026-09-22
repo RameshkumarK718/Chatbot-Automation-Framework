@@ -38,7 +38,6 @@ public class ChatbotTest {
         public String relevance;
         public String status;
         public String passFailureReason;
-
         public TestRowData(
                 String sheetName,
                 int rowIndex,
