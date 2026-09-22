@@ -65,7 +65,7 @@ public class ChatbotTest {
         }
     }
 
-  // ==================== CONFIGURATION ====================
+    // ==================== CONFIGURATION ====================
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
 
@@ -80,7 +80,6 @@ public class ChatbotTest {
     private static final String FRAMEWORK_EXCEL_URL_EFI = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx";
 
     // ==================== ACTIVE ENVIRONMENT ====================
-    // Defaults to "EFI", but can be overridden via command line: mvn test -Denv=VEDAS
     private static final String ACTIVE_ENVIRONMENT = System.getProperty("env", "EFI").toUpperCase();
 
     private static final String APP_URL = 
@@ -97,6 +96,17 @@ public class ChatbotTest {
                     : FRAMEWORK_EXCEL_URL_EFI;
 
     private static final String FRAMEWORK_EXCEL_FILE = "Frameworks.xlsx";
+
+    // ==================== ENVIRONMENT-AWARE COLUMN MAPPINGS ====================
+    // VEDAS Columns
+    private static final int VEDAS_COL_CHATBOT_ANSWER = 5;
+    private static final int VEDAS_COL_STATUS = 7;
+    private static final int VEDAS_COL_REASON = 8;
+
+    // EFI Columns
+    private static final int EFI_COL_CHATBOT_ANSWER = 10; // "Actual result"
+    private static final int EFI_COL_REASON = 11;         // "Pass / Fail" reason
+    private static final int EFI_COL_STATUS = 12;         // Pass / Fail status column
 
     private WebDriver driver;
     private WebDriverWait wait;
@@ -122,7 +132,6 @@ public class ChatbotTest {
     }
 
     // READ CREDENTIALS FROM EXCEL
-    @SuppressWarnings("deprecation")
     private String[] getCredentialsFromExcel() {
         String username = "";
         String password = "";
@@ -162,9 +171,11 @@ public class ChatbotTest {
         }
     }
 
-    // FETCH FRAMEWORK DATA FROM GITHUB
+    // FETCH FRAMEWORK DATA FROM GITHUB (DYNAMIC FOR VEDAS & EFI)
     private List<TestRowData> fetchExcelDataFromGitHub(String fileUrl) {
         List<TestRowData> dataList = new ArrayList<>();
+        boolean isVedas = "VEDAS".equalsIgnoreCase(ACTIVE_ENVIRONMENT);
+
         try (InputStream is = openUrlStream(fileUrl);
              Workbook workbook = new XSSFWorkbook(is)) {
             if (workbook.getNumberOfSheets() == 0) {
@@ -174,16 +185,36 @@ public class ChatbotTest {
                 Sheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
                 System.out.println("--> Reading sheet: " + sheetName);
+
                 for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                     Row row = sheet.getRow(r);
                     if (row == null) {
                         continue;
                     }
-                    String testCaseId = getCellStringValue(row.getCell(0));
-                    String category = getCellStringValue(row.getCell(1));
-                    String subcategory = getCellStringValue(row.getCell(2));
-                    String question = getCellStringValue(row.getCell(3));
-                    String expectedAnswer = getCellStringValue(row.getCell(4));
+
+                    String testCaseId, category, subcategory, question, expectedAnswer;
+
+                    if (isVedas) {
+                        // VEDAS Mapping Structure
+                        testCaseId = getCellStringValue(row.getCell(0));
+                        category = getCellStringValue(row.getCell(1));
+                        subcategory = getCellStringValue(row.getCell(2));
+                        question = getCellStringValue(row.getCell(3));
+                        expectedAnswer = getCellStringValue(row.getCell(4));
+                    } else {
+                        // EFI Mapping Structure
+                        testCaseId = getCellStringValue(row.getCell(4)); // Q #
+                        category = getCellStringValue(row.getCell(0));   // Role
+                        subcategory = getCellStringValue(row.getCell(2)); // Set name
+                        question = getCellStringValue(row.getCell(5));   // Question / Input to enter
+                        expectedAnswer = getCellStringValue(row.getCell(7)); // Expected result
+
+                        // Check if runnable today for EFI
+                        String runnable = getCellStringValue(row.getCell(9));
+                        if ("NO".equalsIgnoreCase(runnable)) {
+                            continue;
+                        }
+                    }
 
                     if (question.isBlank()) {
                         continue;
@@ -191,6 +222,7 @@ public class ChatbotTest {
                     if (testCaseId.isBlank()) {
                         testCaseId = String.format("TC-%03d", r);
                     }
+
                     dataList.add(
                             new TestRowData(
                                     sheetName,
@@ -206,7 +238,7 @@ public class ChatbotTest {
                                     ""));
                 }
             }
-            System.out.println("--> Successfully parsed " + dataList.size() + " test cases from GitHub.");
+            System.out.println("--> Successfully parsed " + dataList.size() + " test cases for " + ACTIVE_ENVIRONMENT + " from GitHub.");
         } catch (Exception e) {
             throw new RuntimeException(
                     "Error fetching Frameworks Excel from GitHub: " + e.getMessage(), e);
@@ -256,7 +288,7 @@ public class ChatbotTest {
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);
 
         try {
-            System.out.println("--> Opening application: " + APP_URL);
+            System.out.println("--> Opening application (" + ACTIVE_ENVIRONMENT + "): " + APP_URL);
             driver.get(APP_URL);
 
             WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
@@ -389,7 +421,7 @@ public class ChatbotTest {
                 testDataList.isEmpty(),
                 "Failed to fetch Excel data from GitHub or file is empty.");
         System.out.println("============================================================");
-        System.out.println("Executing " + testDataList.size() + " test cases against Chatbot UI.");
+        System.out.println("Executing " + testDataList.size() + " test cases against Chatbot UI (" + ACTIVE_ENVIRONMENT + ").");
         System.out.println("============================================================");
         List<TestRowData> executedResults = new ArrayList<>();
         for (int i = 0; i < testDataList.size(); i++) {
@@ -443,7 +475,13 @@ public class ChatbotTest {
         return message;
     }
 
+    // DYNAMIC ENVIRONMENT-AWARE EXCEL WRITER
     private void updateFrameworkExcel(List<TestRowData> results) {
+        boolean isVedas = "VEDAS".equalsIgnoreCase(ACTIVE_ENVIRONMENT);
+        int answerCol = isVedas ? VEDAS_COL_CHATBOT_ANSWER : EFI_COL_CHATBOT_ANSWER;
+        int statusCol = isVedas ? VEDAS_COL_STATUS : EFI_COL_STATUS;
+        int reasonCol = isVedas ? VEDAS_COL_REASON : EFI_COL_REASON;
+
         try (
             InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
             Workbook workbook = new XSSFWorkbook(is);
@@ -458,20 +496,24 @@ public class ChatbotTest {
                 if (row == null) {
                     continue;
                 }
-                Cell chatbotAnswerCell = row.getCell(5);
-                if (chatbotAnswerCell == null) chatbotAnswerCell = row.createCell(5);
+                
+                // Write Chatbot Answer / Actual Result
+                Cell chatbotAnswerCell = row.getCell(answerCol);
+                if (chatbotAnswerCell == null) chatbotAnswerCell = row.createCell(answerCol);
                 chatbotAnswerCell.setCellValue(result.chatbotAnswer == null ? "" : result.chatbotAnswer);
 
-                Cell statusCell = row.getCell(7);
-                if (statusCell == null) statusCell = row.createCell(7);
+                // Write Pass/Fail Status
+                Cell statusCell = row.getCell(statusCol);
+                if (statusCell == null) statusCell = row.createCell(statusCol);
                 statusCell.setCellValue(result.status == null ? "" : result.status);
 
-                Cell reasonCell = row.getCell(8);
-                if (reasonCell == null) reasonCell = row.createCell(8);
+                // Write Reason / Pass-Fail Detail
+                Cell reasonCell = row.getCell(reasonCol);
+                if (reasonCell == null) reasonCell = row.createCell(reasonCol);
                 reasonCell.setCellValue(result.passFailureReason == null ? "" : result.passFailureReason);
             }
             workbook.write(outputStream);
-            System.out.println("--> Execution results updated successfully in Frameworks.xlsx");
+            System.out.println("--> Execution results updated successfully in Frameworks.xlsx for " + ACTIVE_ENVIRONMENT);
         } catch (Exception e) {
             throw new RuntimeException(
                 "Failed to update Frameworks Excel: " + e.getMessage(), e
@@ -507,7 +549,7 @@ public class ChatbotTest {
 
         System.out.println();
         System.out.println("========================================================================================");
-        System.out.println("                    CHATBOT AI & SYSTEM RELIABILITY AUDIT REPORT");
+        System.out.println("                    CHATBOT AI & SYSTEM RELIABILITY AUDIT REPORT (" + ACTIVE_ENVIRONMENT + ")");
         System.out.println("========================================================================================");
         System.out.println(" >> SECTION 1: EXECUTIVE DASHBOARD SUMMARY");
         System.out.println("----------------------------------------------------------------------------------------");
@@ -543,13 +585,13 @@ public class ChatbotTest {
         for (TestRowData r : results) {
             System.out.printf("[%s] ID: %s | Sheet: %s | Row: %d%n",
                     r.status, r.testCaseId, r.sheetName, r.rowIndex);
-            System.out.printf("    Category     : %s%n", r.category);
-            System.out.printf("    Subcategory  : %s%n", r.subcategory);
-            System.out.printf("    Question     : %s%n", r.question);
-            System.out.printf("    Expected     : %s%n", r.expectedAnswer);
-            System.out.printf("    Chatbot      : %s%n", r.chatbotAnswer);
-            System.out.printf("    Relevance    : %s%n", r.relevance);
-            System.out.printf("    Reason       : %s%n", r.passFailureReason);
+            System.out.printf("    Category       : %s%n", r.category);
+            System.out.printf("    Subcategory    : %s%n", r.subcategory);
+            System.out.printf("    Question       : %s%n", r.question);
+            System.out.printf("    Expected       : %s%n", r.expectedAnswer);
+            System.out.printf("    Chatbot        : %s%n", r.chatbotAnswer);
+            System.out.printf("    Relevance      : %s%n", r.relevance);
+            System.out.printf("    Reason         : %s%n", r.passFailureReason);
             System.out.println("----------------------------------------------------------------------------------------");
         }
         System.out.println("========================================================================================");
