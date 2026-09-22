@@ -1,0 +1,120 @@
+name: Vedas & EFI Complete Automation & AI Evaluation Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  run-all-tests-and-eval:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: maven
+
+      - name: Set up Google Chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+
+      - name: Verify Environment
+        run: |
+          java -version
+          mvn -version
+          google-chrome --version
+
+      # 1. Run Chatbot Automation Tests
+      - name: Run Chatbot Tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: mvn -B clean test -Dtest=ChatbotTest -Dheadless=true
+        continue-on-error: true
+
+      # 2. Run EFI Automation Tests
+      - name: Run EFI Automation Tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: mvn -B test -Dtest=EFI -Dheadless=true
+        continue-on-error: true
+
+      # 3. Set up Python for AI Evaluator
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Python Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install pandas openpyxl openai requests
+          fi
+
+      - name: Grant execution permission
+        run: chmod +x engine_ai_evaluator.py || true
+
+      # 4. Run AI Evaluation Script
+      - name: Run AI Evaluation
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python engine_ai_evaluator.py
+
+      # 5. Commit and Push Reports (Both EFI and AI Result files)
+      - name: Commit and Push Updated Reports
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git status --short
+          
+          # Add output sheets/reports if present
+          git add Frameworks-Result.xlsx EFI.xlsx || true
+
+          if git diff --staged --quiet; then
+            echo "No changes detected in reports to commit."
+            exit 0
+          fi
+
+          git commit -m "chore: update automated execution reports and AI evaluations [skip ci]"
+          
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          echo "Target branch: $BRANCH_NAME"
+          
+          git pull origin "$BRANCH_NAME" --rebase
+          git push origin "$BRANCH_NAME"
+          echo "Successfully pushed updated reports."
+
+      # 6. Upload All Test Artifacts
+      - name: Upload Test Results and Reports Bundle
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: complete-automation-reports
+          if-no-files-found: ignore
+          path: |
+            Frameworks-Result.xlsx
+            EFI.xlsx
+            target/surefire-reports/
+            target/screenshots/
