@@ -38,6 +38,7 @@ public class ChatbotTest {
         public String relevance;
         public String status;
         public String passFailureReason;
+
         public TestRowData(
                 String sheetName,
                 int rowIndex,
@@ -63,7 +64,8 @@ public class ChatbotTest {
             this.passFailureReason = passFailureReason;
         }
     }
-// ==================== CONFIGURATION ====================
+
+    // ==================== CONFIGURATION ====================
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
 
@@ -96,15 +98,13 @@ public class ChatbotTest {
     private static final String FRAMEWORK_EXCEL_FILE = "Frameworks.xlsx";
 
     // ==================== ENVIRONMENT-AWARE COLUMN MAPPINGS ====================
-    // VEDAS Columns
     private static final int VEDAS_COL_CHATBOT_ANSWER = 5;
     private static final int VEDAS_COL_STATUS = 7;
     private static final int VEDAS_COL_REASON = 8;
 
-    // EFI Columns
-    private static final int EFI_COL_CHATBOT_ANSWER = 10; // "Actual result"
-    private static final int EFI_COL_REASON = 11;         // "Pass / Fail" reason
-    private static final int EFI_COL_STATUS = 12;         // Pass / Fail status column
+    private static final int EFI_COL_CHATBOT_ANSWER = 10; 
+    private static final int EFI_COL_REASON = 11;         
+    private static final int EFI_COL_STATUS = 12;         
 
     private WebDriver driver;
     private WebDriverWait wait;
@@ -139,7 +139,7 @@ public class ChatbotTest {
                 throw new RuntimeException("Credentials Excel contains no sheets.");
             }
             Sheet sheet = workbook.getSheetAt(0);
-            Row row = sheet.getRow(3); // Expects credentials on Excel row index 3
+            Row row = sheet.getRow(3); 
             if (row == null) {
                 throw new RuntimeException("Credentials row 4 was not found in Excel.");
             }
@@ -169,7 +169,7 @@ public class ChatbotTest {
         }
     }
 
-    // FETCH FRAMEWORK DATA FROM GITHUB (DYNAMIC FOR VEDAS & EFI)
+    // FETCH FRAMEWORK DATA FROM GITHUB
     private List<TestRowData> fetchExcelDataFromGitHub(String fileUrl) {
         List<TestRowData> dataList = new ArrayList<>();
         boolean isVedas = "VEDAS".equalsIgnoreCase(ACTIVE_ENVIRONMENT);
@@ -193,21 +193,18 @@ public class ChatbotTest {
                     String testCaseId, category, subcategory, question, expectedAnswer;
 
                     if (isVedas) {
-                        // VEDAS Mapping Structure
                         testCaseId = getCellStringValue(row.getCell(0));
                         category = getCellStringValue(row.getCell(1));
                         subcategory = getCellStringValue(row.getCell(2));
                         question = getCellStringValue(row.getCell(3));
                         expectedAnswer = getCellStringValue(row.getCell(4));
                     } else {
-                        // EFI Mapping Structure
-                        testCaseId = getCellStringValue(row.getCell(4)); // Q #
-                        category = getCellStringValue(row.getCell(0));   // Role
-                        subcategory = getCellStringValue(row.getCell(2)); // Set name
-                        question = getCellStringValue(row.getCell(5));   // Question / Input to enter
-                        expectedAnswer = getCellStringValue(row.getCell(7)); // Expected result
+                        testCaseId = getCellStringValue(row.getCell(4)); 
+                        category = getCellStringValue(row.getCell(0));   
+                        subcategory = getCellStringValue(row.getCell(2)); 
+                        question = getCellStringValue(row.getCell(5));   
+                        expectedAnswer = getCellStringValue(row.getCell(7)); 
 
-                        // Check if runnable today for EFI
                         String runnable = getCellStringValue(row.getCell(9));
                         if ("NO".equalsIgnoreCase(runnable)) {
                             continue;
@@ -495,17 +492,14 @@ public class ChatbotTest {
                     continue;
                 }
                 
-                // Write Chatbot Answer / Actual Result
                 Cell chatbotAnswerCell = row.getCell(answerCol);
                 if (chatbotAnswerCell == null) chatbotAnswerCell = row.createCell(answerCol);
                 chatbotAnswerCell.setCellValue(result.chatbotAnswer == null ? "" : result.chatbotAnswer);
 
-                // Write Pass/Fail Status
                 Cell statusCell = row.getCell(statusCol);
                 if (statusCell == null) statusCell = row.createCell(statusCol);
                 statusCell.setCellValue(result.status == null ? "" : result.status);
 
-                // Write Reason / Pass-Fail Detail
                 Cell reasonCell = row.getCell(reasonCol);
                 if (reasonCell == null) reasonCell = row.createCell(reasonCol);
                 reasonCell.setCellValue(result.passFailureReason == null ? "" : result.passFailureReason);
