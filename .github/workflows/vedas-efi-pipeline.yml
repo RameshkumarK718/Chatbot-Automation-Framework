@@ -89,11 +89,15 @@ jobs:
           
           git status --short
           
-          # Add output sheets/reports if present
+          # Stage the report files
           git add Frameworks-Result.xlsx EFI.xlsx || true
+
+          # Stash any other unstaged modifications so rebase doesn't fail
+          git stash --keep-index || true
 
           if git diff --staged --quiet; then
             echo "No changes detected in reports to commit."
+            git stash pop || true
             exit 0
           fi
 
@@ -104,6 +108,9 @@ jobs:
           
           git pull origin "$BRANCH_NAME" --rebase
           git push origin "$BRANCH_NAME"
+          
+          # Restore stashed changes if any exist
+          git stash pop || true
           echo "Successfully pushed updated reports."
 
       # 6. Upload All Test Artifacts
