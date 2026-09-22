@@ -115,7 +115,12 @@ jobs:
           fi
 
           git commit -m "chore: update advanced AI evaluation report [skip ci]"
+
+          # Stash any other unstaged changes (like modified python scripts) before pulling
+          git stash || true
           git pull origin "$BRANCH_NAME" --rebase
+          git stash pop || true
+
           git push origin "$BRANCH_NAME"
           echo "Successfully updated and pushed Frameworks-Result.xlsx."
 
