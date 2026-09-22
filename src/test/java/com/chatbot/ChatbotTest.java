@@ -15,7 +15,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -25,9 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 public class ChatbotTest {
-
     // TEST DATA MODEL
     public static class TestRowData {
         public String sheetName;
@@ -68,12 +65,37 @@ public class ChatbotTest {
         }
     }
 
-    // CONFIGURATION
-    private static final String APP_URL = "https://d3rl0fkw0q6ssb.cloudfront.net/";
+  // ==================== CONFIGURATION ====================
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
-    private static final String CREDENTIALS_EXCEL_URL = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials.xlsx";
-    private static final String FRAMEWORK_EXCEL_URL = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks.xlsx";
+
+    // ==================== VEDAS ENVIRONMENT ====================
+    private static final String APP_URL_VEDAS = "https://d3rl0fkw0q6ssb.cloudfront.net/";
+    private static final String CREDENTIALS_EXCEL_URL_VEDAS = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx";
+    private static final String FRAMEWORK_EXCEL_URL_VEDAS = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx";
+
+    // ==================== EFI ENVIRONMENT ====================
+    private static final String APP_URL_EFI = "https://dtqponlzcij0l.cloudfront.net/";
+    private static final String CREDENTIALS_EXCEL_URL_EFI = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx";
+    private static final String FRAMEWORK_EXCEL_URL_EFI = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx";
+
+    // ==================== ACTIVE ENVIRONMENT ====================
+    // Defaults to "EFI", but can be overridden via command line: mvn test -Denv=VEDAS
+    private static final String ACTIVE_ENVIRONMENT = System.getProperty("env", "EFI").toUpperCase();
+
+    private static final String APP_URL = 
+            ACTIVE_ENVIRONMENT.equals("VEDAS") ? APP_URL_VEDAS : APP_URL_EFI;
+
+    private static final String CREDENTIALS_EXCEL_URL =
+            ACTIVE_ENVIRONMENT.equals("VEDAS")
+                    ? CREDENTIALS_EXCEL_URL_VEDAS
+                    : CREDENTIALS_EXCEL_URL_EFI;
+
+    private static final String FRAMEWORK_EXCEL_URL =
+            ACTIVE_ENVIRONMENT.equals("VEDAS")
+                    ? FRAMEWORK_EXCEL_URL_VEDAS
+                    : FRAMEWORK_EXCEL_URL_EFI;
+
     private static final String FRAMEWORK_EXCEL_FILE = "Frameworks.xlsx";
 
     private WebDriver driver;
@@ -187,7 +209,7 @@ public class ChatbotTest {
             System.out.println("--> Successfully parsed " + dataList.size() + " test cases from GitHub.");
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Error fetching Frameworks.xlsx from GitHub: " + e.getMessage(), e);
+                    "Error fetching Frameworks Excel from GitHub: " + e.getMessage(), e);
         }
         return dataList;
     }
@@ -452,7 +474,7 @@ public class ChatbotTest {
             System.out.println("--> Execution results updated successfully in Frameworks.xlsx");
         } catch (Exception e) {
             throw new RuntimeException(
-                "Failed to update Frameworks.xlsx: " + e.getMessage(), e
+                "Failed to update Frameworks Excel: " + e.getMessage(), e
             );
         }
     }
