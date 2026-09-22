@@ -63,8 +63,7 @@ public class ChatbotTest {
             this.passFailureReason = passFailureReason;
         }
     }
-
-    // ==================== CONFIGURATION ====================
+// ==================== CONFIGURATION ====================
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
 
