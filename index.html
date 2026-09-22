@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<<<<<<< HEAD
     <title>Chatbot QA Automation Dashboard | TestNG Framework</title>
-=======
     <title>EFI Chatbot QA Automation Dashboard | TestNG Framework</title>
->>>>>>> efi-repo/main
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -33,7 +30,6 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg text-white tracking-tight flex items-center gap-2">
-<<<<<<< HEAD
                     ChatbotTest Automation Suite 
                     <span class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">TestNG + Selenium</span>
                 </h1>
@@ -44,7 +40,6 @@
             <div class="hidden md:flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
                 <i class="fa-brands fa-github text-slate-400"></i>
                 <span class="font-mono truncate max-w-xs">RameshkumarK718/Chatbot-Automation-Framework</span>
-=======
                     EFI Chatbot Automation Suite 
                     <span class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">TestNG + Selenium</span>
                 </h1>
@@ -55,7 +50,6 @@
             <div class="hidden md:flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
                 <i class="fa-brands fa-github text-slate-400"></i>
                 <span class="font-mono truncate max-w-xs">RameshkumarK718/EFIProject</span>
->>>>>>> efi-repo/main
             </div>
             <div class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-emerald-400 text-xs font-medium">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -71,14 +65,11 @@
             <!-- Controls Section -->
             <div class="p-5 border-b border-slate-800 space-y-4">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Framework Execution</h2>         
-<<<<<<< HEAD
                 <div class="grid grid-cols-2 gap-2">
                     <button onclick="loadGithubExcelData()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">
                         <i class="fa-solid fa-file-excel"></i> Load GitHub Excel sheet
                     </button>
-                    <button onclick="runSimulatedAutomation()" id="run-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">
-=======
-                
+                    <button onclick="runSimulatedAutomation()" id="run-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">                
                 <!-- Individual Sheet Buttons Container -->
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-2">Select Sheet / Role View</label>
@@ -94,16 +85,12 @@
                         <i class="fa-solid fa-sync"></i> Refresh Data
                     </button>
                     <button onclick="runSimulatedAutomation()" id="run-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-1.5">
->>>>>>> efi-repo/main
                         <i class="fa-solid fa-play"></i> Run Suite
                     </button>
                 </div>
                 <button onclick="exportReportExcel()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-2">
-<<<<<<< HEAD
                     <i class="fa-solid fa-file-excel text-emerald-400"></i> Export Frameworks-Result.xlsx
-=======
                     <i class="fa-solid fa-file-excel text-emerald-400"></i> Export EFI_Execution_Report.xlsx
->>>>>>> efi-repo/main
                 </button>
             </div>
             <!-- Java System Console Log Output -->
@@ -115,19 +102,15 @@
                     <button onclick="clearConsole()" class="text-xs text-slate-500 hover:text-slate-300">Clear</button>
                 </div>
                 <div id="console-logs" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-y-auto custom-scrollbar space-y-1">
-<<<<<<< HEAD
                     <div class="text-slate-500">[INFO] Initializing ChromeDriver with --guest & --headless flags...</div>
                     <div class="text-slate-500">[INFO] Frameworks.xlsx loaded successfully | TestNG Suite initialized.</div>
                     <div class="text-indigo-400">[READY] Click "Load GitHub Excel sheet" or "Run Suite" to begin test execution.</div>
-=======
                     <div class="text-slate-500">[INFO] Initializing ChromeDriver with --headless=new flags...</div>
                     <div class="text-slate-500">[INFO] Target: Column J (Actual Result) mapping locked.</div>
                     <div class="text-indigo-400">[READY] Click "Load EFI.xlsx First" to populate navigation buttons.</div>
->>>>>>> efi-repo/main
                 </div>
             </div>
         </aside>
-
         <!-- Main Content Area: Metrics & Test Table -->
         <main class="flex-1 flex flex-col bg-slate-950 overflow-hidden">            
             <!-- Metric Cards Bar -->
@@ -166,13 +149,10 @@
             <div class="flex-1 p-6 pt-4 flex flex-col overflow-hidden">
                 <div class="bg-slate-900 border border-slate-800 rounded-xl flex-1 flex flex-col overflow-hidden shadow-xl">
                     <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
-<<<<<<< HEAD
                         <h3 class="font-semibold text-sm text-white flex items-center gap-2">
                             <i class="fa-solid fa-table text-indigo-400"></i> Frameworks.xlsx & Execution Results
-=======
                         <h3 id="table-title" class="font-semibold text-sm text-white flex items-center gap-2">
                             <i class="fa-solid fa-table text-indigo-400"></i> EFI.xlsx Execution Results (Select a sheet)
->>>>>>> efi-repo/main
                         </h3>
                         <div class="flex items-center gap-2">
                             <input type="text" id="search-input" onkeyup="filterTable()" placeholder="Search test cases or questions..." class="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500 w-64">
@@ -181,7 +161,6 @@
                     <div class="flex-1 overflow-auto custom-scrollbar">
                         <table id="test-table" class="w-full text-left border-collapse text-xs">
                             <thead class="bg-slate-950/80 sticky top-0 border-b border-slate-800 text-slate-400 font-semibold z-10">
-<<<<<<< HEAD
                                 <tr>
                                     <th class="py-3 px-4">TC ID</th>
                                     <th class="py-3 px-4">Category</th>
@@ -192,7 +171,6 @@
                                     <th class="py-3 px-4">Relevance</th>
                                     <th class="py-3 px-4">Status</th>
                                     <th class="py-3 px-4">Pass / Failure Reason</th>
-=======
                                 <tr id="table-header-row">
                                     <th class="py-3 px-4">Role</th>
                                     <th class="py-3 px-4">Set #</th>
@@ -205,20 +183,16 @@
                                     <th class="py-3 px-4">Runnable?</th>
                                     <th class="py-3 px-4 text-indigo-400 font-bold">Actual result (Col J)</th>
                                     <th class="py-3 px-4">Pass / Fail (Col K)</th>
->>>>>>> efi-repo/main
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="divide-y divide-slate-800/60 text-slate-300">
                                 <tr>
-<<<<<<< HEAD
                                     <td colspan="9" class="text-center py-12 text-slate-500">
                                         <i class="fa-solid fa-file-excel text-3xl mb-2 block text-slate-600"></i>
                                         Click <strong>"Load GitHub Excel sheet"</strong> above to populate test records from your repository.
-=======
                                     <td colspan="11" class="text-center py-12 text-slate-500">
                                         <i class="fa-solid fa-file-excel text-3xl mb-2 block text-slate-600"></i>
                                         Click <strong>"Load EFI.xlsx First"</strong> above to load test sheets and generate navigation buttons.
->>>>>>> efi-repo/main
                                     </td>
                                 </tr>
                             </tbody>
@@ -228,48 +202,35 @@
             </div>
         </main>
     </div>
-
     <!-- JavaScript Automation Simulator & Table Renderer -->
     <script>
-<<<<<<< HEAD
         let excelRows = [];
         const githubExcelUrl = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks.xlsx";
-=======
         let workbookData = {}; 
         let sheetNamesList = [];
         let currentSheetName = "";
-        const githubExcelUrl = "https://raw.githubusercontent.com/RameshkumarK718/EFIProject/main/EFI.xlsx";
->>>>>>> efi-repo/main
-        
+        const githubExcelUrl = "https://raw.githubusercontent.com/RameshkumarK718/EFIProject/main/EFI.xlsx";        
         function logToConsole(message, type = "info") {
             const consoleDiv = document.getElementById('console-logs');
             const time = new Date().toLocaleTimeString();
             let colorClass = "text-slate-300";
             if (type === "success") colorClass = "text-emerald-400 font-medium";
             if (type === "error") colorClass = "text-rose-400 font-medium";
-            if (type === "step") colorClass = "text-indigo-400 font-semibold";
-            
+            if (type === "step") colorClass = "text-indigo-400 font-semibold";            
             consoleDiv.innerHTML += `<div class="${colorClass}">[${time}] ${message}</div>`;
             consoleDiv.scrollTop = consoleDiv.scrollHeight;
         }
-
         function clearConsole() {
             document.getElementById('console-logs').innerHTML = "";
         }
-
         async function loadGithubExcelData() {
-<<<<<<< HEAD
             logToConsole("Fetching Frameworks.xlsx from GitHub repository...", "step");
-=======
             logToConsole("Fetching EFI.xlsx from GitHub repository...", "step");
->>>>>>> efi-repo/main
             try {
                 const response = await fetch(githubExcelUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const arrayBuffer = await response.arrayBuffer();
-                
+                const arrayBuffer = await response.arrayBuffer();             
                 const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
-<<<<<<< HEAD
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 
@@ -280,7 +241,6 @@
                 updateMetrics();
             } catch (err) {
                 logToConsole(`Failed to fetch from GitHub raw URL (CORS or Network issue). Loading local framework backup data...`, "error");
-=======
                 sheetNamesList = workbook.SheetNames;
                 workbookData = {};
 
@@ -300,13 +260,11 @@
                 updateMetrics();
             } catch (err) {
                 logToConsole(`Failed to fetch from GitHub raw URL (CORS or Network issue). Loading local fallback test data...`, "error");
->>>>>>> efi-repo/main
                 loadFallbackData();
             }
         }
 
         function loadFallbackData() {
-<<<<<<< HEAD
             excelRows = [
                 ["Category", "Subcategory", "Test Case ID", "User Question", "Expected Answer", "Chatbot Answer", "Relevance", "Status", "Pass and Failure Reason"],
                 ["General / Club Information", "General Information", "TC-001", "I want to know about Sportme club can you explain what are the Sports activity conducted here?", "Sportime offers a variety of sports and activities...", "", "", "", ""],
@@ -315,7 +273,6 @@
             renderTable();
             updateMetrics();
             logToConsole("Fallback framework test records loaded successfully.", "success");
-=======
             sheetNamesList = ["End User", "L1 Engineer", "SDM", "PMO", "PMO Jira"];
             workbookData = {
                 "End User": [
@@ -339,14 +296,12 @@
                     [1, "List all Jira tickets in the EFI project with their status, priority, labels and reporter", "Table of all issues with clickable links", "", ""]
                 ]
             };
-
             buildSheetButtons();
             currentSheetName = sheetNamesList[0];
             renderTable();
             updateMetrics();
             logToConsole("Fallback EFI test records loaded successfully.", "success");
         }
-
         function buildSheetButtons() {
             const container = document.getElementById('sheet-buttons-container');
             container.innerHTML = "";
@@ -380,12 +335,10 @@
                     }
                 }
             });
->>>>>>> efi-repo/main
         }
 
         function renderTable() {
             const tbody = document.getElementById('table-body');
-<<<<<<< HEAD
             tbody.innerHTML = "";          
             if (excelRows.length <= 1) {
                 tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-500">No data found in Excel sheet.</td></tr>`;
@@ -426,7 +379,6 @@
                     <td class="py-3 px-4">${statusBadge}</td>
                     <td class="py-3 px-4 text-slate-400 text-[11px]">${reason}</td>
                 `;
-=======
             const theadRow = document.getElementById('table-header-row');
             tbody.innerHTML = "";
 
@@ -474,32 +426,25 @@
                     rowHtml += `<td class="${tdClass}" title="${row[c] || ''}">${val}</td>`;
                 }
                 tr.innerHTML = rowHtml;
->>>>>>> efi-repo/main
                 tbody.appendChild(tr);
             }
         }
 
         async function runSimulatedAutomation() {
-<<<<<<< HEAD
             if (excelRows.length <= 1) {
                 loadFallbackData();
             }          
             logToConsole("--- Starting TestNG Automation Suite Run ---", "step");
             logToConsole("Connecting to https://d3rl0fkw0q6ssb.cloudfront.net/ via ChromeDriver...", "info");     
-=======
             if (Object.keys(workbookData).length === 0) {
                 loadFallbackData();
             }
 
             logToConsole(`--- Starting TestNG Suite Run for [${currentSheetName}] ---`, "step");
-            logToConsole("Connecting to https://dtqponlzcij0l.cloudfront.net/ via ChromeDriver...", "info");     
->>>>>>> efi-repo/main
-            
+            logToConsole("Connecting to https://dtqponlzcij0l.cloudfront.net/ via ChromeDriver...", "info");                 
             const runBtn = document.getElementById('run-btn');
             runBtn.disabled = true;
             runBtn.classList.add('opacity-50');
-
-<<<<<<< HEAD
             for (let i = 1; i < excelRows.length; i++) {
                 const row = excelRows[i];
                 if (!row) continue;
@@ -534,7 +479,6 @@
                     row[7] = "PASS";
                     row[8] = "Executed successfully.";
                 }
-=======
             const rows = workbookData[currentSheetName];
             const isJiraSheet = currentSheetName.toLowerCase().includes("jira");
 
@@ -562,22 +506,17 @@
                     row[10] = "PASS";        // Column K (Pass / Fail)
                 }
 
->>>>>>> efi-repo/main
                 renderTable();
                 updateMetrics();
             }
 
-<<<<<<< HEAD
             logToConsole("All test questions processed successfully. Frameworks-Result.xlsx ready to export!", "success");
-=======
             logToConsole(`Execution completed for sheet [${currentSheetName}]. Column J updated successfully!`, "success");
->>>>>>> efi-repo/main
             runBtn.disabled = false;
             runBtn.classList.remove('opacity-50');
         }
 
         function updateMetrics() {
-<<<<<<< HEAD
             if (excelRows.length <= 1) return;
             const total = excelRows.length - 1;
             let passed = 0;
@@ -585,7 +524,6 @@
             for (let i = 1; i < excelRows.length; i++) {
                 if (excelRows[i] && excelRows[i][7] === "PASS") passed++;
                 if (excelRows[i] && excelRows[i][7] === "FAIL") failed++;
-=======
             if (!currentSheetName || !workbookData[currentSheetName]) return;
             const rows = workbookData[currentSheetName];
             const total = rows.length - 1;
@@ -599,7 +537,6 @@
                     if (rows[i][statusColIdx] === "PASS") passed++;
                     if (rows[i][statusColIdx] === "FAIL") failed++;
                 }
->>>>>>> efi-repo/main
             }
             const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
             document.getElementById('stat-total').innerText = total;
@@ -609,7 +546,6 @@
         }
 
         function exportReportExcel() {
-<<<<<<< HEAD
             if (excelRows.length <= 1) {
                 alert("No test data available to export!");
                 return;
@@ -619,7 +555,6 @@
             XLSX.utils.book_append_sheet(workbook, worksheet, "Frameworks");
             XLSX.writeFile(workbook, "Frameworks-Result.xlsx");
             logToConsole("Successfully exported report to local Frameworks-Result.xlsx", "success");
-=======
             if (Object.keys(workbookData).length === 0) {
                 alert("No test data available to export!");
                 return;
@@ -631,7 +566,6 @@
             }
             XLSX.writeFile(workbook, "EFI_Execution_Report.xlsx");
             logToConsole("Successfully exported multi-sheet report with preserved Column J to EFI_Execution_Report.xlsx", "success");
->>>>>>> efi-repo/main
         }
 
         function filterTable() {
