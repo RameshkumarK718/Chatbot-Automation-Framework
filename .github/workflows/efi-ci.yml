@@ -197,15 +197,17 @@ jobs:
           git commit -m "chore: update automated EFI execution report [skip ci]"
 
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
-
           echo "Target branch: $BRANCH_NAME"
 
-          git stash || true
-          git pull origin "$BRANCH_NAME" --rebase
-          git stash pop || true
+          # Pull with automatic fallback to accept latest local report if conflict occurs
+          git pull origin "$BRANCH_NAME" --rebase || {
+            echo "Merge conflict detected on binary file. Resolving with local report..."
+            git checkout --ours EFI.xlsx
+            git add EFI.xlsx
+            git rebase --continue || git rebase --abort || true
+          }
 
           git push origin "$BRANCH_NAME"
-
           echo "Successfully pushed updated EFI.xlsx."
 
       # 11. Upload EFI Execution Artifacts
