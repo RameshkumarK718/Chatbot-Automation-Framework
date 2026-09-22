@@ -200,7 +200,9 @@ jobs:
 
           echo "Target branch: $BRANCH_NAME"
 
+          git stash || true
           git pull origin "$BRANCH_NAME" --rebase
+          git stash pop || true
 
           git push origin "$BRANCH_NAME"
 
