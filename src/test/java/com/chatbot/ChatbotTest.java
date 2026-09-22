@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 package com.chatbot.tests;
 package com.chatbot;
 import org.apache.poi.ss.usermodel.*;
@@ -66,7 +65,7 @@ public class ChatbotTest {
         }
     }
     // CONFIGURATION
-    private static final String APP_URL = "https://dtqponlzcij0l.cloudfront.net/";
+    private static final String APP_URL = "https://d3rl0fkw0q6ssb.cloudfront.net/";
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
     private static final String CREDENTIALS_EXCEL_URL = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials.xlsx";
