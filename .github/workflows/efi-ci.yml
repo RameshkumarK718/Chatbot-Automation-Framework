@@ -1,0 +1,219 @@
+name: EFI QA Automation CI
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Run EFI QA Automation
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+      # 1. Checkout Repository
+      - name: Checkout Repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # 2. Verify Repository
+      - name: Verify Repository
+        run: |
+          echo "========================================"
+          echo "Repository Information"
+          echo "========================================"
+
+          echo "Working Directory:"
+          pwd
+
+          echo ""
+          echo "Current Commit:"
+          git rev-parse HEAD
+
+          echo ""
+          echo "Repository Files:"
+          ls -la
+
+          echo ""
+          echo "Checking pom.xml..."
+
+          if [ -f "pom.xml" ]; then
+            echo "pom.xml found."
+            ls -lh pom.xml
+          else
+            echo "ERROR: pom.xml not found."
+            exit 1
+          fi
+
+      # 3. Set Up Java 21
+      - name: Set up JDK 21
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      # 4. Set Up Google Chrome
+      - name: Set up Google Chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+
+      # 5. Verify Environment
+      - name: Verify Environment
+        run: |
+          echo "========================================"
+          echo "Java Version"
+          echo "========================================"
+          java -version
+
+          echo ""
+          echo "========================================"
+          echo "Maven Version"
+          echo "========================================"
+          mvn -version
+
+          echo ""
+          echo "========================================"
+          echo "Google Chrome Version"
+          echo "========================================"
+          google-chrome --version
+
+      # 6. Verify EFI Project Files
+      - name: Verify EFI Project Files
+        run: |
+          echo "========================================"
+          echo "Checking EFI.xlsx"
+          echo "========================================"
+
+          if [ -f "EFI.xlsx" ]; then
+            ls -lh EFI.xlsx
+            echo "EFI.xlsx found."
+          else
+            echo "ERROR: EFI.xlsx not found."
+            exit 1
+          fi
+
+          echo ""
+          echo "========================================"
+          echo "Checking pom.xml"
+          echo "========================================"
+
+          if [ -f "pom.xml" ]; then
+            ls -lh pom.xml
+            echo "pom.xml found."
+          else
+            echo "ERROR: pom.xml not found."
+            exit 1
+          fi
+
+      # 7. Validate Maven Project
+      - name: Validate Maven Project
+        run: |
+          mvn -B validate
+
+      # 8. Run EFI Automation Tests
+      - name: Execute EFI Automation Tests
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          mvn -B clean test -Dtest=EFI -Dheadless=true
+        continue-on-error: true
+
+      # 9. Display Test Results
+      - name: Check EFI Test Results
+        if: always()
+        run: |
+          echo "========================================"
+          echo "EFI Excel File"
+          echo "========================================"
+
+          if [ -f "EFI.xlsx" ]; then
+            ls -lh EFI.xlsx
+          else
+            echo "EFI.xlsx not found."
+          fi
+
+          echo ""
+          echo "========================================"
+          echo "Surefire Reports"
+          echo "========================================"
+
+          if [ -d "target/surefire-reports" ]; then
+            find target/surefire-reports -maxdepth 2 -type f -print
+          else
+            echo "No Surefire reports found."
+          fi
+
+          echo ""
+          echo "========================================"
+          echo "Screenshots"
+          echo "========================================"
+
+          if [ -d "target/screenshots" ]; then
+            find target/screenshots -maxdepth 2 -type f -print
+          else
+            echo "No screenshots found."
+          fi
+
+      # 10. Commit Updated EFI Report
+      - name: Commit and Push Updated EFI Report
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          echo "========================================"
+          echo "Git Status"
+          echo "========================================"
+          git status --short
+
+          if [ ! -f "EFI.xlsx" ]; then
+            echo "EFI.xlsx does not exist. Nothing to commit."
+            exit 0
+          fi
+
+          git add EFI.xlsx
+
+          if git diff --staged --quiet; then
+            echo "No changes detected in EFI.xlsx."
+            exit 0
+          fi
+
+          echo "Changes detected in EFI.xlsx."
+
+          git commit -m "chore: update automated EFI execution report [skip ci]"
+
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+
+          echo "Target branch: $BRANCH_NAME"
+
+          git pull origin "$BRANCH_NAME" --rebase
+
+          git push origin "$BRANCH_NAME"
+
+          echo "Successfully pushed updated EFI.xlsx."
+
+      # 11. Upload EFI Execution Artifacts
+      - name: Upload EFI Execution Artifacts
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: EFI_Execution_Report_Bundle
+          if-no-files-found: warn
+          path: |
+            EFI.xlsx
+            target/surefire-reports/
+            target/screenshots/

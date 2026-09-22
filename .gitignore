@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .project/n.classpath/n.settings//ntarget//nbin//n
 # Java/Maven
 target/
@@ -10,3 +11,44 @@ venv/
 # Editor
 *.swp
 
+=======
+# Maven
+
+target/
+
+*.class
+
+
+# Eclipse
+
+.classpath
+
+.project
+
+.settings/
+
+
+# Python
+
+__pycache__/
+
+*.pyc
+
+.pytest_cache/
+
+venv/
+
+.venv/
+
+
+# TestNG
+
+test-output/
+
+
+# Temporary files
+
+*.swp
+
+*.swo
+>>>>>>> efi-repo/main
