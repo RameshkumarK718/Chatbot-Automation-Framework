@@ -28,7 +28,36 @@ jobs:
         with:
           fetch-depth: 0
 
-      # 2. Set Up Java 21
+      # 2. Verify Repository
+      - name: Verify Repository
+        run: |
+          echo "========================================"
+          echo "Repository Information"
+          echo "========================================"
+
+          echo "Working Directory:"
+          pwd
+
+          echo ""
+          echo "Current Commit:"
+          git rev-parse HEAD
+
+          echo ""
+          echo "Repository Files:"
+          ls -la
+
+          echo ""
+          echo "Checking pom.xml..."
+
+          if [ -f "pom.xml" ]; then
+            echo "pom.xml found."
+            ls -lh pom.xml
+          else
+            echo "ERROR: pom.xml not found."
+            exit 1
+          fi
+
+      # 3. Set Up Java 21
       - name: Set up JDK 21
         uses: actions/setup-java@v6
         with:
@@ -36,13 +65,13 @@ jobs:
           java-version: '21'
           cache: maven
 
-      # 3. Set Up Google Chrome
+      # 4. Set Up Google Chrome
       - name: Set up Google Chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
 
-      # 4. Verify Environment
+      # 5. Verify Environment
       - name: Verify Environment
         run: |
           echo "========================================"
@@ -62,24 +91,11 @@ jobs:
           echo "========================================"
           google-chrome --version
 
-          echo ""
-          echo "========================================"
-          echo "Working Directory"
-          echo "========================================"
-          pwd
-
-      # 5. Verify Project Files
+      # 6. Verify EFI Project Files
       - name: Verify EFI Project Files
         run: |
           echo "========================================"
-          echo "Project Files"
-          echo "========================================"
-
-          ls -la
-
-          echo ""
-          echo "========================================"
-          echo "EFI Excel File"
+          echo "Checking EFI.xlsx"
           echo "========================================"
 
           if [ -f "EFI.xlsx" ]; then
@@ -92,7 +108,7 @@ jobs:
 
           echo ""
           echo "========================================"
-          echo "POM File"
+          echo "Checking pom.xml"
           echo "========================================"
 
           if [ -f "pom.xml" ]; then
@@ -103,12 +119,12 @@ jobs:
             exit 1
           fi
 
-      # 6. Validate Maven Project
+      # 7. Validate Maven Project
       - name: Validate Maven Project
         run: |
           mvn -B validate
 
-      # 7. Run EFI Automation Tests
+      # 8. Run EFI Automation Tests
       - name: Execute EFI Automation Tests
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -116,7 +132,7 @@ jobs:
           mvn -B clean test -Dtest=EFI -Dheadless=true
         continue-on-error: true
 
-      # 8. Display Test Results
+      # 9. Display Test Results
       - name: Check EFI Test Results
         if: always()
         run: |
@@ -152,7 +168,7 @@ jobs:
             echo "No screenshots found."
           fi
 
-      # 9. Commit Updated EFI Excel Report
+      # 10. Commit Updated EFI Report
       - name: Commit and Push Updated EFI Report
         if: always()
         run: |
@@ -160,15 +176,9 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           echo "========================================"
-          echo "Git Status Before Commit"
+          echo "Git Status"
           echo "========================================"
-
           git status --short
-
-          echo ""
-          echo "========================================"
-          echo "Checking EFI.xlsx"
-          echo "========================================"
 
           if [ ! -f "EFI.xlsx" ]; then
             echo "EFI.xlsx does not exist. Nothing to commit."
@@ -188,17 +198,15 @@ jobs:
 
           BRANCH_NAME="${GITHUB_REF#refs/heads/}"
 
-          echo ""
           echo "Target branch: $BRANCH_NAME"
 
           git pull origin "$BRANCH_NAME" --rebase
 
           git push origin "$BRANCH_NAME"
 
-          echo ""
           echo "Successfully pushed updated EFI.xlsx."
 
-      # 10. Upload EFI Execution Artifacts
+      # 11. Upload EFI Execution Artifacts
       - name: Upload EFI Execution Artifacts
         if: always()
         uses: actions/upload-artifact@v7
