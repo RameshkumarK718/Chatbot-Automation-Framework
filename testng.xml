@@ -2,7 +2,7 @@
 <suite name="Chatbot Suite">
     <test name="Chatbot Tests">
         <classes>
-            <class name="com.chatbot.ChatbotTest"/>
-        </classes>
+    <class name="com.chatbot.tests.ChatbotTest"/>
+</classes>
     </test>
 </suite>
