@@ -1,63 +1,91 @@
 name: Universal Chatbot Automation Framework
 
 on:
+  push:
+    branches:
+      - main
+      - master
+
   workflow_dispatch:
     inputs:
       app_url:
-        description: 'Target Chatbot App URL'
+        description: "Target Chatbot App URL"
         required: true
-        default: 'https://dtqponlzcij0l.cloudfront.net/'
+        default: "https://dtqponlzcij0l.cloudfront.net/"
+
       framework_excel_url:
-        description: 'Question Bank Excel URL (GitHub Raw)'
+        description: "Question Bank Excel URL (GitHub Raw)"
         required: true
-        default: 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx'
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx"
+
       credentials_excel_url:
-        description: 'Credentials Excel URL (GitHub Raw)'
+        description: "Credentials Excel URL (GitHub Raw)"
         required: true
-        default: 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx'
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx"
 
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+
     steps:
+
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          java-version: "21"
+          distribution: "temurin"
+          cache: "maven"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
-          python-version: '3.10'
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+          install-dependencies: true
+
+      - name: Verify Environment
+        run: |
+          java -version
+          mvn -version
+          python --version
+          google-chrome --version
 
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Maven Tests with Live Error Streaming
+      - name: Run Maven Tests
         run: |
           mvn clean test -e -Dsurefire.useFile=false \
-            -Dapp.url="${{ github.event.inputs.app_url }}" \
-            -Dframework.excel.url="${{ github.event.inputs.framework_excel_url }}" \
-            -Dcredentials.excel.url="${{ github.event.inputs.credentials_excel_url }}"
+            -Dapp.url="${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}" \
+            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx' }}" \
+            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx' }}"
 
       - name: Run Python AI Evaluator
-        if: always() # Runs even if tests fail, or you can remove this if you only want it to run on success
+        if: always()
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: python engine_ai_evaluator.py --input Frameworks_Output.xlsx --output Frameworks-Result.xlsx
+        run: |
+          python engine_ai_evaluator.py \
+            --input Frameworks_Output.xlsx \
+            --output Frameworks-Result.xlsx
 
-      - name: Upload Test Reports & Results Artifact
+      - name: Upload Test Reports & Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: chatbot-test-reports
           path: |
             target/surefire-reports/
             Frameworks_Output.xlsx
             Frameworks-Result.xlsx
+          if-no-files-found: warn
