@@ -1,4 +1,4 @@
-package com.chatbot;
+package com.chatbot.tests;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -21,9 +21,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class ChatbotTest {
 
@@ -343,31 +341,47 @@ public class ChatbotTest {
         System.out.println("============================================================");
         
         List<TestRowData> executedResults = new ArrayList<>();
+        int failedCount = 0;
+
         for (int i = 0; i < testDataList.size(); i++) {
             TestRowData rowData = testDataList.get(i);
             try {
                 String chatbotResponse = sendQuestion(rowData.col3); // col3 is the question
-                rowData.col10 = chatbotResponse; // Actual response written to column 10
+                rowData.col10 = chatbotResponse; // Actual response
+                
                 if (chatbotResponse == null || chatbotResponse.isBlank()) {
                     rowData.col12 = "FAIL";
                     rowData.col11 = "Chatbot returned an empty response.";
+                    failedCount++;
                 } else if (chatbotResponse.toLowerCase().contains("error")) {
                     rowData.col12 = "FAIL";
                     rowData.col11 = "Chatbot returned an error message.";
+                    failedCount++;
+                } else if (!rowData.col4.isBlank() && !chatbotResponse.toLowerCase().contains(rowData.col4.toLowerCase())) {
+                    // Validate against Expected Answer (col4)
+                    rowData.col12 = "FAIL";
+                    rowData.col11 = "Mismatch. Expected to contain: '" + rowData.col4 + "' but got: '" + chatbotResponse + "'";
+                    failedCount++;
                 } else {
                     rowData.col12 = "PASS";
-                    rowData.col11 = "Success.";
+                    rowData.col11 = "Success. Response matched expected criteria.";
                 }
             } catch (Exception e) {
                 rowData.col10 = "EXCEPTION: " + e.getMessage();
                 rowData.col12 = "FAIL";
                 rowData.col11 = e.getMessage();
+                failedCount++;
             }
             executedResults.add(rowData);
         }
+        
         updateFrameworkExcel(executedResults);
-    }
 
+        // Fail the TestNG test if any individual test case failed
+        if (failedCount > 0) {
+            Assert.fail("Test suite completed with " + failedCount + " failing test case(s). Check Frameworks_Output.xlsx for details.");
+        }
+    }
     private void updateFrameworkExcel(List<TestRowData> results) {
         try (InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
