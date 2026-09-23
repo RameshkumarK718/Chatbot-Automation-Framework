@@ -176,7 +176,16 @@
         let workbookData = {}; 
         let sheetNamesList = [];
         let currentSheetName = "";
-        const githubExcelUrl = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx";        
+
+        // Dynamically grab Excel URL from query params, or fallback to default repository link
+        const urlParams = new URLSearchParams(window.location.search);
+        const githubExcelUrl = urlParams.get('excelUrl') || "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx";
+
+        // Update UI to show the active file source
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("Loading workbook from: " + githubExcelUrl);
+            loadGithubExcelData();
+        });
 
         function logToConsole(message, type = "info") {
             const consoleDiv = document.getElementById('console-logs');
@@ -194,7 +203,7 @@
         }
 
         async function loadGithubExcelData() {
-            logToConsole("Fetching Frameworks(EFI).xlsx from GitHub repository...", "step");
+            logToConsole(`Fetching Excel from: ${githubExcelUrl}`, "step");
             try {
                 const response = await fetch(githubExcelUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -215,12 +224,11 @@
                     currentSheetName = sheetNamesList[0];
                 }
 
-                logToConsole(`Successfully parsed Frameworks(EFI).xlsx! Sheets found: ${sheetNamesList.join(', ')}`, "success");
+                logToConsole(`Successfully parsed Excel! Sheets found: ${sheetNamesList.join(', ')}`, "success");
                 renderTable();
                 updateMetrics();
             } catch (err) {
-                logToConsole(`Failed to fetch from GitHub raw URL (CORS or Network issue). Loading local fallback test data...`, "error");
-                loadFallbackData();
+                logToConsole(`Failed to fetch from URL (CORS or Network issue). Error: ${err.message}`, "error");
             }
         }
 
