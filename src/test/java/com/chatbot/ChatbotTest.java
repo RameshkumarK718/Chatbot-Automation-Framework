@@ -69,7 +69,7 @@ public class ChatbotTest {
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
 
     // Easily override via JVM arguments: -Dapp.url=... -Dframework.excel.url=... -Dcredentials.excel.url=...
-    private static final String APP_URL = System.getProperty("app.url", "https://d3rl0fkw0q6ssb.cloudfront.net/");
+    private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url", 
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
     private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url", 
