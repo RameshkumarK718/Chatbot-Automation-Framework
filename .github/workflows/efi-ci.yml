@@ -39,22 +39,25 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Maven Tests with Dynamic Parameters
+      - name: Run Maven Tests with Live Error Streaming
         run: |
-          mvn clean test -e \
+          mvn clean test -e -Dsurefire.useFile=false \
             -Dapp.url="${{ github.event.inputs.app_url }}" \
             -Dframework.excel.url="${{ github.event.inputs.framework_excel_url }}" \
             -Dcredentials.excel.url="${{ github.event.inputs.credentials_excel_url }}"
 
       - name: Run Python AI Evaluator
+        if: always() # Runs even if tests fail, or you can remove this if you only want it to run on success
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python engine_ai_evaluator.py --input Frameworks_Output.xlsx --output Frameworks-Result.xlsx
 
-      - name: Upload Test Results Artifact
+      - name: Upload Test Reports & Results Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: chatbot-evaluation-report
+          name: chatbot-test-reports
           path: |
+            target/surefire-reports/
             Frameworks_Output.xlsx
             Frameworks-Result.xlsx
