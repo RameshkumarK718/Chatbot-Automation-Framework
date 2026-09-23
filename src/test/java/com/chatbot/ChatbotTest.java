@@ -95,27 +95,15 @@ public class ChatbotTest {
     private java.util.List<String> getRolesFromExcel() {
 
         java.util.List<String> roles = new java.util.ArrayList<>();
-
-
-
         try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
 
              Workbook workbook = new XSSFWorkbook(is)) {
-
-
-
             if (workbook.getNumberOfSheets() == 0) {
 
                 throw new RuntimeException("Role Excel contains no sheets.");
 
             }
-
-
-
             Sheet sheet = workbook.getSheetAt(0);
-
-
-
             // Row 1 is the header.
 
             // Roles are stored in Column A from Row 2 onward.
@@ -123,21 +111,12 @@ public class ChatbotTest {
             for (int r = 1; r <= sheet.getLastRowNum(); r++) {
 
                 Row row = sheet.getRow(r);
-
-
-
                 if (row == null) {
 
                     continue;
 
                 }
-
-
-
                 String role = getCellStringValue(row.getCell(0)).trim();
-
-
-
                 if (!role.isBlank()) {
 
                     roles.add(role);
@@ -145,9 +124,6 @@ public class ChatbotTest {
                 }
 
             }
-
-
-
             System.out.println("--> Roles loaded successfully: " + roles);
 
 
@@ -167,9 +143,6 @@ public class ChatbotTest {
         return roles;
 
     }
-
-
-
     private String getCellStringValue(Cell cell) {
         if (cell == null) {
             return "";
@@ -271,13 +244,7 @@ public class ChatbotTest {
     // ==================== DRIVER INITIALIZATION & LOGIN ====================
 
     private void initializeDriverAndLogin() {
-
-
-
         java.util.List<String> configuredRoles = getRolesFromExcel();
-
-
-
         if (configuredRoles.isEmpty()) {
 
             throw new IllegalStateException(
@@ -287,13 +254,7 @@ public class ChatbotTest {
             );
 
         }
-
-
-
         ChromeOptions options = new ChromeOptions();
-
-
-
         options.addArguments("--headless=new");
 
         options.addArguments("--no-sandbox");
@@ -305,37 +266,16 @@ public class ChatbotTest {
         options.addArguments("--window-size=1920,1080");
 
         options.addArguments("--remote-allow-origins=*");
-
-
-
         driver = new ChromeDriver(options);
-
-
-
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
 
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
-
-
-
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);
-
-
-
         String role = configuredRoles.get(0).trim();
-
-
-
         System.out.println("--> Selected role from Excel: " + role);
 
         System.out.println("--> Opening application URL: " + APP_URL);
-
-
-
         driver.get(APP_URL);
-
-
-
         String roleKey = role
 
                 .replaceAll("////s+", " ")
@@ -343,9 +283,6 @@ public class ChatbotTest {
                 .trim()
 
                 .toLowerCase();
-
-
-
         By roleButtonLocator = By.xpath(
 
                 "//button[" +
@@ -361,25 +298,13 @@ public class ChatbotTest {
                 "]"
 
         );
-
-
-
         WebElement roleButton = wait.until(
 
                 ExpectedConditions.elementToBeClickable(roleButtonLocator)
 
         );
-
-
-
         clickElement(roleButton);
-
-
-
         System.out.println("--> Role selected: " + role);
-
-
-
         // EFI requires a name after selecting the role.
 
         By nameInputLocator = By.cssSelector(
@@ -387,17 +312,11 @@ public class ChatbotTest {
                 "input[placeholder='Your name']"
 
         );
-
-
-
         WebElement nameInput = wait.until(
 
                 ExpectedConditions.elementToBeClickable(nameInputLocator)
 
         );
-
-
-
         String testUserName = System.getProperty(
 
                 "efi.user.name",
@@ -411,43 +330,27 @@ public class ChatbotTest {
                 )
 
         );
-
-
-
         if (testUserName == null || testUserName.isBlank()) {
 
             throw new IllegalStateException(
 
                     "EFI user name is empty."
-
             );
 
         }
-
-
-
         nameInput.clear();
 
         nameInput.sendKeys(testUserName);
-
-
-
         System.out.println(
 
                 "--> Name entered for EFI session."
 
         );
-
-
-
         By continueButtonLocator = By.xpath(
 
                 "//button[@type='submit' and normalize-space()='Continue']"
 
         );
-
-
-
         WebElement continueButton = wait.until(
 
                 ExpectedConditions.elementToBeClickable(
@@ -457,41 +360,20 @@ public class ChatbotTest {
                 )
 
         );
-
-
-
         clickElement(continueButton);
-
-
-
         System.out.println(
 
                 "--> Continue clicked."
 
         );
-
-
-
         waitForChatInput();
-
-
-
         System.out.println(
 
                 "--> Chatbot input is ready."
 
         );
-
-
-
         System.out.println("--> Chatbot input is ready.");
-
-
-
     }
-
-
-
     // ==================== CHATBOT INTERACTION HELPERS ====================
 
     private By getChatInputLocator() {
