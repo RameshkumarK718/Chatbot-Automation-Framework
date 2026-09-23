@@ -1,4 +1,4 @@
-name: Universal Chatbot CI
+name: Universal Chatbot Automation Framework CI
 
 on:
   workflow_dispatch:
