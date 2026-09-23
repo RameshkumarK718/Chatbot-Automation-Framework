@@ -61,7 +61,7 @@ public class ChatbotTest {
     // ==================== CONFIGURATIONS & VARIABLES ====================
 
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
-    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(60);
+    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
 
     // Dynamic configuration via system properties or defaults
     private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
