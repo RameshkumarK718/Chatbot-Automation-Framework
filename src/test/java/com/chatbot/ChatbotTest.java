@@ -221,12 +221,15 @@ public class ChatbotTest {
 
     private void initializeDriverAndLogin() {
         String[] credentials = getCredentialsFromExcel();
+
         String memberId = credentials[0];
         String password = credentials[1];
+
         Assert.assertFalse(memberId.isBlank(), "Member ID is missing from Cloud Excel.");
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
 
         ChromeOptions options = new ChromeOptions();
+
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
@@ -235,38 +238,80 @@ public class ChatbotTest {
         options.addArguments("--remote-allow-origins=*");
 
         driver = new ChromeDriver(options);
+
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);
 
         try {
             System.out.println("--> Opening application URL: " + APP_URL);
             driver.get(APP_URL);
 
-            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
+            // ==================== LOGIN ====================
+            WebElement memberInput = wait.until(
+                    ExpectedConditions.elementToBeClickable(By.id("vaa-email"))
+            );
             memberInput.clear();
             memberInput.sendKeys(memberId);
 
-            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
+            WebElement passwordInput = wait.until(
+                    ExpectedConditions.elementToBeClickable(By.id("vaa-pw"))
+            );
             passwordInput.clear();
             passwordInput.sendKeys(password);
 
-            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
+            WebElement loginButton = wait.until(
+                    ExpectedConditions.elementToBeClickable(By.id("vaa-submit"))
+            );
             clickElement(loginButton);
 
+            System.out.println("--> Login submitted.");
+
+            // ==================== WAIT FOR POST-LOGIN PAGE ====================
             wait.until(ExpectedConditions.or(
                     ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
-                    ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(normalize-space(),'Conversational AI')]"))
+                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Conversational AI')]"))
             ));
 
-            WebElement conversationalAILink = wait.until(ExpectedConditions.elementToBeClickable(
-                    By.xpath("//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')]")));
-            clickElement(conversationalAILink);
+            System.out.println("--> Post-login page loaded.");
+            System.out.println("--> Current URL: " + driver.getCurrentUrl());
 
+            // ==================== CONVERSATIONAL AI ====================
+            By conversationalAILocator = By.xpath(
+                    "//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')] | //*[contains(normalize-space(), 'Conversational AI')]"
+            );
+
+            WebElement conversationalAI = wait.until(
+                    ExpectedConditions.elementToBeClickable(conversationalAILocator)
+            );
+
+            System.out.println("--> Conversational AI element found: " + conversationalAI.getTagName());
+            System.out.println("--> Conversational AI text: [" + conversationalAI.getText() + "]");
+
+            ((JavascriptExecutor) driver).executeScript(
+                    "arguments[0].scrollIntoView({block:'center'});",
+                    conversationalAI
+            );
+
+            clickElement(conversationalAI);
+
+            System.out.println("--> Conversational AI clicked.");
+
+            // ==================== CHAT INPUT ====================
             waitForChatInput();
+
             System.out.println("--> Chatbot input is ready.");
+
         } catch (Exception e) {
-            throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
+            System.err.println("--> Failed to initialize chatbot test setup.");
+            System.err.println("--> Current URL: " + driver.getCurrentUrl());
+            System.err.println("--> Page title: " + driver.getTitle());
+
+            throw new AssertionError(
+                    "Failed to initialize chatbot test setup: " + e.getMessage(),
+                    e
+            );
         }
     }
 
@@ -382,6 +427,7 @@ public class ChatbotTest {
             Assert.fail("Test suite completed with " + failedCount + " failing test case(s). Check Frameworks_Output.xlsx for details.");
         }
     }
+
     private void updateFrameworkExcel(List<TestRowData> results) {
         try (InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
