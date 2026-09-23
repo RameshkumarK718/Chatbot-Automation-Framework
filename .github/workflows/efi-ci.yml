@@ -6,7 +6,7 @@ on:
       app_url:
         description: 'Target Chatbot App URL'
         required: true
-        default: 'https://d3rl0fkw0q6ssb.cloudfront.net/'
+        default: 'https://dtqponlzcij0l.cloudfront.net/'
       framework_excel_url:
         description: 'Question Bank Excel URL (GitHub Raw)'
         required: true
