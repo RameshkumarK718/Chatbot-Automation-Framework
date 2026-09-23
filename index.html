@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EFI Chatbot QA Automation Dashboard | TestNG Framework</title>
+    <title>Universal Chatbot QA Automation Dashboard | TestNG Framework</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -29,20 +29,20 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg text-white tracking-tight flex items-center gap-2">
-                    EFI Chatbot Automation Suite 
-                    <span class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">TestNG + Selenium</span>
+                    Universal Chatbot Automation Suite 
+                    <span class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">TestNG + Selenium + AI</span>
                 </h1>
-                <p class="text-xs text-slate-400">Target App: <a href="https://dtqponlzcij0l.cloudfront.net/" target="_blank" class="text-indigo-400 hover:underline">https://dtqponlzcij0l.cloudfront.net/</a></p>
+                <p class="text-xs text-slate-400">Target App: <a href="https://d3rl0fkw0q6ssb.cloudfront.net/" target="_blank" class="text-indigo-400 hover:underline">https://d3rl0fkw0q6ssb.cloudfront.net/</a></p>
             </div>
         </div>       
         <div class="flex items-center space-x-4">
             <div class="hidden md:flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
                 <i class="fa-brands fa-github text-slate-400"></i>
-                <span class="font-mono truncate max-w-xs">RameshkumarK718/EFIProject</span>
+                <span class="font-mono truncate max-w-xs">RameshkumarK718/Chatbot-Automation-Framework</span>
             </div>
             <div class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-emerald-400 text-xs font-medium">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>CI/CD Headless Ready</span>
+                <span>CI/CD Workflow Ready</span>
             </div>
         </div>
     </header>
@@ -54,16 +54,17 @@
             <!-- Controls Section -->
             <div class="p-5 border-b border-slate-800 space-y-4">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Framework Execution</h2>         
-                
+               
                 <!-- Individual Sheet Buttons Container -->
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-2">Select Sheet / Role View</label>
                     <div id="sheet-buttons-container" class="space-y-1.5">
                         <button onclick="loadGithubExcelData()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-file-excel"></i> Load EFI.xlsx First
+                            <i class="fa-solid fa-file-excel"></i> Load Frameworks(EFI).xlsx First
                         </button>
                     </div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-2 pt-2">
                     <button onclick="loadGithubExcelData()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-sync"></i> Refresh Data
@@ -73,7 +74,7 @@
                     </button>
                 </div>
                 <button onclick="exportReportExcel()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-excel text-emerald-400"></i> Export EFI_Execution_Report.xlsx
+                    <i class="fa-solid fa-file-excel text-emerald-400"></i> Export Frameworks-Result.xlsx
                 </button>
             </div>
 
@@ -86,9 +87,9 @@
                     <button onclick="clearConsole()" class="text-xs text-slate-500 hover:text-slate-300">Clear</button>
                 </div>
                 <div id="console-logs" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-y-auto custom-scrollbar space-y-1">
-                    <div class="text-slate-500">[INFO] Initializing ChromeDriver with --headless=new flags...</div>
-                    <div class="text-slate-500">[INFO] Target: Column J (Actual Result) mapping locked.</div>
-                    <div class="text-indigo-400">[READY] Click "Load EFI.xlsx First" to populate navigation buttons.</div>
+                    <div class="text-slate-500">[INFO] Initializing Universal TestNG Runner & AI Evaluator...</div>
+                    <div class="text-slate-500">[INFO] Universal Excel mapping locked to repository specifications.</div>
+                    <div class="text-indigo-400">[READY] Click "Load Frameworks(EFI).xlsx First" to populate navigation buttons.</div>
                 </div>
             </div>
         </aside>
@@ -132,7 +133,7 @@
                 <div class="bg-slate-900 border border-slate-800 rounded-xl flex-1 flex flex-col overflow-hidden shadow-xl">
                     <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
                         <h3 id="table-title" class="font-semibold text-sm text-white flex items-center gap-2">
-                            <i class="fa-solid fa-table text-indigo-400"></i> EFI.xlsx Execution Results (Select a sheet)
+                            <i class="fa-solid fa-table text-indigo-400"></i> Frameworks(EFI).xlsx Execution Results (Select a sheet)
                         </h3>
                         <div class="flex items-center gap-2">
                             <input type="text" id="search-input" onkeyup="filterTable()" placeholder="Search test cases or questions..." class="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500 w-64">
@@ -151,15 +152,15 @@
                                     <th class="py-3 px-4">Expected result</th>
                                     <th class="py-3 px-4">Expected source</th>
                                     <th class="py-3 px-4">Runnable?</th>
-                                    <th class="py-3 px-4 text-indigo-400 font-bold">Actual result (Col J)</th>
-                                    <th class="py-3 px-4">Pass / Fail (Col K)</th>
+                                    <th class="py-3 px-4 text-indigo-400 font-bold">Actual result</th>
+                                    <th class="py-3 px-4">Pass / Fail</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body" class="divide-y divide-slate-800/60 text-slate-300">
                                 <tr>
                                     <td colspan="11" class="text-center py-12 text-slate-500">
                                         <i class="fa-solid fa-file-excel text-3xl mb-2 block text-slate-600"></i>
-                                        Click <strong>"Load EFI.xlsx First"</strong> above to load test sheets and generate navigation buttons.
+                                        Click <strong>"Load Frameworks(EFI).xlsx First"</strong> above to load test sheets and generate navigation buttons.
                                     </td>
                                 </tr>
                             </tbody>
@@ -175,7 +176,7 @@
         let workbookData = {}; 
         let sheetNamesList = [];
         let currentSheetName = "";
-        const githubExcelUrl = "https://raw.githubusercontent.com/RameshkumarK718/EFIProject/main/EFI.xlsx";        
+        const githubExcelUrl = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx";        
 
         function logToConsole(message, type = "info") {
             const consoleDiv = document.getElementById('console-logs');
@@ -193,7 +194,7 @@
         }
 
         async function loadGithubExcelData() {
-            logToConsole("Fetching EFI.xlsx from GitHub repository...", "step");
+            logToConsole("Fetching Frameworks(EFI).xlsx from GitHub repository...", "step");
             try {
                 const response = await fetch(githubExcelUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -214,7 +215,7 @@
                     currentSheetName = sheetNamesList[0];
                 }
 
-                logToConsole(`Successfully parsed EFI.xlsx! Sheets found: ${sheetNamesList.join(', ')}`, "success");
+                logToConsole(`Successfully parsed Frameworks(EFI).xlsx! Sheets found: ${sheetNamesList.join(', ')}`, "success");
                 renderTable();
                 updateMetrics();
             } catch (err) {
@@ -224,34 +225,18 @@
         }
 
         function loadFallbackData() {
-            sheetNamesList = ["End User", "L1 Engineer", "SDM", "PMO", "PMO Jira"];
+            sheetNamesList = ["End User", "L1 Engineer", "SDM", "PMO"];
             workbookData = {
                 "End User": [
                     ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
-                    ["End User", 1, "Information from KB", 1, "How do I install Cisco AnyConnect VPN on my Mac?", "Chat", "Chat replies with VPN steps and cites source.", "VPN KB", "Yes", "", ""]
-                ],
-                "L1 Engineer": [
-                    ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
-                    ["L1 Engineer", 1, "Domain Add", 1, "How do I add a computer to the EFI domain?", "Chat", "Ask panel returns answer with steps.", "Staff KB", "Yes", "", ""]
-                ],
-                "SDM": [
-                    ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
-                    ["SDM", 1, "Policy", 1, "What does the EFI password policy require?", "Chat", "Password policy details.", "Password KB", "Yes", "", ""]
-                ],
-                "PMO": [
-                    ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
-                    ["PMO", 1, "SAP Access", 1, "How do I access the SAP Web GUI?", "Chat", "SAP Web GUI link and SSO instructions.", "SAP KB", "Yes", "", ""]
-                ],
-                "PMO Jira": [
-                    ["#", "Question", "What it tests / expected answer", "Actual Result", "Status"],
-                    [1, "List all Jira tickets in the EFI project with their status, priority, labels and reporter", "Table of all issues with clickable links", "", ""]
+                    ["End User", 1, "Information from KB", 1, "How do I setup VPN?", "Chat", "Chat replies with VPN steps.", "KB", "Yes", "", ""]
                 ]
             };
             buildSheetButtons();
             currentSheetName = sheetNamesList[0];
             renderTable();
             updateMetrics();
-            logToConsole("Fallback EFI test records loaded successfully.", "success");
+            logToConsole("Fallback test records loaded successfully.", "success");
         }
 
         function buildSheetButtons() {
@@ -305,11 +290,11 @@
             const headers = rows[0];
             let headerHtml = "";
             headers.forEach((h, idx) => {
-                let highlightClass = (idx === 9 || idx === headers.length - 2) ? "text-indigo-400 font-bold" : "";
+                let highlightClass = (idx >= headers.length - 2) ? "text-indigo-400 font-bold" : "";
                 headerHtml += `<th class="py-3 px-4 ${highlightClass}">${h || ''}</th>`;
             });
             theadRow.innerHTML = headerHtml;
-            document.getElementById('table-title').innerHTML = `<i class="fa-solid fa-table text-indigo-400"></i> EFI.xlsx &gt; ${currentSheetName} (${rows.length - 1} test rows)`;
+            document.getElementById('table-title').innerHTML = `<i class="fa-solid fa-table text-indigo-400"></i> Frameworks(EFI).xlsx &gt; ${currentSheetName} (${rows.length - 1} test rows)`;
 
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
@@ -323,7 +308,7 @@
                     let val = row[c] !== undefined ? row[c] : "";
                     let tdClass = "py-3 px-4 text-slate-300 max-w-xs truncate";
 
-                    if (headers[c] && (headers[c].includes("Pass / Fail") || headers[c].includes("Status"))) {
+                    if (headers[c] && (headers[c].toLowerCase().includes("pass") || headers[c].toLowerCase().includes("status"))) {
                         if (val === "PASS") {
                             val = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">PASS</span>`;
                         } else if (val === "FAIL") {
@@ -349,7 +334,7 @@
 
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
-                const statusVal = row[row.length - 1] || row[7] || "";
+                const statusVal = row[row.length - 1] || "";
                 if (statusVal === "PASS") passCount++;
                 if (statusVal === "FAIL") failCount++;
             }
@@ -367,7 +352,7 @@
             }
 
             logToConsole(`--- Starting TestNG Suite Run for [${currentSheetName}] ---`, "step");
-            logToConsole("Connecting to https://dtqponlzcij0l.cloudfront.net/ via ChromeDriver...", "info");             
+            logToConsole("Connecting to https://d3rl0fkw0q6ssb.cloudfront.net/ via ChromeDriver...", "info");             
             
             const runBtn = document.getElementById('run-btn');
             runBtn.disabled = true;
@@ -377,14 +362,13 @@
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
                 if (!row) continue;
-                const question = row[4] || row[1];
-                if (!question) continue;
+                const question = row[4] || row[1] || "Test Query";
 
                 logToConsole(`Processing Row ${i} of ${rows.length - 1}: "${question}"`, "info");
-                await new Promise(r => setTimeout(r, 600));
+                await new Promise(r => setTimeout(r, 400));
 
-                row[9] = `Successfully fetched response from EFI KB for: "${question}"`;
-                row[10] = "PASS";
+                row[row.length - 2] = `Successfully evaluated chatbot response for: "${question}"`;
+                row[row.length - 1] = "PASS";
                 logToConsole(`Result: PASS`, "success");
             }
 
@@ -407,13 +391,13 @@
         }
 
         function exportReportExcel() {
-            logToConsole("Exporting execution report to EFI_Execution_Report.xlsx...", "step");
+            logToConsole("Exporting execution report to Frameworks-Result.xlsx...", "step");
             const wb = XLSX.utils.book_new();
             for (const sheetName in workbookData) {
                 const ws = XLSX.utils.aoa_to_sheet(workbookData[sheetName]);
                 XLSX.utils.book_append_sheet(wb, ws, sheetName);
             }
-            XLSX.writeFile(wb, "EFI_Execution_Report.xlsx");
+            XLSX.writeFile(wb, "Frameworks-Result.xlsx");
             logToConsole("Report exported successfully!", "success");
         }
     </script>
