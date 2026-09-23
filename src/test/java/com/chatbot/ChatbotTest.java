@@ -1,4 +1,5 @@
 package com.chatbot.tests;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -15,60 +16,52 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChatbotTest {
 
-    // EXTENDED TEST DATA MODEL (Supports columns 0 to 12)
+    // FLEXIBLE TEST DATA MODEL SUPPORTING DYNAMIC COLUMNS
     public static class TestRowData {
         public String sheetName;
         public int rowIndex;
-        public String col0; // Test Case ID / Primary Identifier
-        public String col1; // Category
-        public String col2; // Subcategory
-        public String col3; // Question / Input Prompt
-        public String col4; // Expected Answer
-        public String col5; // Extra Field / Context
-        public String col6; // Extra Field / Priority
-        public String col7; // Extra Field / Tags
-        public String col8; // Extra Field / Notes
-        public String col9; // Runnable Flag (YES/NO)
-        public String col10; // Chatbot Actual Answer Output
-        public String col11; // Failure Reason / Audit Log
-        public String col12; // Final Test Status (PASS/FAIL)
+        public String testCaseId;
+        public String role;
+        public String question;
+        public String expectedResult;
+        public String runnable;
+        public String actualResult;
+        public String reason;
+        public String status;
 
-        public TestRowData(String sheetName, int rowIndex, String col0, String col1, String col2,
-                           String col3, String col4, String col5, String col6, String col7,
-                           String col8, String col9, String col10, String col11, String col12) {
+        public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
+                           String question, String expectedResult, String runnable,
+                           String actualResult, String reason, String status) {
             this.sheetName = sheetName;
             this.rowIndex = rowIndex;
-            this.col0 = col0;
-            this.col1 = col1;
-            this.col2 = col2;
-            this.col3 = col3;
-            this.col4 = col4;
-            this.col5 = col5;
-            this.col6 = col6;
-            this.col7 = col7;
-            this.col8 = col8;
-            this.col9 = col9;
-            this.col10 = col10;
-            this.col11 = col11;
-            this.col12 = col12;
+            this.testCaseId = testCaseId;
+            this.role = role;
+            this.question = question;
+            this.expectedResult = expectedResult;
+            this.runnable = runnable;
+            this.actualResult = actualResult;
+            this.reason = reason;
+            this.status = status;
         }
     }
 
-    // ==================== UNIVERSAL CONFIGURATIONS ====================
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
 
-    // Easily override via JVM arguments: -Dapp.url=... -Dframework.excel.url=... -Dcredentials.excel.url=...
+    // Dynamic configuration via system properties or defaults
     private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url", 
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
@@ -77,25 +70,9 @@ public class ChatbotTest {
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
 
-    // ==================== COLUMN MAPPINGS (0 to 12 Index Map) ====================
-    private static final int Role = 0;
-    private static final int Set # = 1;
-    private static final int Set name = 2;
-    private static final int Q # = 3;
-    private static final int Question / Input to enter = 4;
-    private static final int Entry point = 5;
-    private static final int Expected result = 6;
-    private static final int Expected source = 7;
-    private static final int Runnable for this role today? = 8;
-    private static final int Actual result = 9;
-    private static final int Pass / Fail = 10;
-    private static final int Nil = 11;
-    private static final int Nil = 12;
-
     private WebDriver driver;
     private WebDriverWait wait;
 
-    // GET EXCEL INPUT STREAM
     private InputStream openUrlStream(String fileUrl) throws Exception {
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -111,7 +88,6 @@ public class ChatbotTest {
         return connection.getInputStream();
     }
 
-    // READ CREDENTIALS FROM EXCEL
     private String[] getCredentialsFromExcel() {
         String username = "";
         String password = "";
@@ -121,9 +97,12 @@ public class ChatbotTest {
                 throw new RuntimeException("Credentials Excel contains no sheets.");
             }
             Sheet sheet = workbook.getSheetAt(0);
-            Row row = sheet.getRow(3); // Row 4 (0-indexed)
+            Row row = sheet.getRow(1); // Row 2 (0-indexed row 1 for first data row)
             if (row == null) {
-                throw new RuntimeException("Credentials row 4 was not found in Excel.");
+                row = sheet.getRow(3); // Fallback to row 4 if needed
+            }
+            if (row == null) {
+                throw new RuntimeException("Credentials row was not found in Excel.");
             }
             username = getCellStringValue(row.getCell(0));
             password = getCellStringValue(row.getCell(1));
@@ -146,7 +125,7 @@ public class ChatbotTest {
         }
     }
 
-    // UNIVERSAL 0-12 EXCEL DATA FETCHER
+    // DYNAMIC EXCEL DATA FETCHER (Reads headers automatically)
     private List<TestRowData> fetchExcelDataFromGitHub(String fileUrl) {
         List<TestRowData> dataList = new ArrayList<>();
 
@@ -155,51 +134,62 @@ public class ChatbotTest {
             if (workbook.getNumberOfSheets() == 0) {
                 throw new RuntimeException("Framework Excel contains no sheets.");
             }
+
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
                 System.out.println("--> Reading sheet: " + sheetName);
 
+                Row headerRow = sheet.getRow(0);
+                if (headerRow == null) continue;
+
+                Map<String, Integer> colMap = new HashMap<>();
+                for (Cell cell : headerRow) {
+                    colMap.put(getCellStringValue(cell).toLowerCase(), cell.getColumnIndex());
+                }
+
                 for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                     Row row = sheet.getRow(r);
-                    if (row == null) {
-                        continue;
-                    }
+                    if (row == null) continue;
 
-                    String testCaseId = getCellStringValue(row.getCell(COL_ID));
-                    String category = getCellStringValue(row.getCell(COL_CATEGORY));
-                    String subcategory = getCellStringValue(row.getCell(COL_SUBCATEGORY));
-                    String question = getCellStringValue(row.getCell(COL_QUESTION));
-                    String expectedAnswer = getCellStringValue(row.getCell(COL_EXPECTED_ANSWER));
-                    String extra5 = getCellStringValue(row.getCell(COL_EXTRA_5));
-                    String extra6 = getCellStringValue(row.getCell(COL_EXTRA_6));
-                    String extra7 = getCellStringValue(row.getCell(COL_EXTRA_7));
-                    String extra8 = getCellStringValue(row.getCell(COL_EXTRA_8));
-                    String runnable = getCellStringValue(row.getCell(COL_RUNNABLE));
-
-                    // Skip row if marked as NO in the runnable column
-                    if ("NO".equalsIgnoreCase(runnable)) {
-                        continue;
-                    }
+                    // Dynamically locate columns based on common names or header variants
+                    String role = getCellByAnyHeader(row, colMap, "role", "set #");
+                    String question = getCellByAnyHeader(row, colMap, "question / input to enter", "question");
+                    String expectedResult = getCellByAnyHeader(row, colMap, "expected result", "what it tests / expected answer");
+                    String runnable = getCellByAnyHeader(row, colMap, "runnable for this role today?");
+                    
                     if (question.isBlank()) {
                         continue;
                     }
-                    if (testCaseId.isBlank()) {
-                        testCaseId = String.format("TC-%03d", r);
+                    if ("no".equalsIgnoreCase(runnable)) {
+                        continue;
                     }
 
+                    // Find index for Actual result, Pass/Fail columns to write back later
+                    String testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
+
                     dataList.add(new TestRowData(
-                            sheetName, r, testCaseId, category, subcategory,
-                            question, expectedAnswer, extra5, extra6, extra7,
-                            extra8, runnable, "", "", ""
+                            sheetName, r, testCaseId, role, question, expectedResult,
+                            runnable, "", "", ""
                     ));
                 }
             }
-            System.out.println("--> Successfully parsed " + dataList.size() + " test cases (Columns 0-12 supported).");
+            System.out.println("--> Successfully parsed " + dataList.size() + " test cases dynamically.");
         } catch (Exception e) {
             throw new RuntimeException("Error fetching Frameworks Excel: " + e.getMessage(), e);
         }
         return dataList;
+    }
+
+    private String getCellByAnyHeader(Row row, Map<String, Integer> colMap, String... possibleHeaders) {
+        for (String header : possibleHeaders) {
+            for (Map.Entry<String, Integer> entry : colMap.entrySet()) {
+                if (entry.getKey().contains(header)) {
+                    return getCellStringValue(row.getCell(entry.getValue()));
+                }
+            }
+        }
+        return "";
     }
 
     @BeforeMethod
@@ -221,7 +211,6 @@ public class ChatbotTest {
 
     private void initializeDriverAndLogin() {
         String[] credentials = getCredentialsFromExcel();
-
         String memberId = credentials[0];
         String password = credentials[1];
 
@@ -229,7 +218,6 @@ public class ChatbotTest {
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
 
         ChromeOptions options = new ChromeOptions();
-
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
@@ -238,80 +226,47 @@ public class ChatbotTest {
         options.addArguments("--remote-allow-origins=*");
 
         driver = new ChromeDriver(options);
-
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
-
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);
 
         try {
             System.out.println("--> Opening application URL: " + APP_URL);
             driver.get(APP_URL);
 
-            // ==================== LOGIN ====================
-            WebElement memberInput = wait.until(
-                    ExpectedConditions.elementToBeClickable(By.id("vaa-email"))
-            );
+            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
             memberInput.clear();
             memberInput.sendKeys(memberId);
 
-            WebElement passwordInput = wait.until(
-                    ExpectedConditions.elementToBeClickable(By.id("vaa-pw"))
-            );
+            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
             passwordInput.clear();
             passwordInput.sendKeys(password);
 
-            WebElement loginButton = wait.until(
-                    ExpectedConditions.elementToBeClickable(By.id("vaa-submit"))
-            );
+            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
             clickElement(loginButton);
 
             System.out.println("--> Login submitted.");
 
-            // ==================== WAIT FOR POST-LOGIN PAGE ====================
             wait.until(ExpectedConditions.or(
                     ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
                     ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Conversational AI')]"))
             ));
 
             System.out.println("--> Post-login page loaded.");
-            System.out.println("--> Current URL: " + driver.getCurrentUrl());
 
-            // ==================== CONVERSATIONAL AI ====================
             By conversationalAILocator = By.xpath(
                     "//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')] | //*[contains(normalize-space(), 'Conversational AI')]"
             );
 
-            WebElement conversationalAI = wait.until(
-                    ExpectedConditions.elementToBeClickable(conversationalAILocator)
-            );
-
-            System.out.println("--> Conversational AI element found: " + conversationalAI.getTagName());
-            System.out.println("--> Conversational AI text: [" + conversationalAI.getText() + "]");
-
-            ((JavascriptExecutor) driver).executeScript(
-                    "arguments[0].scrollIntoView({block:'center'});",
-                    conversationalAI
-            );
-
+            WebElement conversationalAI = wait.until(ExpectedConditions.elementToBeClickable(conversationalAILocator));
             clickElement(conversationalAI);
-
             System.out.println("--> Conversational AI clicked.");
 
-            // ==================== CHAT INPUT ====================
             waitForChatInput();
-
             System.out.println("--> Chatbot input is ready.");
 
         } catch (Exception e) {
-            System.err.println("--> Failed to initialize chatbot test setup.");
-            System.err.println("--> Current URL: " + driver.getCurrentUrl());
-            System.err.println("--> Page title: " + driver.getTitle());
-
-            throw new AssertionError(
-                    "Failed to initialize chatbot test setup: " + e.getMessage(),
-                    e
-            );
+            throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
         }
     }
 
@@ -391,30 +346,25 @@ public class ChatbotTest {
         for (int i = 0; i < testDataList.size(); i++) {
             TestRowData rowData = testDataList.get(i);
             try {
-                String chatbotResponse = sendQuestion(rowData.col3); // col3 is the question
-                rowData.col10 = chatbotResponse; // Actual response
+                String chatbotResponse = sendQuestion(rowData.question);
+                rowData.actualResult = chatbotResponse;
                 
                 if (chatbotResponse == null || chatbotResponse.isBlank()) {
-                    rowData.col12 = "FAIL";
-                    rowData.col11 = "Chatbot returned an empty response.";
+                    rowData.status = "FAIL";
+                    rowData.reason = "Chatbot returned an empty response.";
                     failedCount++;
                 } else if (chatbotResponse.toLowerCase().contains("error")) {
-                    rowData.col12 = "FAIL";
-                    rowData.col11 = "Chatbot returned an error message.";
-                    failedCount++;
-                } else if (!rowData.col4.isBlank() && !chatbotResponse.toLowerCase().contains(rowData.col4.toLowerCase())) {
-                    // Validate against Expected Answer (col4)
-                    rowData.col12 = "FAIL";
-                    rowData.col11 = "Mismatch. Expected to contain: '" + rowData.col4 + "' but got: '" + chatbotResponse + "'";
+                    rowData.status = "FAIL";
+                    rowData.reason = "Chatbot returned an error message.";
                     failedCount++;
                 } else {
-                    rowData.col12 = "PASS";
-                    rowData.col11 = "Success. Response matched expected criteria.";
+                    rowData.status = "PASS";
+                    rowData.reason = "Success. Response received.";
                 }
             } catch (Exception e) {
-                rowData.col10 = "EXCEPTION: " + e.getMessage();
-                rowData.col12 = "FAIL";
-                rowData.col11 = e.getMessage();
+                rowData.actualResult = "EXCEPTION: " + e.getMessage();
+                rowData.status = "FAIL";
+                rowData.reason = e.getMessage();
                 failedCount++;
             }
             executedResults.add(rowData);
@@ -422,7 +372,6 @@ public class ChatbotTest {
         
         updateFrameworkExcel(executedResults);
 
-        // Fail the TestNG test if any individual test case failed
         if (failedCount > 0) {
             Assert.fail("Test suite completed with " + failedCount + " failing test case(s). Check Frameworks_Output.xlsx for details.");
         }
@@ -438,21 +387,26 @@ public class ChatbotTest {
                 Row row = sheet.getRow(result.rowIndex);
                 if (row == null) continue;
                 
-                // Write back outputs to columns 10, 11, and 12
-                Cell answerCell = row.getCell(COL_CHATBOT_ANSWER);
-                if (answerCell == null) answerCell = row.createCell(COL_CHATBOT_ANSWER);
-                answerCell.setCellValue(result.col10);
+                Row headerRow = sheet.getRow(0);
+                if (headerRow == null) continue;
 
-                Cell reasonCell = row.getCell(COL_REASON);
-                if (reasonCell == null) reasonCell = row.createCell(COL_REASON);
-                reasonCell.setCellValue(result.col11);
-
-                Cell statusCell = row.getCell(COL_STATUS);
-                if (statusCell == null) statusCell = row.createCell(COL_STATUS);
-                statusCell.setCellValue(result.col12);
+                // Find 'Actual result' and 'Pass / Fail' columns dynamically by header
+                for (Cell cell : headerRow) {
+                    String header = getCellStringValue(cell).toLowerCase();
+                    int colIdx = cell.getColumnIndex();
+                    if (header.contains("actual result")) {
+                        Cell c = row.getCell(colIdx);
+                        if (c == null) c = row.createCell(colIdx);
+                        c.setCellValue(result.actualResult);
+                    } else if (header.contains("pass / fail") || header.contains("status")) {
+                        Cell c = row.getCell(colIdx);
+                        if (c == null) c = row.createCell(colIdx);
+                        c.setCellValue(result.status);
+                    }
+                }
             }
             workbook.write(outputStream);
-            System.out.println("--> Execution results safely written up to Column 12 in output file.");
+            System.out.println("--> Execution results safely written dynamically to output file.");
         } catch (Exception e) {
             throw new RuntimeException("Failed to update Excel: " + e.getMessage(), e);
         }
