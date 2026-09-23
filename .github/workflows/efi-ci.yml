@@ -1,0 +1,48 @@
+name: Universal Chatbot CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      app_url:
+        description: 'Target Chatbot App URL'
+        required: true
+        default: 'https://d3rl0fkw0q6ssb.cloudfront.net/'
+      framework_excel_url:
+        description: 'Question Bank Excel URL (GitHub Raw)'
+        required: true
+        default: 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx'
+      credentials_excel_url:
+        description: 'Credentials Excel URL (GitHub Raw)'
+        required: true
+        default: 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx'
+
+jobs:
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python Dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Maven Tests with Dynamic Parameters
+        run: |
+          mvn test \
+            -Dapp.url="${{ github.event.inputs.app_url }}" \
+            -Dframework.excel.url="${{ github.event.inputs.framework_excel_url }}" \
+            -Dcredentials.excel.url="${{ github.event.inputs.credentials_excel_url }}"
+
+      - name: Run Python AI Evaluator
+        run: python engine_ai_evaluator.py --input Frameworks_Output.xlsx
