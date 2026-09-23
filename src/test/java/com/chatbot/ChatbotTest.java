@@ -78,19 +78,19 @@ public class ChatbotTest {
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
 
     // ==================== COLUMN MAPPINGS (0 to 12 Index Map) ====================
-    private static final int COL_ID = 0;
-    private static final int COL_CATEGORY = 1;
-    private static final int COL_SUBCATEGORY = 2;
-    private static final int COL_QUESTION = 3;
-    private static final int COL_EXPECTED_ANSWER = 4;
-    private static final int COL_EXTRA_5 = 5;
-    private static final int COL_EXTRA_6 = 6;
-    private static final int COL_EXTRA_7 = 7;
-    private static final int COL_EXTRA_8 = 8;
-    private static final int COL_RUNNABLE = 9;
-    private static final int COL_CHATBOT_ANSWER = 10;
-    private static final int COL_REASON = 11;
-    private static final int COL_STATUS = 12;
+    private static final int Role = 0;
+    private static final int Set # = 1;
+    private static final int Set name = 2;
+    private static final int Q # = 3;
+    private static final int Question / Input to enter = 4;
+    private static final int Entry point = 5;
+    private static final int Expected result = 6;
+    private static final int Expected source = 7;
+    private static final int Runnable for this role today? = 8;
+    private static final int Actual result = 9;
+    private static final int Pass / Fail = 10;
+    private static final int Nil = 11;
+    private static final int Nil = 12;
 
     private WebDriver driver;
     private WebDriverWait wait;
