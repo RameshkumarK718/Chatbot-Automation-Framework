@@ -92,30 +92,83 @@ public class ChatbotTest {
         return connection.getInputStream();
     }
 
-    private String[] getCredentialsFromExcel() {
-        String username = "";
-        String password = "";
+    private java.util.List<String> getRolesFromExcel() {
+
+        java.util.List<String> roles = new java.util.ArrayList<>();
+
+
+
         try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
+
              Workbook workbook = new XSSFWorkbook(is)) {
+
+
+
             if (workbook.getNumberOfSheets() == 0) {
-                throw new RuntimeException("Credentials Excel contains no sheets.");
+
+                throw new RuntimeException("Role Excel contains no sheets.");
+
             }
+
+
+
             Sheet sheet = workbook.getSheetAt(0);
-            Row row = sheet.getRow(1); // Row 2 (0-indexed row 1 for first data row)
-            if (row == null) {
-                row = sheet.getRow(3); // Fallback to row 4 if needed
+
+
+
+            // Row 1 is the header.
+
+            // Roles are stored in Column A from Row 2 onward.
+
+            for (int r = 1; r <= sheet.getLastRowNum(); r++) {
+
+                Row row = sheet.getRow(r);
+
+
+
+                if (row == null) {
+
+                    continue;
+
+                }
+
+
+
+                String role = getCellStringValue(row.getCell(0)).trim();
+
+
+
+                if (!role.isBlank()) {
+
+                    roles.add(role);
+
+                }
+
             }
-            if (row == null) {
-                throw new RuntimeException("Credentials row was not found in Excel.");
-            }
-            username = getCellStringValue(row.getCell(0));
-            password = getCellStringValue(row.getCell(1));
-            System.out.println("--> Credentials loaded successfully.");
+
+
+
+            System.out.println("--> Roles loaded successfully: " + roles);
+
+
+
         } catch (Exception e) {
-            throw new RuntimeException("Error reading credentials Excel: " + e.getMessage(), e);
+
+            throw new RuntimeException(
+
+                    "Error reading role Excel: " + e.getMessage(), e
+
+            );
+
         }
-        return new String[]{username, password};
+
+
+
+        return roles;
+
     }
+
+
 
     private String getCellStringValue(Cell cell) {
         if (cell == null) {
@@ -218,65 +271,226 @@ public class ChatbotTest {
     // ==================== DRIVER INITIALIZATION & LOGIN ====================
 
     private void initializeDriverAndLogin() {
-        String[] credentials = getCredentialsFromExcel();
-        String memberId = credentials[0];
-        String password = credentials[1];
 
-        Assert.assertFalse(memberId.isBlank(), "Member ID is missing from Cloud Excel.");
-        Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
 
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
-        options.addArguments("--remote-allow-origins=*");
 
-        driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(Duration.ZERO);
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
-        wait = new WebDriverWait(driver, WAIT_TIMEOUT);
+        java.util.List<String> configuredRoles = getRolesFromExcel();
 
-        try {
-            System.out.println("--> Opening application URL: " + APP_URL);
-            driver.get(APP_URL);
 
-            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
-            memberInput.clear();
-            memberInput.sendKeys(memberId);
 
-            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
-            passwordInput.clear();
-            passwordInput.sendKeys(password);
+        if (configuredRoles.isEmpty()) {
 
-            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
-            clickElement(loginButton);
+            throw new IllegalStateException(
 
-            System.out.println("--> Login submitted.");
+                    "No roles found in credentials Excel."
 
-            wait.until(ExpectedConditions.or(
-                    ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Conversational AI')]"))
-            ));
-
-            System.out.println("--> Post-login page loaded.");
-
-            By conversationalAILocator = By.xpath(
-                    "//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')] | //*[contains(normalize-space(), 'Conversational AI')]"
             );
 
-            WebElement conversationalAI = wait.until(ExpectedConditions.elementToBeClickable(conversationalAILocator));
-            clickElement(conversationalAI);
-            System.out.println("--> Conversational AI clicked.");
-
-            waitForChatInput();
-            System.out.println("--> Chatbot input is ready.");
-
-        } catch (Exception e) {
-            throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
         }
+
+
+
+        ChromeOptions options = new ChromeOptions();
+
+
+
+        options.addArguments("--headless=new");
+
+        options.addArguments("--no-sandbox");
+
+        options.addArguments("--disable-dev-shm-usage");
+
+        options.addArguments("--disable-gpu");
+
+        options.addArguments("--window-size=1920,1080");
+
+        options.addArguments("--remote-allow-origins=*");
+
+
+
+        driver = new ChromeDriver(options);
+
+
+
+        driver.manage().timeouts().implicitlyWait(Duration.ZERO);
+
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+
+
+
+        wait = new WebDriverWait(driver, WAIT_TIMEOUT);
+
+
+
+        String role = configuredRoles.get(0).trim();
+
+
+
+        System.out.println("--> Selected role from Excel: " + role);
+
+        System.out.println("--> Opening application URL: " + APP_URL);
+
+
+
+        driver.get(APP_URL);
+
+
+
+        String roleKey = role
+
+                .replaceAll("////s+", " ")
+
+                .trim()
+
+                .toLowerCase();
+
+
+
+        By roleButtonLocator = By.xpath(
+
+                "//button[" +
+
+                "translate(normalize-space(.)," +
+
+                "'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
+
+                "'abcdefghijklmnopqrstuvwxyz')" +
+
+                "='" + roleKey + "'" +
+
+                "]"
+
+        );
+
+
+
+        WebElement roleButton = wait.until(
+
+                ExpectedConditions.elementToBeClickable(roleButtonLocator)
+
+        );
+
+
+
+        clickElement(roleButton);
+
+
+
+        System.out.println("--> Role selected: " + role);
+
+
+
+        // EFI requires a name after selecting the role.
+
+        By nameInputLocator = By.cssSelector(
+
+                "input[placeholder='Your name']"
+
+        );
+
+
+
+        WebElement nameInput = wait.until(
+
+                ExpectedConditions.elementToBeClickable(nameInputLocator)
+
+        );
+
+
+
+        String testUserName = System.getProperty(
+
+                "efi.user.name",
+
+                System.getenv().getOrDefault(
+
+                        "EFI_USER_NAME",
+
+                        System.getProperty("user.name", "Automation User")
+
+                )
+
+        );
+
+
+
+        if (testUserName == null || testUserName.isBlank()) {
+
+            throw new IllegalStateException(
+
+                    "EFI user name is empty."
+
+            );
+
+        }
+
+
+
+        nameInput.clear();
+
+        nameInput.sendKeys(testUserName);
+
+
+
+        System.out.println(
+
+                "--> Name entered for EFI session."
+
+        );
+
+
+
+        By continueButtonLocator = By.xpath(
+
+                "//button[@type='submit' and normalize-space()='Continue']"
+
+        );
+
+
+
+        WebElement continueButton = wait.until(
+
+                ExpectedConditions.elementToBeClickable(
+
+                        continueButtonLocator
+
+                )
+
+        );
+
+
+
+        clickElement(continueButton);
+
+
+
+        System.out.println(
+
+                "--> Continue clicked."
+
+        );
+
+
+
+        waitForChatInput();
+
+
+
+        System.out.println(
+
+                "--> Chatbot input is ready."
+
+        );
+
+
+
+        System.out.println("--> Chatbot input is ready.");
+
+
+
     }
+
+
 
     // ==================== CHATBOT INTERACTION HELPERS ====================
 
