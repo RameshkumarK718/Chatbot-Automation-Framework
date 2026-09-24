@@ -3,7 +3,7 @@
 <suite name="Universal Chatbot Automation Suite" verbose="1">
     <test name="Chatbot Regression Tests">
         <classes>
-            <class name="com.chatbot.tests.ChatbotTest"/>
+            <class name="com.ChatbotTest"/>
         </classes>
     </test>
 </suite>

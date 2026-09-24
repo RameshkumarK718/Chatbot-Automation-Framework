@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 package com.chatbot;
+=======
+package com;
+>>>>>>> 1d8077a (Update ChatbotTest path and Frame utility for login handling)
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -423,3 +427,7 @@ public class ChatbotTest {
         }
     }
 }
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1d8077a (Update ChatbotTest path and Frame utility for login handling)

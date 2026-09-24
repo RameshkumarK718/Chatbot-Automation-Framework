@@ -21,20 +21,11 @@
     </properties>
 
     <dependencies>
-<<<<<<< HEAD
-
-        <!-- Selenium WebDriver -->
-        <dependency>
-            <groupId>org.seleniumhq.selenium</groupId>
-            <artifactId>selenium-java</artifactId>
-            <version>4.29.0</version>
-=======
         <!-- Selenium Java -->
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
             <artifactId>selenium-java</artifactId>
             <version>${selenium.version}</version>
->>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832
         </dependency>
 
         <!-- Apache POI for Excel Handling -->
@@ -65,7 +56,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- SLF4J API & Simple Binding (Moved to compile scope for global logging stability) -->
+        <!-- SLF4J API & Simple Binding -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -90,35 +81,20 @@
                 </configuration>
             </plugin>
 
-<<<<<<< HEAD
-            <!-- Maven Surefire Plugin (Runs TestNG via testng.xml) -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.2.5</version>
-=======
             <!-- Maven Surefire Plugin to execute testng.xml -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.3.0</version>
->>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832
                 <configuration>
                     <suiteXmlFiles>
                         <suiteXmlFile>testng.xml</suiteXmlFile>
                     </suiteXmlFiles>
-<<<<<<< HEAD
-=======
                     <useFile>false</useFile>
                     <trimStackTrace>false</trimStackTrace>
->>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
-<<<<<<< HEAD
 </project>
-=======
-</project>
->>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832
