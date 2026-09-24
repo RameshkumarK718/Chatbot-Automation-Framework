@@ -1,5 +1,4 @@
 package com;
-
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -16,7 +15,6 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -286,8 +284,4 @@ public class ChatbotTest {
             throw new RuntimeException("Failed to update Excel: " + e.getMessage(), e);
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> cb6f8e8cca5a2a7e53107107b5b13168a5988b22
