@@ -277,11 +277,8 @@ public class ChatbotTest {
         System.out.println("--> Opening application URL: " + APP_URL);
         driver.get(APP_URL);
         String roleKey = role
-
-                .replaceAll("////s+", " ")
-
+                .replaceAll("\\s+", " ")
                 .trim()
-
                 .toLowerCase();
         By roleButtonLocator = By.xpath(
 
