@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-package com.chatbot;
-=======
 package com;
->>>>>>> 1d8077a (Update ChatbotTest path and Frame utility for login handling)
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -244,9 +240,20 @@ public class ChatbotTest {
             System.out.println("--> Opening application URL: " + APP_URL);
             driver.get(APP_URL);
 
-            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
-            memberInput.clear();
-            memberInput.sendKeys(memberId);
+           // 1. Wait for and fill the email/member ID field
+// 1. Wait for and fill the email/member ID field
+WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
+    By.xpath("//input[@id='vaa-email' or contains(@placeholder, 'email') or @type='email']")
+));
+memberInput.clear();
+memberInput.sendKeys(memberId);
+
+// 2. Wait for and fill the password field
+WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
+    By.xpath("//input[@id='vaa-pw' or contains(@placeholder, 'Password') or @type='password']")
+));
+passwordInput.clear();
+passwordInput.sendKeys(password); // Fixed: changed passwordPwd to password
 
             WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
             passwordInput.clear();
@@ -427,7 +434,3 @@ public class ChatbotTest {
         }
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 1d8077a (Update ChatbotTest path and Frame utility for login handling)
