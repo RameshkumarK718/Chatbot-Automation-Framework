@@ -1,6 +1,12 @@
+<<<<<<< HEAD
 
 # Maven / Java build output
 
+=======
+<<<<<<< HEAD
+.project/n.classpath/n.settings//ntarget//nbin//n
+# Java/Maven
+>>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832
 target/
 
 bin/
@@ -37,6 +43,7 @@ venv/
 
 *.swp
 
+<<<<<<< HEAD
 *.swo
 
 *.swn
@@ -44,12 +51,54 @@ venv/
 
 
 # TestNG generated reports
+=======
+=======
+# Maven
+
+target/
+
+*.class
+
+
+# Eclipse
+
+.classpath
+
+.project
+
+.settings/
+
+
+# Python
+
+__pycache__/
+
+*.pyc
+
+.pytest_cache/
+
+venv/
+
+.venv/
+
+
+# TestNG
+>>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832
 
 test-output/
 
 
+<<<<<<< HEAD
 
 # Temporary / backup files
 
 *.backup
 
+=======
+# Temporary files
+
+*.swp
+
+*.swo
+>>>>>>> efi-repo/main
+>>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832

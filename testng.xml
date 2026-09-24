@@ -1,7 +1,7 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
-<suite name="Chatbot Automation Suite">
-    <test name="Chatbot Tests">
+<suite name="Universal Chatbot Automation Suite" verbose="1">
+    <test name="Chatbot Regression Tests">
         <classes>
             <class name="com.chatbot.tests.ChatbotTest"/>
         </classes>
