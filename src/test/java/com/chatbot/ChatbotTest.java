@@ -29,7 +29,6 @@ public class ChatbotTest {
 
     // ==================== TEST DATA MODEL ====================
 
-    // FLEXIBLE TEST DATA MODEL SUPPORTING DYNAMIC COLUMNS
     public static class TestRowData {
         public String sheetName;
         public int rowIndex;
@@ -60,15 +59,15 @@ public class ChatbotTest {
 
     // ==================== CONFIGURATIONS & VARIABLES ====================
 
- private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(20);
-private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(20);
+    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(20);
+    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(20);
     
     // Dynamic configuration via system properties or defaults
     private static final String APP_URL = System.getProperty("app.url", "https://d3rl0fkw0q6ssb.cloudfront.net/");
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url", 
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/credentials(1).xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx");
     private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url", 
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/Frameworks(Vedas).xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx");
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
 
@@ -92,57 +91,31 @@ private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(20);
         return connection.getInputStream();
     }
 
-    private java.util.List<String> getRolesFromExcel() {
-
-        java.util.List<String> roles = new java.util.ArrayList<>();
+    private List<String> getRolesFromExcel() {
+        List<String> roles = new ArrayList<>();
         try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
-
              Workbook workbook = new XSSFWorkbook(is)) {
             if (workbook.getNumberOfSheets() == 0) {
-
                 throw new RuntimeException("Role Excel contains no sheets.");
-
             }
             Sheet sheet = workbook.getSheetAt(0);
-            // Row 1 is the header.
-
-            // Roles are stored in Column A from Row 2 onward.
-
             for (int r = 1; r <= sheet.getLastRowNum(); r++) {
-
                 Row row = sheet.getRow(r);
                 if (row == null) {
-
                     continue;
-
                 }
                 String role = getCellStringValue(row.getCell(0)).trim();
                 if (!role.isBlank()) {
-
                     roles.add(role);
-
                 }
-
             }
             System.out.println("--> Roles loaded successfully: " + roles);
-
-
-
         } catch (Exception e) {
-
-            throw new RuntimeException(
-
-                    "Error reading role Excel: " + e.getMessage(), e
-
-            );
-
+            throw new RuntimeException("Error reading role Excel: " + e.getMessage(), e);
         }
-
-
-
         return roles;
-
     }
+
     private String getCellStringValue(Cell cell) {
         if (cell == null) {
             return "";
@@ -155,7 +128,6 @@ private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(20);
         }
     }
 
-    // DYNAMIC EXCEL DATA FETCHER (Reads headers automatically)
     private List<TestRowData> fetchExcelDataFromGitHub(String fileUrl) {
         List<TestRowData> dataList = new ArrayList<>();
 
@@ -182,7 +154,6 @@ private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(20);
                     Row row = sheet.getRow(r);
                     if (row == null) continue;
 
-                    // Dynamically locate columns based on common names or header variants
                     String role = getCellByAnyHeader(row, colMap, "role", "set #");
                     String question = getCellByAnyHeader(row, colMap, "question / input to enter", "question");
                     String expectedResult = getCellByAnyHeader(row, colMap, "expected result", "what it tests / expected answer");
@@ -195,7 +166,6 @@ private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(20);
                         continue;
                     }
 
-                    // Find index for Actual result, Pass/Fail columns to write back later
                     String testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
 
                     dataList.add(new TestRowData(
@@ -244,133 +214,79 @@ private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(20);
     // ==================== DRIVER INITIALIZATION & LOGIN ====================
 
     private void initializeDriverAndLogin() {
-        java.util.List<String> configuredRoles = getRolesFromExcel();
+        List<String> configuredRoles = getRolesFromExcel();
         if (configuredRoles.isEmpty()) {
-
-            throw new IllegalStateException(
-
-                    "No roles found in credentials Excel."
-
-            );
-
+            throw new IllegalStateException("No roles found in credentials Excel.");
         }
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
-
         options.addArguments("--no-sandbox");
-
         options.addArguments("--disable-dev-shm-usage");
-
         options.addArguments("--disable-gpu");
-
         options.addArguments("--window-size=1920,1080");
-
         options.addArguments("--remote-allow-origins=*");
+        
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
-
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);
+        
         String role = configuredRoles.get(0).trim();
         System.out.println("--> Selected role from Excel: " + role);
 
         System.out.println("--> Opening application URL: " + APP_URL);
         driver.get(APP_URL);
+        
+        // Fixed regex escape sequence bug here
         String roleKey = role
                 .replaceAll("\\s+", " ")
                 .trim()
                 .toLowerCase();
+                
         By roleButtonLocator = By.xpath(
-
                 "//button[" +
-
                 "translate(normalize-space(.)," +
-
                 "'ABCDEFGHIJKLMNOPQRSTUVWXYZ'," +
-
                 "'abcdefghijklmnopqrstuvwxyz')" +
-
                 "='" + roleKey + "'" +
-
                 "]"
-
         );
         WebElement roleButton = wait.until(
-
                 ExpectedConditions.elementToBeClickable(roleButtonLocator)
-
         );
         clickElement(roleButton);
         System.out.println("--> Role selected: " + role);
-        // EFI requires a name after selecting the role.
 
-        By nameInputLocator = By.cssSelector(
-
-                "input[placeholder='Your name']"
-
-        );
+        By nameInputLocator = By.cssSelector("input[placeholder='Your name']");
         WebElement nameInput = wait.until(
-
                 ExpectedConditions.elementToBeClickable(nameInputLocator)
-
         );
+        
         String testUserName = System.getProperty(
-
                 "efi.user.name",
-
                 System.getenv().getOrDefault(
-
                         "EFI_USER_NAME",
-
                         System.getProperty("user.name", "Automation User")
-
                 )
-
         );
         if (testUserName == null || testUserName.isBlank()) {
-
-            throw new IllegalStateException(
-
-                    "EFI user name is empty."
-            );
-
+            throw new IllegalStateException("EFI user name is empty.");
         }
         nameInput.clear();
-
         nameInput.sendKeys(testUserName);
-        System.out.println(
+        System.out.println("--> Name entered for EFI session.");
 
-                "--> Name entered for EFI session."
-
-        );
-        By continueButtonLocator = By.xpath(
-
-                "//button[@type='submit' and normalize-space()='Continue']"
-
-        );
+        By continueButtonLocator = By.xpath("//button[@type='submit' and normalize-space()='Continue']");
         WebElement continueButton = wait.until(
-
-                ExpectedConditions.elementToBeClickable(
-
-                        continueButtonLocator
-
-                )
-
+                ExpectedConditions.elementToBeClickable(continueButtonLocator)
         );
         clickElement(continueButton);
-        System.out.println(
-
-                "--> Continue clicked."
-
-        );
+        System.out.println("--> Continue clicked.");
+        
         waitForChatInput();
-        System.out.println(
-
-                "--> Chatbot input is ready."
-
-        );
         System.out.println("--> Chatbot input is ready.");
     }
+
     // ==================== CHATBOT INTERACTION HELPERS ====================
 
     private By getChatInputLocator() {
@@ -495,7 +411,6 @@ private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(20);
                 Row headerRow = sheet.getRow(0);
                 if (headerRow == null) continue;
 
-                // Find 'Actual result' and 'Pass / Fail' columns dynamically by header
                 for (Cell cell : headerRow) {
                     String header = getCellStringValue(cell).toLowerCase();
                     int colIdx = cell.getColumnIndex();
