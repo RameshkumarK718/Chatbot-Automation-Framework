@@ -21,7 +21,7 @@ on:
       credentials_excel_url:
         description: "Credentials Excel URL (GitHub Raw)"
         required: true
-        default:  "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx"
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx"
 
 jobs:
   run-tests:
