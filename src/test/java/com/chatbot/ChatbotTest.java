@@ -79,8 +79,6 @@ public class ChatbotTest {
     // 3. HTTP STREAM & EXCEL PARSING UTILITIES
     // =========================================================================
     @SuppressWarnings("deprecation")
-	private InputStream openUrlStream(String fileUrl) throws Exception {
-
     private InputStream openUrlStream(String fileUrl) throws Exception {
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
