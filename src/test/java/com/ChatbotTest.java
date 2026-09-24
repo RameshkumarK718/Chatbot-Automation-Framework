@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-package com.chatbot;
-=======
 package com;
->>>>>>> 1d8077a (Update ChatbotTest path and Frame utility for login handling)
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -228,7 +224,10 @@ public class ChatbotTest {
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
 
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
+        // Automatically enable headless mode if running in a CI/CD environment (like GitHub Actions)
+        // Or you can uncomment the line below directly:
+        options.addArguments("--headless=new"); 
+        
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
@@ -237,26 +236,41 @@ public class ChatbotTest {
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(90));
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);
 
         try {
             System.out.println("--> Opening application URL: " + APP_URL);
             driver.get(APP_URL);
 
-            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
+            // Ensure document is fully loaded
+            wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
+
+            // 1. Wait for and fill the email/member ID field
+            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("vaa-email")
+            ));
             memberInput.clear();
             memberInput.sendKeys(memberId);
+            System.out.println("--> Email entered.");
 
-            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
+            // 2. Wait for and fill the password field
+            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("vaa-pw")
+            ));
             passwordInput.clear();
             passwordInput.sendKeys(password);
+            System.out.println("--> Password entered.");
 
-            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
+            // 3. Click Login
+            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("vaa-submit")
+            ));
             clickElement(loginButton);
 
             System.out.println("--> Login submitted.");
 
+            // 4. Wait for post-login view
             wait.until(ExpectedConditions.or(
                     ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
                     ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Conversational AI')]"))
@@ -382,7 +396,6 @@ public class ChatbotTest {
             executedResults.add(rowData);
         }
         
-        // Safely write results back to Excel regardless of outcomes
         updateFrameworkExcel(executedResults);
 
         if (failedCount > 0) {
@@ -427,7 +440,3 @@ public class ChatbotTest {
         }
     }
 }
-<<<<<<< HEAD
-=======
-
->>>>>>> 1d8077a (Update ChatbotTest path and Frame utility for login handling)
