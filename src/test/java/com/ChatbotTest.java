@@ -224,15 +224,17 @@ public class ChatbotTest {
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
 
         ChromeOptions options = new ChromeOptions();
-        // Automatically enable headless mode if running in a CI/CD environment (like GitHub Actions)
-        // Or you can uncomment the line below directly:
         options.addArguments("--headless=new"); 
-        
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--remote-allow-origins=*");
+        
+        // Prevent CloudFront/WAF from blocking headless browser detection
+        options.addArguments("--disable-blink-features=AutomationControlled");
+        options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
+        options.setExperimentalOption("useAutomationExtension", false);
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
@@ -247,27 +249,30 @@ public class ChatbotTest {
             wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
 
             // 1. Wait for and fill the email/member ID field
-            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
-                By.id("vaa-email")
-            ));
+            WebElement memberInput;
+            try {
+                memberInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("vaa-email")));
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", memberInput);
+                wait.until(ExpectedConditions.elementToBeClickable(memberInput));
+            } catch (org.openqa.selenium.TimeoutException e) {
+                System.out.println("--> TIMEOUT! Current URL: " + driver.getCurrentUrl());
+                System.out.println("--> TIMEOUT! Page Title: " + driver.getTitle());
+                System.out.println("--> PAGE SOURCE:\n" + driver.getPageSource());
+                throw e;
+            }
             memberInput.clear();
             memberInput.sendKeys(memberId);
             System.out.println("--> Email entered.");
 
             // 2. Wait for and fill the password field
-            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
-                By.id("vaa-pw")
-            ));
+            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
             passwordInput.clear();
             passwordInput.sendKeys(password);
             System.out.println("--> Password entered.");
 
             // 3. Click Login
-            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(
-                By.id("vaa-submit")
-            ));
+            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
             clickElement(loginButton);
-
             System.out.println("--> Login submitted.");
 
             // 4. Wait for post-login view
@@ -290,10 +295,11 @@ public class ChatbotTest {
             System.out.println("--> Chatbot input is ready.");
 
         } catch (Exception e) {
+            System.out.println("--> CRITICAL FAILURE URL: " + driver.getCurrentUrl());
+            System.out.println("--> CRITICAL FAILURE TITLE: " + driver.getTitle());
             throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
         }
     }
-
     // =========================================================================
     // 5. CHATBOT INTERACTION & LOCATOR METHODS
     // =========================================================================
