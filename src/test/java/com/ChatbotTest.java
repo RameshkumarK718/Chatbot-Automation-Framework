@@ -286,4 +286,8 @@ public class ChatbotTest {
             throw new RuntimeException("Failed to update Excel: " + e.getMessage(), e);
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> cb6f8e8cca5a2a7e53107107b5b13168a5988b22
