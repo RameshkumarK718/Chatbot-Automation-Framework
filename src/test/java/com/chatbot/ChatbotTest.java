@@ -34,22 +34,28 @@ public class ChatbotTest {
         public int rowIndex;
         public String testCaseId;
         public String role;
+        public String category;
+        public String subcategory;
         public String question;
         public String expectedResult;
+        public String context;
         public String runnable;
         public String actualResult;
         public String reason;
         public String status;
-
         public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
-                           String question, String expectedResult, String runnable,
+                           String category, String subcategory, String question, 
+                           String expectedResult, String context, String runnable,
                            String actualResult, String reason, String status) {
             this.sheetName = sheetName;
             this.rowIndex = rowIndex;
             this.testCaseId = testCaseId;
             this.role = role;
+            this.category = category;
+            this.subcategory = subcategory;
             this.question = question;
             this.expectedResult = expectedResult;
+            this.context = context;
             this.runnable = runnable;
             this.actualResult = actualResult;
             this.reason = reason;
@@ -62,7 +68,6 @@ public class ChatbotTest {
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(20);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(20);
     
-    // Dynamic configuration via system properties or defaults
     private static final String APP_URL = System.getProperty("app.url", "https://d3rl0fkw0q6ssb.cloudfront.net/");
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url", 
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx");
@@ -155,8 +160,11 @@ public class ChatbotTest {
                     if (row == null) continue;
 
                     String role = getCellByAnyHeader(row, colMap, "role", "set #");
-                    String question = getCellByAnyHeader(row, colMap, "question / input to enter", "question");
-                    String expectedResult = getCellByAnyHeader(row, colMap, "expected result", "what it tests / expected answer");
+                    String category = getCellByAnyHeader(row, colMap, "category");
+                    String subcategory = getCellByAnyHeader(row, colMap, "subcategory");
+                    String question = getCellByAnyHeader(row, colMap, "user question", "question / input to enter", "question");
+                    String expectedResult = getCellByAnyHeader(row, colMap, "expected answer", "expected result", "what it tests / expected answer");
+                    String context = getCellByAnyHeader(row, colMap, "conversation context", "context");
                     String runnable = getCellByAnyHeader(row, colMap, "runnable for this role today?");
                     
                     if (question.isBlank()) {
@@ -166,11 +174,14 @@ public class ChatbotTest {
                         continue;
                     }
 
-                    String testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
+                    String testCaseId = getCellByAnyHeader(row, colMap, "test case id");
+                    if (testCaseId.isBlank()) {
+                        testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
+                    }
 
                     dataList.add(new TestRowData(
-                            sheetName, r, testCaseId, role, question, expectedResult,
-                            runnable, "", "", ""
+                            sheetName, r, testCaseId, role, category, subcategory, 
+                            question, expectedResult, context, runnable, "", "", ""
                     ));
                 }
             }
@@ -237,11 +248,7 @@ public class ChatbotTest {
         System.out.println("--> Opening application URL: " + APP_URL);
         driver.get(APP_URL);
         
-        // Fixed regex escape sequence bug here
-        String roleKey = role
-                .replaceAll("\\s+", " ")
-                .trim()
-                .toLowerCase();
+        String roleKey = role.replaceAll("\\s+", " ").trim().toLowerCase();
                 
         By roleButtonLocator = By.xpath(
                 "//button[" +
@@ -251,35 +258,23 @@ public class ChatbotTest {
                 "='" + roleKey + "'" +
                 "]"
         );
-        WebElement roleButton = wait.until(
-                ExpectedConditions.elementToBeClickable(roleButtonLocator)
-        );
+        WebElement roleButton = wait.until(ExpectedConditions.elementToBeClickable(roleButtonLocator));
         clickElement(roleButton);
         System.out.println("--> Role selected: " + role);
 
         By nameInputLocator = By.cssSelector("input[placeholder='Your name']");
-        WebElement nameInput = wait.until(
-                ExpectedConditions.elementToBeClickable(nameInputLocator)
-        );
+        WebElement nameInput = wait.until(ExpectedConditions.elementToBeClickable(nameInputLocator));
         
         String testUserName = System.getProperty(
                 "efi.user.name",
-                System.getenv().getOrDefault(
-                        "EFI_USER_NAME",
-                        System.getProperty("user.name", "Automation User")
-                )
+                System.getenv().getOrDefault("EFI_USER_NAME", System.getProperty("user.name", "Automation User"))
         );
-        if (testUserName == null || testUserName.isBlank()) {
-            throw new IllegalStateException("EFI user name is empty.");
-        }
         nameInput.clear();
         nameInput.sendKeys(testUserName);
         System.out.println("--> Name entered for EFI session.");
 
         By continueButtonLocator = By.xpath("//button[@type='submit' and normalize-space()='Continue']");
-        WebElement continueButton = wait.until(
-                ExpectedConditions.elementToBeClickable(continueButtonLocator)
-        );
+        WebElement continueButton = wait.until(ExpectedConditions.elementToBeClickable(continueButtonLocator));
         clickElement(continueButton);
         System.out.println("--> Continue clicked.");
         
@@ -402,6 +397,7 @@ public class ChatbotTest {
         try (InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
              FileOutputStream outputStream = new FileOutputStream(OUTPUT_EXCEL_FILE)) {
+            
             for (TestRowData result : results) {
                 Sheet sheet = workbook.getSheet(result.sheetName);
                 if (sheet == null) continue;
@@ -414,10 +410,20 @@ public class ChatbotTest {
                 for (Cell cell : headerRow) {
                     String header = getCellStringValue(cell).toLowerCase();
                     int colIdx = cell.getColumnIndex();
-                    if (header.contains("actual result")) {
+                    
+                    // Maps exactly what the Python script checks
+                    if (header.contains("chatbot answer") || header.contains("actual result")) {
                         Cell c = row.getCell(colIdx);
                         if (c == null) c = row.createCell(colIdx);
                         c.setCellValue(result.actualResult);
+                    } else if (header.contains("user question") || header.contains("question")) {
+                        Cell c = row.getCell(colIdx);
+                        if (c == null) c = row.createCell(colIdx);
+                        c.setCellValue(result.question);
+                    } else if (header.contains("expected answer") || header.contains("expected result")) {
+                        Cell c = row.getCell(colIdx);
+                        if (c == null) c = row.createCell(colIdx);
+                        c.setCellValue(result.expectedResult);
                     } else if (header.contains("pass / fail") || header.contains("status")) {
                         Cell c = row.getCell(colIdx);
                         if (c == null) c = row.createCell(colIdx);
@@ -426,7 +432,7 @@ public class ChatbotTest {
                 }
             }
             workbook.write(outputStream);
-            System.out.println("--> Execution results safely written dynamically to output file.");
+            System.out.println("--> Execution results safely mapped and written to output file for Python AI Evaluator.");
         } catch (Exception e) {
             throw new RuntimeException("Failed to update Excel: " + e.getMessage(), e);
         }
