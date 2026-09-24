@@ -27,10 +27,9 @@ import java.util.Map;
 
 public class ChatbotTest {
 
-    // =========================================================================
     // 1. DATA MODEL SUPPORTING DYNAMIC EXCEL COLUMNS
-    // =========================================================================
-    public static class TestRowData {
+
+	public static class TestRowData {
         public String sheetName;
         public int rowIndex;
         public String testCaseId;
@@ -58,10 +57,9 @@ public class ChatbotTest {
         }
     }
 
-    // =========================================================================
     // 2. CONFIGURATION & TIMEOUT CONSTANTS
-    // =========================================================================
-    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
+
+	private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
 
     private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
@@ -75,9 +73,8 @@ public class ChatbotTest {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    // =========================================================================
     // 3. HTTP STREAM & EXCEL PARSING UTILITIES
-    // =========================================================================
+
     @SuppressWarnings("deprecation")
     private InputStream openUrlStream(String fileUrl) throws Exception {
         URL url = new URL(fileUrl);
@@ -195,9 +192,8 @@ public class ChatbotTest {
         return "";
     }
 
-    // =========================================================================
     // 4. TESTNG LIFECYCLE HOOKS (SETUP & TEARDOWN)
-    // =========================================================================
+
     @BeforeMethod
     public void setUp() {
         initializeDriverAndLogin();
@@ -300,9 +296,9 @@ public class ChatbotTest {
             throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
         }
     }
-    // =========================================================================
+    
     // 5. CHATBOT INTERACTION & LOCATOR METHODS
-    // =========================================================================
+
     private By getChatInputLocator() {
         return By.xpath("//input[@placeholder='Ask a question...'] | //textarea[@placeholder='Ask a question...'] | //input[contains(@placeholder,'Ask')] | //textarea[contains(@placeholder,'Ask')] | //div[@contenteditable='true']");
     }
@@ -364,9 +360,8 @@ public class ChatbotTest {
         return waitForChatbotResponse(previousResponse);
     }
 
-    // =========================================================================
     // 6. MAIN TEST EXECUTION METHOD
-    // =========================================================================
+
     @Test
     public void runAutomationFramework() {
         List<TestRowData> testDataList = fetchExcelDataFromGitHub(FRAMEWORK_EXCEL_URL);
@@ -409,9 +404,8 @@ public class ChatbotTest {
         }
     }
 
-    // =========================================================================
     // 7. EXCEL RESULT WRITER (OUTPUT GENERATION)
-    // =========================================================================
+
     private void updateFrameworkExcel(List<TestRowData> results) {
         try (InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
@@ -445,8 +439,4 @@ public class ChatbotTest {
             throw new RuntimeException("Failed to update Excel: " + e.getMessage(), e);
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 64e51c1a45a4c69375f915531a528427d827a083
