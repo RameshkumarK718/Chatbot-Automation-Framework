@@ -224,7 +224,14 @@ public class ChatbotTest {
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
 
         ChromeOptions options = new ChromeOptions();
+<<<<<<< HEAD
         options.addArguments("--headless=new"); 
+=======
+        // Automatically enable headless mode if running in a CI/CD environment (like GitHub Actions)
+        // Or you can uncomment the line below directly:
+        options.addArguments("--headless=new"); 
+        
+>>>>>>> ada0b09caae208b3b8e56dec7ebec7bce73d92d6
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
@@ -251,9 +258,13 @@ public class ChatbotTest {
             // 1. Wait for and fill the email/member ID field
             WebElement memberInput;
             try {
+<<<<<<< HEAD
                 memberInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("vaa-email")));
                 ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", memberInput);
                 wait.until(ExpectedConditions.elementToBeClickable(memberInput));
+=======
+                memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
+>>>>>>> ada0b09caae208b3b8e56dec7ebec7bce73d92d6
             } catch (org.openqa.selenium.TimeoutException e) {
                 System.out.println("--> TIMEOUT! Current URL: " + driver.getCurrentUrl());
                 System.out.println("--> TIMEOUT! Page Title: " + driver.getTitle());
@@ -265,13 +276,25 @@ public class ChatbotTest {
             System.out.println("--> Email entered.");
 
             // 2. Wait for and fill the password field
+<<<<<<< HEAD
             WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
+=======
+            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("vaa-pw")
+            ));
+>>>>>>> ada0b09caae208b3b8e56dec7ebec7bce73d92d6
             passwordInput.clear();
             passwordInput.sendKeys(password);
             System.out.println("--> Password entered.");
 
             // 3. Click Login
+<<<<<<< HEAD
             WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
+=======
+            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.id("vaa-submit")
+            ));
+>>>>>>> ada0b09caae208b3b8e56dec7ebec7bce73d92d6
             clickElement(loginButton);
             System.out.println("--> Login submitted.");
 
@@ -445,4 +468,8 @@ public class ChatbotTest {
             throw new RuntimeException("Failed to update Excel: " + e.getMessage(), e);
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> ada0b09caae208b3b8e56dec7ebec7bce73d92d6
