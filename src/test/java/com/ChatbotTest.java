@@ -222,11 +222,12 @@ public class ChatbotTest {
 
         Assert.assertFalse(memberId.isBlank(), "Member ID is missing from Cloud Excel.");
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
-        
+
         ChromeOptions options = new ChromeOptions();
         // Automatically enable headless mode if running in a CI/CD environment (like GitHub Actions)
         // Or you can uncomment the line below directly:
         options.addArguments("--headless=new"); 
+        
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
@@ -246,9 +247,15 @@ public class ChatbotTest {
             wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
 
             // 1. Wait for and fill the email/member ID field
-            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
-                By.id("vaa-email")
-            ));
+            WebElement memberInput;
+            try {
+                memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
+            } catch (org.openqa.selenium.TimeoutException e) {
+                System.out.println("--> TIMEOUT! Current URL: " + driver.getCurrentUrl());
+                System.out.println("--> TIMEOUT! Page Title: " + driver.getTitle());
+                System.out.println("--> PAGE SOURCE:\n" + driver.getPageSource());
+                throw e;
+            }
             memberInput.clear();
             memberInput.sendKeys(memberId);
             System.out.println("--> Email entered.");
