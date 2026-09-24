@@ -16,12 +16,12 @@ on:
       framework_excel_url:
         description: "Question Bank Excel URL (GitHub Raw)"
         required: true
-        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/Frameworks(Vedas).xlsx"
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx"
 
       credentials_excel_url:
         description: "Credentials Excel URL (GitHub Raw)"
         required: true
-        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/credentials(1).xlsx"
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx"
 
 jobs:
   run-tests:
@@ -57,16 +57,19 @@ jobs:
           mvn -version
           python --version
           google-chrome --version
+
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
       - name: Run Maven Tests
         run: |
           mvn clean test -e -Dsurefire.useFile=false \
             -Dapp.url="${{ inputs.app_url || 'https://d3rl0fkw0q6ssb.cloudfront.net/' }}" \
-            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/Frameworks(Vedas).xlsx' }}" \
-            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/credentials(1).xlsx' }}"
+            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx' }}" \
+            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx' }}"
+
       - name: Run Python AI Evaluator
         if: always()
         env:
@@ -75,6 +78,7 @@ jobs:
           python engine_ai_evaluator.py \
             --input Frameworks_Output.xlsx \
             --output Frameworks-Result.xlsx
+
       - name: Upload Test Reports & Results
         if: always()
         uses: actions/upload-artifact@v4
