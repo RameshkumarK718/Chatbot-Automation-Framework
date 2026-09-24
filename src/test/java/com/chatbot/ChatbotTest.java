@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 package com.chatbot;
-=======
-package com.chatbot.tests;
->>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -83,11 +79,9 @@ public class ChatbotTest {
     // 3. HTTP STREAM & EXCEL PARSING UTILITIES
     // =========================================================================
     @SuppressWarnings("deprecation")
-<<<<<<< HEAD
 	private InputStream openUrlStream(String fileUrl) throws Exception {
-=======
+
     private InputStream openUrlStream(String fileUrl) throws Exception {
->>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -430,8 +424,4 @@ public class ChatbotTest {
             throw new RuntimeException("Failed to update Excel: " + e.getMessage(), e);
         }
     }
-<<<<<<< HEAD
 }
-=======
-}
->>>>>>> 11a839bf6169f9e7ab02254ff8c4a3eb01e3e832
