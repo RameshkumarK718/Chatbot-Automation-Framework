@@ -224,46 +224,50 @@ public class ChatbotTest {
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
 
         ChromeOptions options = new ChromeOptions();
-// options.addArguments("--headless=new"); // <-- Commenting this out opens the visible browser window
-options.addArguments("--no-sandbox");
-options.addArguments("--disable-dev-shm-usage");
-options.addArguments("--disable-gpu");
-options.addArguments("--window-size=1920,1080");
-options.addArguments("--remote-allow-origins=*");
+        // options.addArguments("--headless=new"); // Visible mode for troubleshooting
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+        options.addArguments("--window-size=1920,1080");
+        options.addArguments("--remote-allow-origins=*");
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(90));
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);
 
         try {
             System.out.println("--> Opening application URL: " + APP_URL);
             driver.get(APP_URL);
 
-           // 1. Wait for and fill the email/member ID field
-// 1. Wait for and fill the email/member ID field
-WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
-    By.xpath("//input[@id='vaa-email' or contains(@placeholder, 'email') or @type='email']")
-));
-memberInput.clear();
-memberInput.sendKeys(memberId);
+            // Ensure document is fully loaded
+            wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
 
-// 2. Wait for and fill the password field
-WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
-    By.xpath("//input[@id='vaa-pw' or contains(@placeholder, 'Password') or @type='password']")
-));
-passwordInput.clear();
-passwordInput.sendKeys(password); // Fixed: changed passwordPwd to password
+            // 1. Wait for and fill the email/member ID field with broader fallback XPaths
+            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//input[@id='vaa-email' or @name='email' or contains(@placeholder, 'email') or @type='email' or @tagName='input']")
+            ));
+            memberInput.clear();
+            memberInput.sendKeys(memberId);
+            System.out.println("--> Email entered.");
 
-            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
+            // 2. Wait for and fill the password field
+            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//input[@id='vaa-pw' or @name='password' or contains(@placeholder, 'Password') or @type='password']")
+            ));
             passwordInput.clear();
             passwordInput.sendKeys(password);
+            System.out.println("--> Password entered.");
 
-            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
+            // 3. Click Login
+            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//button[@id='vaa-submit' or @type='submit' or contains(text(), 'Login')]")
+            ));
             clickElement(loginButton);
 
             System.out.println("--> Login submitted.");
 
+            // 4. Wait for post-login view
             wait.until(ExpectedConditions.or(
                     ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
                     ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Conversational AI')]"))
@@ -389,7 +393,6 @@ passwordInput.sendKeys(password); // Fixed: changed passwordPwd to password
             executedResults.add(rowData);
         }
         
-        // Safely write results back to Excel regardless of outcomes
         updateFrameworkExcel(executedResults);
 
         if (failedCount > 0) {
