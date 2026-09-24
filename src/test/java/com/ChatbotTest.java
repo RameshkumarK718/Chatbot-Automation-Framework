@@ -224,7 +224,6 @@ public class ChatbotTest {
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
 
         ChromeOptions options = new ChromeOptions();
-        // options.addArguments("--headless=new"); // Visible mode for troubleshooting
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
@@ -243,9 +242,9 @@ public class ChatbotTest {
             // Ensure document is fully loaded
             wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
 
-            // 1. Wait for and fill the email/member ID field with broader fallback XPaths
+            // 1. Wait for and fill the email/member ID field
             WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//input[@id='vaa-email' or @name='email' or contains(@placeholder, 'email') or @type='email' or @tagName='input']")
+                By.id("vaa-email")
             ));
             memberInput.clear();
             memberInput.sendKeys(memberId);
@@ -253,7 +252,7 @@ public class ChatbotTest {
 
             // 2. Wait for and fill the password field
             WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//input[@id='vaa-pw' or @name='password' or contains(@placeholder, 'Password') or @type='password']")
+                By.id("vaa-pw")
             ));
             passwordInput.clear();
             passwordInput.sendKeys(password);
@@ -261,7 +260,7 @@ public class ChatbotTest {
 
             // 3. Click Login
             WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[@id='vaa-submit' or @type='submit' or contains(text(), 'Login')]")
+                By.id("vaa-submit")
             ));
             clickElement(loginButton);
 
