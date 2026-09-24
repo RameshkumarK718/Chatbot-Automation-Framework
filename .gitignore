@@ -1,12 +1,55 @@
-.project/n.classpath/n.settings//ntarget//nbin//n
-# Java/Maven
+
+# Maven / Java build output
+
 target/
+
+bin/
+
 *.class
+
+
+
+# Eclipse
+
+.metadata/
+
+.classpath
+
+.settings/
+
+
+
 # Python
+
 __pycache__/
+
 *.pyc
+
 .pytest_cache/
+
 venv/
-# Editor
+
+.venv/
+
+
+
+# IDE / temporary files
+
 *.swp
+
+*.swo
+
+*.swn
+
+
+
+# TestNG generated reports
+
+test-output/
+
+
+
+# Temporary / backup files
+
+*.backup
 

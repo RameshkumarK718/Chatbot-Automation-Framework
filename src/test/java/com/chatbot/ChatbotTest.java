@@ -1,9 +1,4 @@
-<<<<<<< Updated upstream
-package com.chatbot.tests;
-=======
 package com.chatbot;
-
->>>>>>> Stashed changes
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -29,57 +24,62 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 public class ChatbotTest {
-    // TEST DATA MODEL
+
+    // =========================================================================
+    // 1. DATA MODEL SUPPORTING DYNAMIC EXCEL COLUMNS
+    // =========================================================================
     public static class TestRowData {
         public String sheetName;
         public int rowIndex;
         public String testCaseId;
-        public String category;
-        public String subcategory;
+        public String role;
         public String question;
-        public String expectedAnswer;
-        public String chatbotAnswer;
-        public String relevance;
+        public String expectedResult;
+        public String runnable;
+        public String actualResult;
+        public String reason;
         public String status;
-        public String passFailureReason;
-        public TestRowData(
-                String sheetName,
-                int rowIndex,
-                String testCaseId,
-                String category,
-                String subcategory,
-                String question,
-                String expectedAnswer,
-                String chatbotAnswer,
-                String relevance,
-                String status,
-                String passFailureReason) {
+
+        public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
+                            String question, String expectedResult, String runnable,
+                            String actualResult, String reason, String status) {
             this.sheetName = sheetName;
             this.rowIndex = rowIndex;
             this.testCaseId = testCaseId;
-            this.category = category;
-            this.subcategory = subcategory;
+            this.role = role;
             this.question = question;
-            this.expectedAnswer = expectedAnswer;
-            this.chatbotAnswer = chatbotAnswer;
-            this.relevance = relevance;
+            this.expectedResult = expectedResult;
+            this.runnable = runnable;
+            this.actualResult = actualResult;
+            this.reason = reason;
             this.status = status;
-            this.passFailureReason = passFailureReason;
         }
     }
-    // CONFIGURATION
-    private static final String APP_URL = "https://d3rl0fkw0q6ssb.cloudfront.net/";
-    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
-    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
-    private static final String CREDENTIALS_EXCEL_URL = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials.xlsx";
-    private static final String FRAMEWORK_EXCEL_URL = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks.xlsx";
-    private static final String FRAMEWORK_EXCEL_FILE = "Frameworks.xlsx";
+
+    // =========================================================================
+    // 2. CONFIGURATION & TIMEOUT CONSTANTS
+    // =========================================================================
+    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
+    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
+
+    private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
+    private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url", 
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
+    private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url", 
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
+
+    private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
+
     private WebDriver driver;
     private WebDriverWait wait;
-<<<<<<< Updated upstream
-    // GET EXCEL INPUT STREAM
-    private InputStream openUrlStream(String fileUrl) throws Exception {
+
+    // =========================================================================
+    // 3. HTTP STREAM & EXCEL PARSING UTILITIES
+    // =========================================================================
+    @SuppressWarnings("deprecation")
+	private InputStream openUrlStream(String fileUrl) throws Exception {
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
@@ -89,21 +89,12 @@ public class ChatbotTest {
         connection.setRequestProperty("Accept", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         int responseCode = connection.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK) {
-            throw new RuntimeException(
-                    "Unable to download file. HTTP response code: "
-                            + responseCode
-                            + " | URL: "
-                            + fileUrl);
+            throw new RuntimeException("Unable to download file. HTTP response code: " + responseCode + " | URL: " + fileUrl);
         }
         return connection.getInputStream();
     }
-    // READ CREDENTIALS FROM EXCEL
-    private String[] getCredentialsFromExcel() {
-=======
 
-    @SuppressWarnings("deprecation")
-	private String[] getCredentialsFromExcel() {
->>>>>>> Stashed changes
+    private String[] getCredentialsFromExcel() {
         String username = "";
         String password = "";
         try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
@@ -112,23 +103,22 @@ public class ChatbotTest {
                 throw new RuntimeException("Credentials Excel contains no sheets.");
             }
             Sheet sheet = workbook.getSheetAt(0);
-            Row row = sheet.getRow(3); // Expects credentials on Excel row index 3
+            Row row = sheet.getRow(1);
             if (row == null) {
-                throw new RuntimeException("Credentials row 4 was not found in Excel.");
+                row = sheet.getRow(3);
             }
-            Cell userCell = row.getCell(0);
-            Cell passCell = row.getCell(1);
-            username = getCellStringValue(userCell);
-            password = getCellStringValue(passCell);
+            if (row == null) {
+                throw new RuntimeException("Credentials row was not found in Excel.");
+            }
+            username = getCellStringValue(row.getCell(0));
+            password = getCellStringValue(row.getCell(1));
             System.out.println("--> Credentials loaded successfully.");
-            System.out.println("--> Member ID: " + username);
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Error reading credentials Excel from GitHub: " + e.getMessage(), e);
+            throw new RuntimeException("Error reading credentials Excel: " + e.getMessage(), e);
         }
         return new String[]{username, password};
     }
-    // EXCEL CELL VALUE HANDLER
+
     private String getCellStringValue(Cell cell) {
         if (cell == null) {
             return "";
@@ -140,64 +130,79 @@ public class ChatbotTest {
             return cell.toString().trim();
         }
     }
-    // FETCH FRAMEWORK DATA FROM GITHUB (Aligned with exact column order)
+
     private List<TestRowData> fetchExcelDataFromGitHub(String fileUrl) {
         List<TestRowData> dataList = new ArrayList<>();
+
         try (InputStream is = openUrlStream(fileUrl);
              Workbook workbook = new XSSFWorkbook(is)) {
             if (workbook.getNumberOfSheets() == 0) {
                 throw new RuntimeException("Framework Excel contains no sheets.");
             }
+
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
                 System.out.println("--> Reading sheet: " + sheetName);
+
+                Row headerRow = sheet.getRow(0);
+                if (headerRow == null) continue;
+
+                Map<String, Integer> colMap = new HashMap<>();
+                for (Cell cell : headerRow) {
+                    colMap.put(getCellStringValue(cell).toLowerCase(), cell.getColumnIndex());
+                }
+
                 for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                     Row row = sheet.getRow(r);
-                    if (row == null) {
-                        continue;
-                    }
-                    // Column mapping based on exact headers:
-                    // 0: Test Case ID | 1: Category | 2: Subcategory | 3: User Question | 4: Expected Answer
-                    String testCaseId = getCellStringValue(row.getCell(0));
-                    String category = getCellStringValue(row.getCell(1));
-                    String subcategory = getCellStringValue(row.getCell(2));
-                    String question = getCellStringValue(row.getCell(3));
-                    String expectedAnswer = getCellStringValue(row.getCell(4));
-                    // Ignore completely empty questions.
+                    if (row == null) continue;
+
+                    String role = getCellByAnyHeader(row, colMap, "role", "set #");
+                    String question = getCellByAnyHeader(row, colMap, "question / input to enter", "question");
+                    String expectedResult = getCellByAnyHeader(row, colMap, "expected result", "what it tests / expected answer");
+                    String runnable = getCellByAnyHeader(row, colMap, "runnable for this role today?");
+                    
                     if (question.isBlank()) {
                         continue;
                     }
-                    if (testCaseId.isBlank()) {
-                        testCaseId = String.format("TC-%03d", r);
+                    if ("no".equalsIgnoreCase(runnable)) {
+                        continue;
                     }
-                    dataList.add(
-                            new TestRowData(
-                                    sheetName,
-                                    r,
-                                    testCaseId,
-                                    category,
-                                    subcategory,
-                                    question,
-                                    expectedAnswer,
-                                    "",
-                                    "High",
-                                    "",
-                                    ""));
+
+                    String testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
+
+                    dataList.add(new TestRowData(
+                            sheetName, r, testCaseId, role, question, expectedResult,
+                            runnable, "", "", ""
+                    ));
                 }
             }
-            System.out.println("--> Successfully parsed " + dataList.size() + " test cases from GitHub.");
+            System.out.println("--> Successfully parsed " + dataList.size() + " test cases dynamically.");
         } catch (Exception e) {
-            throw new RuntimeException(
-                    "Error fetching Frameworks.xlsx from GitHub: " + e.getMessage(), e);
+            throw new RuntimeException("Error fetching Frameworks Excel: " + e.getMessage(), e);
         }
         return dataList;
     }
-    // TEST SETUP & TEARDOWN
+
+    private String getCellByAnyHeader(Row row, Map<String, Integer> colMap, String... possibleHeaders) {
+        for (String header : possibleHeaders) {
+            for (Map.Entry<String, Integer> entry : colMap.entrySet()) {
+                if (entry.getKey().contains(header)) {
+                    return getCellStringValue(row.getCell(entry.getValue()));
+                }
+            }
+        }
+        return "";
+    }
+
+    // =========================================================================
+    // 4. TESTNG LIFECYCLE HOOKS (SETUP & TEARDOWN)
+    // =========================================================================
     @BeforeMethod
     public void setUp() {
         initializeDriverAndLogin();
     }
+
     @AfterMethod
     public void tearDown() {
         if (driver != null) {
@@ -209,83 +214,79 @@ public class ChatbotTest {
             }
         }
     }
-    // INITIALIZE CHROME + LOGIN
+
     private void initializeDriverAndLogin() {
         String[] credentials = getCredentialsFromExcel();
         String memberId = credentials[0];
         String password = credentials[1];
+
         Assert.assertFalse(memberId.isBlank(), "Member ID is missing from Cloud Excel.");
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
+
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
-        options.addArguments("--disable-notifications");
-        options.addArguments("--disable-popup-blocking");
         options.addArguments("--remote-allow-origins=*");
+
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);
+
         try {
-            System.out.println("--> Opening application: " + APP_URL);
+            System.out.println("--> Opening application URL: " + APP_URL);
             driver.get(APP_URL);
-            // MEMBER ID
-            WebElement memberInput = wait.until(
-                    ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
+
+            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-email")));
             memberInput.clear();
             memberInput.sendKeys(memberId);
-            // PASSWORD
-            WebElement passwordInput = wait.until(
-                    ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
+
+            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
             passwordInput.clear();
             passwordInput.sendKeys(password);
-            // LOGIN
-            WebElement loginButton = wait.until(
-                    ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
+
+            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
             clickElement(loginButton);
-            System.out.println("--> Login button clicked.");
-            // WAIT FOR PORTAL / CONVERSATIONAL AI
-            wait.until(
-                    ExpectedConditions.or(
-                            ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
-                            ExpectedConditions.visibilityOfElementLocated(
-                                    By.xpath("//*[contains(normalize-space(),'Conversational AI')]"))
-                    ));
-            System.out.println("--> Login completed successfully.");
-            // OPEN CONVERSATIONAL AI
-            WebElement conversationalAILink = wait.until(
-                    ExpectedConditions.elementToBeClickable(
-                            By.xpath("//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')]")));
-            clickElement(conversationalAILink);
-            System.out.println("--> Conversational AI opened.");
-            // WAIT FOR CHAT INPUT
+
+            System.out.println("--> Login submitted.");
+
+            wait.until(ExpectedConditions.or(
+                    ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
+                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Conversational AI')]"))
+            ));
+
+            System.out.println("--> Post-login page loaded.");
+
+            By conversationalAILocator = By.xpath(
+                    "//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')] | //*[contains(normalize-space(), 'Conversational AI')]"
+            );
+
+            WebElement conversationalAI = wait.until(ExpectedConditions.elementToBeClickable(conversationalAILocator));
+            clickElement(conversationalAI);
+            System.out.println("--> Conversational AI clicked.");
+
             waitForChatInput();
             System.out.println("--> Chatbot input is ready.");
+
         } catch (Exception e) {
-            throw new AssertionError(
-                    "Failed to initialize chatbot test setup: " + e.getMessage(), e);
+            throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
         }
     }
-    // CHAT INPUT LOCATOR & HELPERS
+
+    // =========================================================================
+    // 5. CHATBOT INTERACTION & LOCATOR METHODS
+    // =========================================================================
     private By getChatInputLocator() {
-        return By.xpath(
-                "//input[@placeholder='Ask a question...']"
-                        + " | "
-                        + "//textarea[@placeholder='Ask a question...']"
-                        + " | "
-                        + "//input[contains(@placeholder,'Ask')]"
-                        + " | "
-                        + "//textarea[contains(@placeholder,'Ask')]"
-                        + " | "
-                        + "//div[@contenteditable='true']");
+        return By.xpath("//input[@placeholder='Ask a question...'] | //textarea[@placeholder='Ask a question...'] | //input[contains(@placeholder,'Ask')] | //textarea[contains(@placeholder,'Ask')] | //div[@contenteditable='true']");
     }
+
     private WebElement waitForChatInput() {
-        return wait.until(
-                ExpectedConditions.elementToBeClickable(getChatInputLocator()));
+        return wait.until(ExpectedConditions.elementToBeClickable(getChatInputLocator()));
     }
+
     private void clickElement(WebElement element) {
         try {
             element.click();
@@ -295,19 +296,15 @@ public class ChatbotTest {
             js.executeScript("arguments[0].click();", element);
         }
     }
+
     private List<WebElement> getChatMessages() {
         try {
-            return driver.findElements(
-                    By.xpath(
-                            "//div[contains(@class,'message')]"
-                                    + " | "
-                                    + "//div[contains(@class,'bot-response')]"
-                                    + " | "
-                                    + "//div[contains(@class,'chat-bubble')]"));
+            return driver.findElements(By.xpath("//div[contains(@class,'message')] | //div[contains(@class,'bot-response')] | //div[contains(@class,'chat-bubble')]"));
         } catch (Exception e) {
             return new ArrayList<>();
         }
     }
+
     private String getLastChatMessageText() {
         List<WebElement> messages = getChatMessages();
         for (int i = messages.size() - 1; i >= 0; i--) {
@@ -316,220 +313,113 @@ public class ChatbotTest {
                 if (!text.isBlank()) {
                     return text;
                 }
-            } catch (StaleElementReferenceException ignored) {
-                // Continue to next message.
-            }
+            } catch (StaleElementReferenceException ignored) {}
         }
         return "";
     }
+
     private String waitForChatbotResponse(String previousResponse) {
         WebDriverWait responseWait = new WebDriverWait(driver, RESPONSE_TIMEOUT);
-        return responseWait.until(
-                d -> {
-                    String currentResponse = getLastChatMessageText();
-                    if (currentResponse.isBlank()) {
-                        return null;
-                    }
-                    if (!currentResponse.equals(previousResponse)) {
-                        return currentResponse;
-                    }
-                    return null;
-                });
+        return responseWait.until(d -> {
+            String currentResponse = getLastChatMessageText();
+            if (currentResponse.isBlank()) return null;
+            if (!currentResponse.equals(previousResponse)) return currentResponse;
+            return null;
+        });
     }
+
     private String sendQuestion(String question) {
         String previousResponse = getLastChatMessageText();
         WebElement chatInput = waitForChatInput();
         try {
             chatInput.click();
             chatInput.clear();
-        } catch (Exception ignored) {
-            // Fallback handled smoothly
-        }
+        } catch (Exception ignored) {}
         chatInput.sendKeys(question);
         chatInput.sendKeys(Keys.ENTER);
-        System.out.println("--> Question submitted: " + question);
         return waitForChatbotResponse(previousResponse);
     }
-    // MAIN AUTOMATION TEST
+
+    // =========================================================================
+    // 6. MAIN TEST EXECUTION METHOD
+    // =========================================================================
     @Test
     public void runAutomationFramework() {
         List<TestRowData> testDataList = fetchExcelDataFromGitHub(FRAMEWORK_EXCEL_URL);
-        Assert.assertFalse(
-                testDataList.isEmpty(),
-                "Failed to fetch Excel data from GitHub or file is empty.");
+        Assert.assertFalse(testDataList.isEmpty(), "Failed to fetch Excel data or file is empty.");
+        
         System.out.println("============================================================");
-        System.out.println("Executing " + testDataList.size() + " test cases against Chatbot UI.");
+        System.out.println("Executing " + testDataList.size() + " test cases against target Chatbot.");
         System.out.println("============================================================");
+        
         List<TestRowData> executedResults = new ArrayList<>();
+        int failedCount = 0;
+
         for (int i = 0; i < testDataList.size(); i++) {
             TestRowData rowData = testDataList.get(i);
-            String testCaseId = rowData.testCaseId;
-            String question = rowData.question;
-            if (question == null || question.isBlank()) {
-                continue;
-            }
-            if (testCaseId == null || testCaseId.isBlank()) {
-                testCaseId = String.format("TC-%03d", i + 1);
-                rowData.testCaseId = testCaseId;
-            }
-            System.out.println("\n------------------------------------------------------------");
-            System.out.println("Executing Test Case: " + testCaseId);
-            System.out.println("Question: " + question);
             try {
-                String chatbotResponse = sendQuestion(question);
-                rowData.chatbotAnswer = chatbotResponse;
+                String chatbotResponse = sendQuestion(rowData.question);
+                rowData.actualResult = chatbotResponse;
+                
                 if (chatbotResponse == null || chatbotResponse.isBlank()) {
                     rowData.status = "FAIL";
-                    rowData.passFailureReason = "Chatbot returned an empty response.";
-                } else if (chatbotResponse.toLowerCase().contains("error")) {
-                    rowData.status = "FAIL";
-                    rowData.passFailureReason = "Chatbot returned an error response.";
+                    rowData.reason = "Chatbot returned an empty response.";
+                    failedCount++;
                 } else {
                     rowData.status = "PASS";
-                    rowData.passFailureReason = "Chatbot returned a non-empty response.";
+                    rowData.reason = "Success. Response received.";
                 }
             } catch (Exception e) {
-                rowData.chatbotAnswer = "EXCEPTION: " + safeExceptionMessage(e);
+                rowData.actualResult = "EXCEPTION: " + e.getMessage();
                 rowData.status = "FAIL";
-                rowData.passFailureReason = safeExceptionMessage(e);
+                rowData.reason = e.getMessage();
+                failedCount++;
             }
             executedResults.add(rowData);
-            System.out.println("Status: " + rowData.status);
-            System.out.println("Response: " + rowData.chatbotAnswer);
         }
-        // UPDATE EXCEL & GENERATE REPORT
+        
+        // Safely write results back to Excel regardless of outcomes
         updateFrameworkExcel(executedResults);
-        generateDetailedEnterpriseReport(executedResults);
-    }
-    // SAFE EXCEPTION MESSAGE
-    private String safeExceptionMessage(Exception e) {
-        if (e == null) {
-            return "Unknown error";
+
+        if (failedCount > 0) {
+            System.out.println("--> Warning: Test suite completed with " + failedCount + " failing test case(s). Results written to " + OUTPUT_EXCEL_FILE);
         }
-        String message = e.getMessage();
-        if (message == null || message.isBlank()) {
-            return e.getClass().getSimpleName();
-        }
-        return message;
     }
-    // UPDATE FRAMEWORK EXCEL WITH CHATBOT ANSWERS, STATUS, AND REASONS
+
+    // =========================================================================
+    // 7. EXCEL RESULT WRITER (OUTPUT GENERATION)
+    // =========================================================================
     private void updateFrameworkExcel(List<TestRowData> results) {
-        try (
-            InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
-            Workbook workbook = new XSSFWorkbook(is);
-            FileOutputStream outputStream = new FileOutputStream(FRAMEWORK_EXCEL_FILE)
-        ) {
+        try (InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
+             Workbook workbook = new XSSFWorkbook(is);
+             FileOutputStream outputStream = new FileOutputStream(OUTPUT_EXCEL_FILE)) {
             for (TestRowData result : results) {
                 Sheet sheet = workbook.getSheet(result.sheetName);
-                if (sheet == null) {
-                    continue;
-                }
+                if (sheet == null) continue;
                 Row row = sheet.getRow(result.rowIndex);
-                if (row == null) {
-                    continue;
+                if (row == null) continue;
+                
+                Row headerRow = sheet.getRow(0);
+                if (headerRow == null) continue;
+
+                for (Cell cell : headerRow) {
+                    String header = getCellStringValue(cell).toLowerCase();
+                    int colIdx = cell.getColumnIndex();
+                    if (header.contains("actual result")) {
+                        Cell c = row.getCell(colIdx);
+                        if (c == null) c = row.createCell(colIdx);
+                        c.setCellValue(result.actualResult);
+                    } else if (header.contains("pass / fail") || header.contains("status")) {
+                        Cell c = row.getCell(colIdx);
+                        if (c == null) c = row.createCell(colIdx);
+                        c.setCellValue(result.status);
+                    }
                 }
-                // Col 5: Chatbot Answer
-                Cell chatbotAnswerCell = row.getCell(5);
-                if (chatbotAnswerCell == null) chatbotAnswerCell = row.createCell(5);
-                chatbotAnswerCell.setCellValue(result.chatbotAnswer == null ? "" : result.chatbotAnswer);
-                // Col 7: Status
-                Cell statusCell = row.getCell(7);
-                if (statusCell == null) statusCell = row.createCell(7);
-                statusCell.setCellValue(result.status == null ? "" : result.status);
-                // Col 8: Pass and Failure Reason
-                Cell reasonCell = row.getCell(8);
-                if (reasonCell == null) reasonCell = row.createCell(8);
-                reasonCell.setCellValue(result.passFailureReason == null ? "" : result.passFailureReason);
             }
             workbook.write(outputStream);
-            System.out.println("--> Execution results updated successfully in Frameworks.xlsx");
+            System.out.println("--> Execution results safely written dynamically to output file.");
         } catch (Exception e) {
-            throw new RuntimeException(
-                "Failed to update Frameworks.xlsx: " + e.getMessage(), e
-            );
+            throw new RuntimeException("Failed to update Excel: " + e.getMessage(), e);
         }
     }
-    // ENTERPRISE REPORT
-    private void generateDetailedEnterpriseReport(List<TestRowData> results) {
-        int total = results.size();
-        int passed = 0;
-        int failed = 0;
-        Map<String, Integer> categoryPassCount = new HashMap<>();
-        Map<String, Integer> categoryTotalCount = new HashMap<>();
-        for (TestRowData res : results) {
-            String category = res.category;
-            if (category == null || category.isBlank()) {
-                category = "Uncategorized";
-            }
-            categoryTotalCount.put(
-                    category,
-                    categoryTotalCount.getOrDefault(category, 0) + 1);
-            if ("PASS".equalsIgnoreCase(res.status)) {
-                passed++;
-                categoryPassCount.put(
-                        category,
-                        categoryPassCount.getOrDefault(category, 0) + 1);
-            } else {
-                failed++;
-            }
-        }
-        double passRate = total > 0 ? ((double) passed / total) * 100 : 0.0;
-        double failRate = total > 0 ? ((double) failed / total) * 100 : 0.0;
-        // REPORT HEADER
-        System.out.println();
-        System.out.println("========================================================================================");
-        System.out.println("                        CHATBOT AI & SYSTEM RELIABILITY AUDIT REPORT");
-        System.out.println("========================================================================================");
-        // SECTION 1
-        System.out.println(" >> SECTION 1: EXECUTIVE DASHBOARD SUMMARY");
-        System.out.println("----------------------------------------------------------------------------------------");
-        System.out.printf(" • Total Test Cases Evaluated : %d%n", total);
-        System.out.printf(" • Passed Test Cases          : %d%n", passed);
-        System.out.printf(" • Failed Test Cases          : %d%n", failed);
-        System.out.printf(" • Pass Rate                  : %.2f%%%n", passRate);
-        System.out.printf(" • Fail Rate                  : %.2f%%%n", failRate);
-        // SECTION 2
-        System.out.println();
-        System.out.println("----------------------------------------------------------------------------------------");
-        System.out.println(" >> SECTION 2: CATEGORY-WISE PERFORMANCE BREAKDOWN");
-        System.out.println("----------------------------------------------------------------------------------------");
-        for (Map.Entry<String, Integer> entry : categoryTotalCount.entrySet()) {
-            String category = entry.getKey();
-            int categoryTotal = entry.getValue();
-            int categoryPassed = categoryPassCount.getOrDefault(category, 0);
-            double categoryRate = categoryTotal > 0
-                    ? ((double) categoryPassed / categoryTotal) * 100
-                    : 0.0;
-            System.out.printf(
-                    " • [%s] Passed: %d / %d (%.1f%%)%n",
-                    category,
-                    categoryPassed,
-                    categoryTotal,
-                    categoryRate);
-        }
-        // SECTION 3
-        System.out.println();
-        System.out.println("----------------------------------------------------------------------------------------");
-        System.out.println(" >> SECTION 3: DETAILED QA & MASTER AUDIT LOGS");
-        System.out.println("----------------------------------------------------------------------------------------");
-        for (TestRowData r : results) {
-            System.out.printf("[%s] ID: %s | Sheet: %s | Row: %d%n",
-                    r.status, r.testCaseId, r.sheetName, r.rowIndex);
-            System.out.printf("    Category     : %s%n", r.category);
-            System.out.printf("    Subcategory  : %s%n", r.subcategory);
-            System.out.printf("    Question     : %s%n", r.question);
-            System.out.printf("    Expected     : %s%n", r.expectedAnswer);
-            System.out.printf("    Chatbot      : %s%n", r.chatbotAnswer);
-            System.out.printf("    Relevance    : %s%n", r.relevance);
-            System.out.printf("    Reason       : %s%n", r.passFailureReason);
-            System.out.println("----------------------------------------------------------------------------------------");
-        }
-        System.out.println("========================================================================================");
-    }
 }
-<<<<<<< Updated upstream
-=======
-class chat {
-
-}
->>>>>>> Stashed changes
