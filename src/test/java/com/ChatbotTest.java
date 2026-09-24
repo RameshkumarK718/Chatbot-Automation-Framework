@@ -222,8 +222,11 @@ public class ChatbotTest {
 
         Assert.assertFalse(memberId.isBlank(), "Member ID is missing from Cloud Excel.");
         Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
-
+        
         ChromeOptions options = new ChromeOptions();
+        // Automatically enable headless mode if running in a CI/CD environment (like GitHub Actions)
+        // Or you can uncomment the line below directly:
+        options.addArguments("--headless=new"); 
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         options.addArguments("--disable-gpu");
