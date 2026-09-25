@@ -208,7 +208,7 @@ def update_html_dashboard(output_file="Frameworks-Result.xlsx", html_file="index
 </head>
 <body>
     <div class="container">
-        <h1>🤖 Chatbot Automation Dashboard</h1>
+        <h1> Chatbot Automation Dashboard</h1>
         <div class="card-grid">
             <div class="card">
                 <h3>Total Test Cases</h3>
