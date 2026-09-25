@@ -52,17 +52,17 @@ Return ONLY valid JSON:
     "reason": "The response directly answers the question and contains no hallucinated information."
 }}
 """
-       # Define the models to try in order of preference (Primary -> Fallback)
-        models_to_try = [
+        # Define the models to try in order of preference (Primary -> Fallback)
+      models_to_try = [
             {
                 "model": "gpt-4o-mini", 
                 "strict_json": True, 
                 "desc": "Primary Engine (gpt-4o-mini)"
             },
             {
-                "model": "gpt-3.5-turbo", 
-                "strict_json": True, 
-                "desc": "Fallback Engine (gpt-3.5-turbo)"
+                "model": "openrouter/free", 
+                "strict_json": False, 
+                "desc": "Fallback Engine (OpenRouter Free Router)"
             }
         ]
         last_exception = None
