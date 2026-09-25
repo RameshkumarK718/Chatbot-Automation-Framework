@@ -62,20 +62,22 @@ public class ChatbotTest {
 	private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
 
-    private static final String APP_URL = System.getProperty("app.url", "https://d3rl0fkw0q6ssb.cloudfront.net/");
+  private static final String APP_URL = System.getProperty("app.url", "https://d3rl0fkw0q6ssb.cloudfront.net/");
     
+    // Input Credentials Excel URL (Correct format)
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url", 
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx");
     
-    // FIX: Change 'github.com/.../blob/main' to 'raw.githubusercontent.com/.../main'
+    // Input Question Bank Excel URL (Removed extra '/raw/')
     private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url", 
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks(Vedas).xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx");
     
+    // Output Result Excel URL (Removed extra '/raw/')
     private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url", 
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks-Result(Vedas).xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(Vedas).xlsx");
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
-
+	
     private WebDriver driver;
     private WebDriverWait wait;
 
