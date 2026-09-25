@@ -54,8 +54,8 @@ Return ONLY valid JSON:
 """
         try:
             response = self.client.chat.completions.create(
-                   # model="gpt-4o-mini",
-              model="openrouter/free",
+                   model="gpt-4o-mini",
+             # model="openrouter/free",
             messages=[
                     {
                         "role": "system",
