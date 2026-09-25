@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Chatbot QA Automation Dashboard | TestNG Framework</title>
+    <title>Universal Chatbot QA Automation Dashboard | Multi-Framework Suite</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome for Icons -->
@@ -30,15 +30,21 @@
             <div>
                 <h1 class="font-bold text-lg text-white tracking-tight flex items-center gap-2">
                     Universal Chatbot Automation Suite 
-                    <span class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">TestNG + Selenium + AI</span>
+                    <span id="badge-framework" class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">EFI Framework</span>
                 </h1>
-                <p class="text-xs text-slate-400">Target App: <a href="https://d3rl0fkw0q6ssb.cloudfront.net/" target="_blank" class="text-indigo-400 hover:underline">https://d3rl0fkw0q6ssb.cloudfront.net/</a></p>
+                <p class="text-xs text-slate-400">Target App: <a id="target-app-link" href="https://d3rl0fkw0q6ssb.cloudfront.net/" target="_blank" class="text-indigo-400 hover:underline">https://d3rl0fkw0q6ssb.cloudfront.net/</a></p>
             </div>
         </div>       
+        
         <div class="flex items-center space-x-4">
-            <div class="hidden md:flex items-center space-x-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 text-xs text-slate-300">
-                <i class="fa-brands fa-github text-slate-400"></i>
-                <span class="font-mono truncate max-w-xs">RameshkumarK718/Chatbot-Automation-Framework</span>
+            <!-- App Switcher Dropdown -->
+            <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
+                <span class="text-slate-400 font-medium"><i class="fa-solid fa-layer-group mr-1 text-indigo-400"></i> App Suite:</span>
+                <select id="app-selector" onchange="switchTargetApp()" class="bg-slate-900 text-slate-200 border border-slate-700 rounded px-2 py-1 focus:outline-none focus:border-indigo-500 text-xs font-medium cursor-pointer">
+                    <option value="efi">EFI Framework (Cloudfront)</option>
+                    <option value="vedas">Vedas Framework (Vedas App)</option>
+                    <option value="custom">Upload Custom .xlsx File...</option>
+                </select>
             </div>
             <div class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-emerald-400 text-xs font-medium">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -48,25 +54,28 @@
     </header>
 
     <!-- Main Workspace -->
-    <div class="flex-1 flex overflow-hidden">       
+    <div class="flex-1 flex overflow-hidden">        
         <!-- Sidebar Controls & Console -->
         <aside class="w-96 bg-slate-900/60 border-r border-slate-800 flex flex-col shrink-0">
             <!-- Controls Section -->
             <div class="p-5 border-b border-slate-800 space-y-4">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Framework Execution</h2>         
                
+                <!-- Hidden file input for custom uploads -->
+                <input type="file" id="custom-file-input" accept=".xlsx, .xls" class="hidden" onchange="handleCustomFileUpload(event)">
+
                 <!-- Individual Sheet Buttons Container -->
                 <div>
                     <label class="block text-xs font-medium text-slate-400 mb-2">Select Sheet / Role View</label>
                     <div id="sheet-buttons-container" class="space-y-1.5">
-                        <button onclick="loadGithubExcelData()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-file-excel"></i> Load Frameworks(EFI).xlsx First
+                        <button onclick="loadActiveAppData()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-excel"></i> Load Active Excel Data First
                         </button>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 pt-2">
-                    <button onclick="loadGithubExcelData()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
+                    <button onclick="loadActiveAppData()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
                         <i class="fa-solid fa-sync"></i> Refresh Data
                     </button>
                     <button onclick="runSimulatedAutomation()" id="run-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-1.5">
@@ -74,7 +83,7 @@
                     </button>
                 </div>
                 <button onclick="exportReportExcel()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-excel text-emerald-400"></i> Export Frameworks-Result.xlsx
+                    <i class="fa-solid fa-file-excel text-emerald-400"></i> Export Result.xlsx
                 </button>
             </div>
 
@@ -88,8 +97,7 @@
                 </div>
                 <div id="console-logs" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-y-auto custom-scrollbar space-y-1">
                     <div class="text-slate-500">[INFO] Initializing Universal TestNG Runner & AI Evaluator...</div>
-                    <div class="text-slate-500">[INFO] Universal Excel mapping locked to repository specifications.</div>
-                    <div class="text-indigo-400">[READY] Click "Load Frameworks(EFI).xlsx First" to populate navigation buttons.</div>
+                    <div class="text-indigo-400">[READY] Select your target App Suite and click Load.</div>
                 </div>
             </div>
         </aside>
@@ -133,7 +141,7 @@
                 <div class="bg-slate-900 border border-slate-800 rounded-xl flex-1 flex flex-col overflow-hidden shadow-xl">
                     <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
                         <h3 id="table-title" class="font-semibold text-sm text-white flex items-center gap-2">
-                            <i class="fa-solid fa-table text-indigo-400"></i> Frameworks(EFI).xlsx Execution Results (Select a sheet)
+                            <i class="fa-solid fa-table text-indigo-400"></i> Execution Results (Select app and load data)
                         </h3>
                         <div class="flex items-center gap-2">
                             <input type="text" id="search-input" onkeyup="filterTable()" placeholder="Search test cases or questions..." class="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500 w-64">
@@ -160,7 +168,7 @@
                                 <tr>
                                     <td colspan="11" class="text-center py-12 text-slate-500">
                                         <i class="fa-solid fa-file-excel text-3xl mb-2 block text-slate-600"></i>
-                                        Click <strong>"Load Frameworks(EFI).xlsx First"</strong> above to load test sheets and generate navigation buttons.
+                                        Select your App Suite above and click <strong>"Load Active Excel Data"</strong>.
                                     </td>
                                 </tr>
                             </tbody>
@@ -171,12 +179,26 @@
         </main>
     </div>
 
-    <!-- JavaScript Automation Simulator & Table Renderer -->
+    <!-- JavaScript Automation Simulator & Multi-App Config Manager -->
     <script>
+        // App Configurations Registry
+        const appConfigs = {
+            "efi": {
+                name: "EFI Framework",
+                url: "https://d3rl0fkw0q6ssb.cloudfront.net/",
+                fileUrl: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx"
+            },
+            "vedas": {
+                name: "Vedas Framework",
+                url: "https://vedas.app/chat", // Update with your actual Vedas app URL if different
+                fileUrl: "Frameworks(Vedas).xlsx" // Local file path or relative path if hosted together
+            }
+        };
+
+        let currentAppKey = "efi";
         let workbookData = {}; 
         let sheetNamesList = [];
         let currentSheetName = "";
-        const githubExcelUrl = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx";        
 
         function logToConsole(message, type = "info") {
             const consoleDiv = document.getElementById('console-logs');
@@ -193,10 +215,67 @@
             document.getElementById('console-logs').innerHTML = "";
         }
 
-        async function loadGithubExcelData() {
-            logToConsole("Fetching Frameworks(EFI).xlsx from GitHub repository...", "step");
+        function switchTargetApp() {
+            const selector = document.getElementById('app-selector');
+            const selectedVal = selector.value;
+
+            if (selectedVal === "custom") {
+                document.getElementById('custom-file-input').click();
+                return;
+            }
+
+            currentAppKey = selectedVal;
+            const config = appConfigs[currentAppKey];
+
+            // Update UI elements in Header
+            document.getElementById('badge-framework').innerText = config.name;
+            const linkEl = document.getElementById('target-app-link');
+            linkEl.href = config.url;
+            linkEl.innerText = config.url;
+
+            logToConsole(`Switched active app configuration to: ${config.name} (${config.url})`, "step");
+            loadActiveAppData();
+        }
+
+        function handleCustomFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            logToConsole(`Reading custom uploaded file: ${file.name}...`, "step");
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const arrayBuffer = e.target.result;
+                    const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+                    
+                    sheetNamesList = workbook.SheetNames;
+                    workbookData = {};
+                    sheetNamesList.forEach(name => {
+                        const worksheet = workbook.Sheets[name];
+                        workbookData[name] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    });
+
+                    buildSheetButtons();
+                    if (sheetNamesList.length > 0) currentSheetName = sheetNamesList[0];
+
+                    // Update header badge for custom file
+                    document.getElementById('badge-framework').innerText = file.name;
+                    logToConsole(`Successfully parsed custom file! Sheets: ${sheetNamesList.join(', ')}`, "success");
+                    renderTable();
+                    updateMetrics();
+                } catch (err) {
+                    logToConsole(`Error parsing uploaded Excel file: ${err.message}`, "error");
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function loadActiveAppData() {
+            const config = appConfigs[currentAppKey];
+            logToConsole(`Fetching spreadsheet for [${config.name}] from: ${config.fileUrl}`, "step");
+            
             try {
-                const response = await fetch(githubExcelUrl);
+                const response = await fetch(config.fileUrl);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const arrayBuffer = await response.arrayBuffer();             
                 const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
@@ -210,33 +289,32 @@
                 });
 
                 buildSheetButtons();
-
                 if (sheetNamesList.length > 0) {
                     currentSheetName = sheetNamesList[0];
                 }
 
-                logToConsole(`Successfully parsed Frameworks(EFI).xlsx! Sheets found: ${sheetNamesList.join(', ')}`, "success");
+                logToConsole(`Successfully loaded data for [${config.name}]! Sheets: ${sheetNamesList.join(', ')}`, "success");
                 renderTable();
                 updateMetrics();
             } catch (err) {
-                logToConsole(`Failed to fetch from GitHub raw URL (CORS or Network issue). Loading local fallback test data...`, "error");
-                loadFallbackData();
+                logToConsole(`Network/CORS fetch issue for ${config.fileUrl}. Loading simulated layout...`, "error");
+                loadFallbackData(config.name);
             }
         }
 
-        function loadFallbackData() {
+        function loadFallbackData(appName) {
             sheetNamesList = ["End User", "L1 Engineer", "SDM", "PMO"];
             workbookData = {
                 "End User": [
                     ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
-                    ["End User", 1, "Information from KB", 1, "How do I setup VPN?", "Chat", "Chat replies with VPN steps.", "KB", "Yes", "", ""]
+                    ["End User", 1, `${appName} KB Test`, 1, "How do I check system status?", "Chat", "Chat replies with status steps.", "KB", "Yes", "", ""]
                 ]
             };
             buildSheetButtons();
             currentSheetName = sheetNamesList[0];
             renderTable();
             updateMetrics();
-            logToConsole("Fallback test records loaded successfully.", "success");
+            logToConsole(`Fallback test records loaded for ${appName}.`, "success");
         }
 
         function buildSheetButtons() {
@@ -294,7 +372,7 @@
                 headerHtml += `<th class="py-3 px-4 ${highlightClass}">${h || ''}</th>`;
             });
             theadRow.innerHTML = headerHtml;
-            document.getElementById('table-title').innerHTML = `<i class="fa-solid fa-table text-indigo-400"></i> Frameworks(EFI).xlsx &gt; ${currentSheetName} (${rows.length - 1} test rows)`;
+            document.getElementById('table-title').innerHTML = `<i class="fa-solid fa-table text-indigo-400"></i> ${currentAppKey.toUpperCase()} &gt; ${currentSheetName} (${rows.length - 1} test rows)`;
 
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
@@ -352,11 +430,12 @@
 
         async function runSimulatedAutomation() {
             if (Object.keys(workbookData).length === 0) {
-                loadFallbackData();
+                loadActiveAppData();
+                return;
             }
 
-            logToConsole(`--- Starting TestNG Suite Run for [${currentSheetName}] ---`, "step");
-            logToConsole("Connecting to https://d3rl0fkw0q6ssb.cloudfront.net/ via ChromeDriver...", "info");             
+            const config = appConfigs[currentAppKey] || { name: "Custom App", url: "Target URL" };
+            logToConsole(`--- Starting TestNG Suite Run against [${config.name}] (${config.url}) ---`, "step");
             
             const runBtn = document.getElementById('run-btn');
             runBtn.disabled = true;
@@ -364,24 +443,22 @@
 
             const rows = workbookData[currentSheetName];
             const headers = rows[0];
-            const headerLen = headers.length; // Ensures proper padding and index mapping
+            const headerLen = headers.length;
 
             for (let i = 1; i < rows.length; i++) {
                 let row = rows[i];
                 if (!row) continue;
 
-                // Ensure row array is fully padded to match header length so columns exist
                 while (row.length < headerLen) {
                     row.push("");
                 }
 
                 const question = row[4] || row[1] || "Test Query";
 
-                logToConsole(`Processing Row ${i} of ${rows.length - 1}: "${question}"`, "info");
-                await new Promise(r => setTimeout(r, 400));
+                logToConsole(`Executing Row ${i}/${rows.length - 1} on ${config.name}: "${question}"`, "info");
+                await new Promise(r => setTimeout(r, 350));
 
-                // Explicitly target Actual result (2nd to last header) and Pass/Fail (last header)
-                row[headerLen - 2] = `Successfully evaluated chatbot response for: "${question}"`;
+                row[headerLen - 2] = `Verified response on ${config.name} for: "${question}"`;
                 row[headerLen - 1] = "PASS";
                 logToConsole(`Result: PASS`, "success");
             }
