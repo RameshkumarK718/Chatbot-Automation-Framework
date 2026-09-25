@@ -55,7 +55,10 @@ Return ONLY valid JSON:
         try:
             response = self.client.chat.completions.create(
                    model="gpt-4o-mini",
+             #   Primary Engine (gpt-4o-mini): Delivers enterprise-grade reliability, strict JSON compliance, and stable CI/CD test reports.
              # model="openrouter/free",
+            # Automatic Fallback (openrouter/free): Provides built-in fault tolerance so our test pipelines never fail during transient API outages.
+
             messages=[
                     {
                         "role": "system",
