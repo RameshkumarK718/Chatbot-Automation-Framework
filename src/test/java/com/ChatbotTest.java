@@ -72,7 +72,7 @@ public class ChatbotTest {
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks(Vedas).xlsx");
     
     private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url", 
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks-Result.xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks-Result(Vedas).xlsx");
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
 
