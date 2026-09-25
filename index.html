@@ -332,9 +332,13 @@
             let passCount = 0;
             let failCount = 0;
 
+            const headers = rows[0] || [];
+            const headerLen = headers.length;
+
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
-                const statusVal = row[row.length - 1] || "";
+                if (!row) continue;
+                const statusVal = row[headerLen - 1] || "";
                 if (statusVal === "PASS") passCount++;
                 if (statusVal === "FAIL") failCount++;
             }
@@ -359,16 +363,26 @@
             runBtn.classList.add('opacity-50');
 
             const rows = workbookData[currentSheetName];
+            const headers = rows[0];
+            const headerLen = headers.length; // Ensures proper padding and index mapping
+
             for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
+                let row = rows[i];
                 if (!row) continue;
+
+                // Ensure row array is fully padded to match header length so columns exist
+                while (row.length < headerLen) {
+                    row.push("");
+                }
+
                 const question = row[4] || row[1] || "Test Query";
 
                 logToConsole(`Processing Row ${i} of ${rows.length - 1}: "${question}"`, "info");
                 await new Promise(r => setTimeout(r, 400));
 
-                row[row.length - 2] = `Successfully evaluated chatbot response for: "${question}"`;
-                row[row.length - 1] = "PASS";
+                // Explicitly target Actual result (2nd to last header) and Pass/Fail (last header)
+                row[headerLen - 2] = `Successfully evaluated chatbot response for: "${question}"`;
+                row[headerLen - 1] = "PASS";
                 logToConsole(`Result: PASS`, "success");
             }
 
