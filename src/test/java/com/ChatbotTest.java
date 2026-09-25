@@ -309,8 +309,7 @@ public class ChatbotTest {
     // 5. CHATBOT INTERACTION & LOCATOR METHODS
 
     private By getChatInputLocator() {
-        // Replace with the exact placeholder or ID/class found during inspection
-        return By.xpath("//input[@placeholder='Your Exact Placeholder'] | //textarea[@placeholder='Your Exact Placeholder'] | //div[@contenteditable='true']");
+        return By.xpath("//input[@placeholder='Ask a question...'] | //textarea[@placeholder='Ask a question...'] | //input[contains(@placeholder,'Ask')] | //textarea[contains(@placeholder,'Ask')] | //div[@contenteditable='true']");
     }
 
     private WebElement waitForChatInput() {
