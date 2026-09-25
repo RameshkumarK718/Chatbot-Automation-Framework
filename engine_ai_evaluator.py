@@ -52,67 +52,34 @@ Return ONLY valid JSON:
     "reason": "The response directly answers the question and contains no hallucinated information."
 }}
 """
-        # Define the models to try in order of preference (Primary -> Fallback)
-        models_to_try = [
-            {
-                "model": "gpt-4o-mini", 
-                "strict_json": True, 
-                "desc": "Primary Engine (gpt-4o-mini)"
-            },
-            {
-              #  "model": "openrouter/free", 
-              #  "strict_json": False, 
-              #  "desc": "Automatic Fallback (openrouter/free)"
+        try:
+            response = self.client.chat.completions.create(
+                   model="gpt-4o-mini",
+             #   Primary Engine (gpt-4o-mini): Delivers enterprise-grade reliability, strict JSON compliance, and stable CI/CD test reports.
+             # model="openrouter/free",
+            # Automatic Fallback (openrouter/free): Provides built-in fault tolerance so our test pipelines never fail during transient API outages.
+
+            messages=[
+                    {
+                        "role": "system",
+                        "content": "You are a QA evaluator. Return valid JSON only."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                response_format={"type": "json_object"},
+                temperature=0.0
+            )
+            return json.loads(response.choices[0].message.content)
+        except Exception as e:
+            return {
+                "relevance": "Irrelevant",
+                "hallucination": True,
+                "score": 0.0,
+                "reason": f"AI evaluation failed: {str(e)}"
             }
-        ]
-
-        last_exception = None
-
-        for attempt in models_to_try:
-            try:
-                # Build request parameters dynamically
-                kwargs = {
-                    "model": attempt["model"],
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": "You are a QA evaluator. Return valid JSON only."
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt
-                        }
-                    ],
-                    "temperature": 0.0
-                }
-                
-                # Only apply strict OpenAI JSON format if supported by the model
-                if attempt["strict_json"]:
-                    kwargs["response_format"] = {"type": "json_object"}
-
-                response = self.client.chat.completions.create(**kwargs)
-                content = response.choices[0].message.content
-                
-                # Clean up markdown code blocks if a free model adds them
-                if "```json" in content:
-                    content = content.split("```json")[1].split("```")[0].strip()
-                elif "```" in content:
-                    content = content.split("```")[1].split("```")[0].strip()
-
-                return json.loads(content)
-
-            except Exception as e:
-                last_exception = e
-                print(f"Warning: {attempt['desc']} failed ({str(e)}). Attempting fallback...")
-                continue
-
-        # If all models fail, return a structured fallback failure response
-        return {
-            "relevance": "Irrelevant",
-            "hallucination": True,
-            "score": 0.0,
-            "reason": f"All AI evaluation models failed. Last error: {str(last_exception)}"
-        }
 
 def get_first_text(row, columns):
     """Return the first non-empty value from the specified columns."""
@@ -150,113 +117,11 @@ def is_hallucinated(value):
         }
     return bool(value)
 
-def update_html_dashboard(output_file="Frameworks-Result.xlsx", html_file="index.html"):
-    """Dynamically reads the evaluated Excel results and updates the index.html dashboard."""
-    try:
-        if not os.path.exists(output_file):
-            print(f"Result file {output_file} not found for HTML generation.")
-            return
-
-        excel_file = pd.ExcelFile(output_file)
-        total_tests = 0
-        total_passed = 0
-        total_failed = 0
-        summary_rows_html = ""
-
-        for sheet_name in excel_file.sheet_names:
-            df = pd.read_excel(output_file, sheet_name=sheet_name, dtype=str)
-            if "Status" in df.columns:
-                sheet_total = len(df)
-                sheet_passed = len(df[df["Status"].str.upper() == "PASS"])
-                sheet_failed = len(df[df["Status"].str.upper() == "FAIL"])
-                
-                total_tests += sheet_total
-                total_passed += sheet_passed
-                total_failed += sheet_failed
-
-                summary_rows_html += f"""
-                <tr>
-                    <td>{sheet_name}</td>
-                    <td>{sheet_total}</td>
-                    <td class="pass">{sheet_passed}</td>
-                    <td class="fail">{sheet_failed}</td>
-                </tr>"""
-
-        pass_percentage = (total_passed / total_tests * 100) if total_tests > 0 else 0
-
-        html_content = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Chatbot Automation Dashboard</title>
-    <style>
-        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; background: #f8f9fa; color: #333; }}
-        .container {{ max-width: 1000px; margin: auto; }}
-        h1 {{ color: #2c3e50; border-bottom: 2px solid #dee2e6; padding-bottom: 10px; }}
-        .card-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 20px; }}
-        .card {{ background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: center; }}
-        .card h3 {{ margin: 0 0 10px 0; color: #6c757d; font-size: 14px; text-transform: uppercase; }}
-        .card p {{ margin: 0; font-size: 24px; font-weight: bold; color: #2c3e50; }}
-        .pass {{ color: #28a745; font-weight: bold; }}
-        .fail {{ color: #dc3545; font-weight: bold; }}
-        table {{ width: 100%; border-collapse: collapse; background: white; margin-top: 30px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }}
-        th, td {{ padding: 12px 15px; text-align: left; border-bottom: 1px solid #dee2e6; }}
-        th {{ background-color: #343a40; color: white; }}
-        tr:hover {{ background-color: #f1f3f5; }}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🤖 Chatbot Automation Dashboard</h1>
-        <div class="card-grid">
-            <div class="card">
-                <h3>Total Test Cases</h3>
-                <p>{total_tests}</p>
-            </div>
-            <div class="card">
-                <h3>Passed</h3>
-                <p class="pass">{total_passed}</p>
-            </div>
-            <div class="card">
-                <h3>Failed</h3>
-                <p class="fail">{total_failed}</p>
-            </div>
-            <div class="card">
-                <h3>Pass Rate</h3>
-                <p>{pass_percentage:.1f}%</p>
-            </div>
-        </div>
-
-        <h2>Module Breakdown</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Module / Sheet Name</th>
-                    <th>Total Tests</th>
-                    <th>Passed</th>
-                    <th>Failed</th>
-                </tr>
-            </thead>
-            <tbody>
-                {summary_rows_html}
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
-"""
-        with open(html_file, "w", encoding="utf-8") as f:
-            f.write(html_content)
-        print(f"Dashboard successfully updated: {html_file}")
-    except Exception as e:
-        print(f"Failed to update HTML dashboard: {e}")
-
 def process_qa_framework_excel(
     input_file="Frameworks_Output.xlsx",
     output_file="Frameworks-Result.xlsx"
 ):
-    """Process all sheets from Java output, generate evaluated Excel report, and update index.html."""
+    """Process all sheets from Java output and generate the evaluated Excel report."""
     if not os.path.exists(input_file):
         print(f"Input file not found: {input_file}")
         pd.DataFrame(
@@ -269,7 +134,6 @@ def process_qa_framework_excel(
             output_file,
             index=False
         )
-        update_html_dashboard(output_file=output_file, html_file="index.html")
         return
 
     api_key = os.getenv("OPENAI_API_KEY")
@@ -285,7 +149,6 @@ def process_qa_framework_excel(
             output_file,
             index=False
         )
-        update_html_dashboard(output_file=output_file, html_file="index.html")
         return
 
     evaluator = AIEvaluator(api_key)
@@ -412,9 +275,6 @@ def process_qa_framework_excel(
             
     print("\nEvaluation completed successfully.")
     print(f"Output file: {output_file}")
-
-    # Automatically generate / update index.html after evaluation
-    update_html_dashboard(output_file=output_file, html_file="index.html")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Run AI Evaluator on Chatbot Results")
