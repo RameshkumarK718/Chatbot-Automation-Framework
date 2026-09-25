@@ -67,9 +67,9 @@ jobs:
       - name: Run Maven Tests
         run: |
           mvn clean test -e -Dsurefire.useFile=false \
-            -Dapp.url="${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}" \
-            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx' }}" \
-            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx' }}"
+            -Dapp.url="${{ inputs.app_url || 'https://d3rl0fkw0q6ssb.cloudfront.net/' }}" \
+            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/Frameworks(Vedas).xlsx' }}" \
+            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/credentials(1).xlsx' }}"
 
       - name: Run Python AI Evaluator
         if: always()
