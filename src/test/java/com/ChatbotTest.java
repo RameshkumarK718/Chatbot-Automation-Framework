@@ -63,10 +63,16 @@ public class ChatbotTest {
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
 
     private static final String APP_URL = System.getProperty("app.url", "https://d3rl0fkw0q6ssb.cloudfront.net/");
+    
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url", 
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/credentials(1).xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx");
+    
+    // FIX: Change 'github.com/.../blob/main' to 'raw.githubusercontent.com/.../main'
     private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url", 
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/Frameworks(Vedas).xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks(Vedas).xlsx");
+    
+    private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url", 
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks-Result.xlsx");
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
 
