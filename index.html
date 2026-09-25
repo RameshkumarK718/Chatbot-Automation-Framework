@@ -181,7 +181,6 @@
 
     <!-- JavaScript Automation Simulator & Multi-App Config Manager -->
     <script>
-        // App Configurations Registry
         const appConfigs = {
             "efi": {
                 name: "EFI Framework",
@@ -190,8 +189,8 @@
             },
             "vedas": {
                 name: "Vedas Framework",
-                url: "https://vedas.app/chat", // Update with your actual Vedas app URL if different
-                fileUrl: "Frameworks(Vedas).xlsx" // Local file path or relative path if hosted together
+                url: "https://vedas.app/chat",
+                fileUrl: "Frameworks(Vedas).xlsx"
             }
         };
 
@@ -227,7 +226,6 @@
             currentAppKey = selectedVal;
             const config = appConfigs[currentAppKey];
 
-            // Update UI elements in Header
             document.getElementById('badge-framework').innerText = config.name;
             const linkEl = document.getElementById('target-app-link');
             linkEl.href = config.url;
@@ -258,7 +256,6 @@
                     buildSheetButtons();
                     if (sheetNamesList.length > 0) currentSheetName = sheetNamesList[0];
 
-                    // Update header badge for custom file
                     document.getElementById('badge-framework').innerText = file.name;
                     logToConsole(`Successfully parsed custom file! Sheets: ${sheetNamesList.join(', ')}`, "success");
                     renderTable();
