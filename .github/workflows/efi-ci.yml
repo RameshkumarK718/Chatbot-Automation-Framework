@@ -16,12 +16,17 @@ on:
       framework_excel_url:
         description: "Question Bank Excel URL (GitHub Raw)"
         required: true
-        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/Frameworks(Vedas).xlsx"
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks(Vedas).xlsx"
 
       credentials_excel_url:
         description: "Credentials Excel URL (GitHub Raw)"
         required: true
-        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/credentials(1).xlsx"
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/credentials(1).xlsx"
+
+      result_excel_url:
+        description: "Result Excel URL (GitHub Raw)"
+        required: true
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks-Result.xlsx"
 
 jobs:
   run-tests:
@@ -68,8 +73,9 @@ jobs:
         run: |
           mvn clean test -e -Dsurefire.useFile=false \
             -Dapp.url="${{ inputs.app_url || 'https://d3rl0fkw0q6ssb.cloudfront.net/' }}" \
-            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/Frameworks(Vedas).xlsx' }}" \
-            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/credentials(1).xlsx' }}"
+            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks(Vedas).xlsx' }}" \
+            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/credentials(1).xlsx' }}" \
+            -Dresult.excel.url="${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/raw/main/Frameworks-Result.xlsx' }}"
 
       - name: Run Python AI Evaluator
         if: always()
