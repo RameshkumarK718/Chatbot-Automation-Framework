@@ -11,17 +11,17 @@ on:
       app_url:
         description: "Target Chatbot App URL"
         required: true
-        default: "https://dtqponlzcij0l.cloudfront.net/"
+        default: "https://d3rl0fkw0q6ssb.cloudfront.net/"
 
       framework_excel_url:
         description: "Question Bank Excel URL (GitHub Raw)"
         required: true
-        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx"
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/Frameworks(Vedas).xlsx"
 
       credentials_excel_url:
         description: "Credentials Excel URL (GitHub Raw)"
         required: true
-        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx"
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/blob/main/credentials(1).xlsx"
 
 jobs:
   run-tests:
