@@ -73,7 +73,8 @@ public class ChatbotTest {
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx");
     
     // Output Result Excel URL (Removed extra '/raw/')
-    private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url", 
+    @SuppressWarnings("unused")
+	private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url", 
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(Vedas).xlsx");
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
@@ -308,7 +309,8 @@ public class ChatbotTest {
     // 5. CHATBOT INTERACTION & LOCATOR METHODS
 
     private By getChatInputLocator() {
-        return By.xpath("//input[@placeholder='Ask a question...'] | //textarea[@placeholder='Ask a question...'] | //input[contains(@placeholder,'Ask')] | //textarea[contains(@placeholder,'Ask')] | //div[@contenteditable='true']");
+        // Replace with the exact placeholder or ID/class found during inspection
+        return By.xpath("//input[@placeholder='Your Exact Placeholder'] | //textarea[@placeholder='Your Exact Placeholder'] | //div[@contenteditable='true']");
     }
 
     private WebElement waitForChatInput() {
