@@ -52,8 +52,7 @@ Return ONLY valid JSON:
     "reason": "The response directly answers the question and contains no hallucinated information."
 }}
 """
-        # Define the models to try in order of preference (Primary -> Fallback)
-      models_to_try = [
+        models_to_try = [
             {
                 "model": "gpt-4o-mini", 
                 "strict_json": True, 
@@ -69,7 +68,6 @@ Return ONLY valid JSON:
 
         for attempt in models_to_try:
             try:
-                # Build request parameters dynamically
                 kwargs = {
                     "model": attempt["model"],
                     "messages": [
@@ -85,14 +83,12 @@ Return ONLY valid JSON:
                     "temperature": 0.0
                 }
                 
-                # Only apply strict OpenAI JSON format if supported by the model
                 if attempt["strict_json"]:
                     kwargs["response_format"] = {"type": "json_object"}
 
                 response = self.client.chat.completions.create(**kwargs)
                 content = response.choices[0].message.content
                 
-                # Clean up markdown code blocks if a free model adds them
                 if "```json" in content:
                     content = content.split("```json")[1].split("```")[0].strip()
                 elif "```" in content:
@@ -105,7 +101,6 @@ Return ONLY valid JSON:
                 print(f"Warning: {attempt['desc']} failed ({str(e)}). Attempting fallback...")
                 continue
 
-        # If all models fail, return a structured fallback failure response
         return {
             "relevance": "Irrelevant",
             "hallucination": True,
@@ -298,7 +293,6 @@ def process_qa_framework_excel(
             sheet_name=sheet_name,
             dtype=str
         )
-        # Drop unnamed/blank pandas index columns if any exist
         df = df.loc[
             :,
             ~df.columns.str.contains(
@@ -312,7 +306,6 @@ def process_qa_framework_excel(
         for index, row in df.iterrows():
             row_dict = row.to_dict()
             
-            # Map precisely to columns populated by Java runner
             question = get_first_text(row, ["User Question", "Question", "Question / Input to enter"])
             expected = get_first_text(row, ["Expected Answer", "Expected Result", "What it tests / Expected Answer"])
             chatbot_answer = get_first_text(row, ["Chatbot Answer", "Actual Result"])
@@ -337,7 +330,6 @@ def process_qa_framework_excel(
                 print(f"Row {index + 1}: FAIL | Match: {match_pct_str} | Empty/Error response")
                 continue
 
-            # Run Advanced OpenAI evaluation
             result = evaluator.evaluate_advanced(
                 question=question,
                 expected=expected,
@@ -351,7 +343,6 @@ def process_qa_framework_excel(
             except (TypeError, ValueError):
                 semantic_score = 0.0
 
-            # Pass/Fail determination criteria
             if (
                 match_pct >= 70.0
                 and relevance.lower() == "relevant"
@@ -412,7 +403,6 @@ def process_qa_framework_excel(
     print("\nEvaluation completed successfully.")
     print(f"Output file: {output_file}")
 
-    # Automatically generate / update index.html after evaluation
     update_html_dashboard(output_file=output_file, html_file="index.html")
 
 if __name__ == "__main__":
