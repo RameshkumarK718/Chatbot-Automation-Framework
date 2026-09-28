@@ -9,19 +9,24 @@ on:
   workflow_dispatch:
     inputs:
       app_url:
-        description: "Target Chatbot App URL"
+        description: "Target EFI Chatbot App URL"
         required: true
         default: "https://dtqponlzcij0l.cloudfront.net/"
 
       framework_excel_url:
-        description: "Question Bank Excel URL (GitHub Raw)"
+        description: "EFI Question Bank Excel URL (GitHub Raw)"
         required: true
         default: "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks(EFI).xlsx"
 
       credentials_excel_url:
-        description: "Credentials Excel URL (GitHub Raw)"
+        description: "EFI Credentials Excel URL (GitHub Raw)"
         required: true
         default: "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx"
+
+      result_excel_url:
+        description: "EFI Result Excel URL (GitHub Raw)"
+        required: true
+        default: "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks-Result(EFI).xlsx"
 
 jobs:
   run-tests:
@@ -68,7 +73,8 @@ jobs:
           mvn clean test -e -Dsurefire.useFile=false \
             -Dapp.url="${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}" \
             -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks(EFI).xlsx' }}" \
-            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx' }}"
+            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx' }}" \
+            -Dresult.excel.url="${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks-Result(EFI).xlsx' }}"
 
       - name: Run Python AI Evaluator
         if: always()
