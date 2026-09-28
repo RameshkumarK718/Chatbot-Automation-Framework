@@ -1,4 +1,5 @@
 package com;
+
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
@@ -15,6 +16,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -60,17 +62,18 @@ public class ChatbotTest {
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(60);
 
-   private static final String APP_URL = System.getProperty(
+    private static final String APP_URL = System.getProperty(
         "app.url","https://dtqponlzcij0l.cloudfront.net/");
 
-private static final String CREDENTIALS_EXCEL_URL = System.getProperty(
+    @SuppressWarnings("unused")
+    private static final String CREDENTIALS_EXCEL_URL = System.getProperty(
         "credentials.excel.url", "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx");
 
-private static final String FRAMEWORK_EXCEL_URL = System.getProperty(
+    private static final String FRAMEWORK_EXCEL_URL = System.getProperty(
         "framework.excel.url", "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks(EFI).xlsx");
 
-@SuppressWarnings("unused")
-private static final String RESULT_EXCEL_URL = System.getProperty(
+    @SuppressWarnings("unused")
+    private static final String RESULT_EXCEL_URL = System.getProperty(
         "result.excel.url", "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks-Result(EFI).xlsx");
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
@@ -95,26 +98,18 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
         return connection.getInputStream();
     }
 
-  private String[] getCredentialsFromExcel() {
+    private String[] getCredentialsFromExcel() {
         String username = "";
         String password = "";
         
-<<<<<<< Updated upstream
-        // Safely load credentials(2).xlsx from src/main/resources via classpath
-=======
         // Load from local classpath resources
->>>>>>> Stashed changes
-        try (InputStream is = ChatbotTest.class.getClassLoader().getResourceAsStream("credentials(2).xlsx")) {
+        try (InputStream is = ChatbotTest.class.getClassLoader().getResourceAsStream("credentials.xlsx")) {
             
             if (is == null) {
-                throw new RuntimeException("credentials(2).xlsx not found in classpath resources!");
+                throw new RuntimeException("credentials.xlsx not found in classpath resources!");
             }
             
-<<<<<<< Updated upstream
-            try (Workbook workbook = WorkbookFactory.create(is)) {
-=======
             try (Workbook workbook = new XSSFWorkbook(is)) {
->>>>>>> Stashed changes
                 if (workbook.getNumberOfSheets() == 0) {
                     throw new RuntimeException("Credentials Excel contains no sheets.");
                 }
@@ -128,11 +123,7 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
                 }
                 username = getCellStringValue(row.getCell(0));
                 password = getCellStringValue(row.getCell(1));
-<<<<<<< Updated upstream
-                System.out.println("--> Credentials loaded successfully from classpath.");
-=======
                 System.out.println("--> Credentials loaded successfully.");
->>>>>>> Stashed changes
             }
             
         } catch (Exception e) {
@@ -334,7 +325,6 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
         }
     }
 
-    // Expanded locators to safely catch chat message containers across diverse UI frameworks
     private List<WebElement> getChatMessages() {
         try {
             return driver.findElements(By.xpath(
@@ -384,7 +374,6 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
         
         chatInput.sendKeys(question);
         
-        // Try submitting via Send button first, then fall back to Keys.ENTER
         try {
             WebElement sendButton = driver.findElement(By.xpath("//button[@type='submit'] | //button[contains(@aria-label, 'Send')] | //button[.//svg] | //button[contains(@class, 'send')]"));
             sendButton.click();
