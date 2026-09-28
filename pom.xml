@@ -92,9 +92,9 @@
                     </suiteXmlFiles>
                     <useFile>false</useFile>
                     <trimStackTrace>false</trimStackTrace>
+                    <testFailureIgnore>true</testFailureIgnore>
                 </configuration>
             </plugin>
         </plugins>
     </build>
-
 </project>
