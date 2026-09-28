@@ -8,26 +8,25 @@ on:
 
   workflow_dispatch:
     inputs:
-      app_url:
-        description: "Target Chatbot App URL"
+            app_url:
+        description: "Target EFI Chatbot App URL"
         required: true
-        default: "https://d3rl0fkw0q6ssb.cloudfront.net/"
+        default: "https://dtqponlzcij0l.cloudfront.net/"
 
       framework_excel_url:
-        description: "Question Bank Excel URL (GitHub Raw)"
+        description: "EFI Question Bank Excel URL (GitHub Raw)"
         required: true
-        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx"
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx"
 
       credentials_excel_url:
-        description: "Credentials Excel URL (GitHub Raw)"
+        description: "EFI Credentials Excel URL (GitHub Raw)"
         required: true
-        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx"
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx"
 
       result_excel_url:
-        description: "Result Excel URL (GitHub Raw)"
+        description: "EFI Result Excel URL (GitHub Raw)"
         required: true
-        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(Vedas).xlsx"
-
+        default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx"
 jobs:
   run-tests:
     runs-on: ubuntu-latest
