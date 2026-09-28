@@ -28,8 +28,7 @@ import java.util.Map;
 public class ChatbotTest {
 
     // 1. DATA MODEL SUPPORTING DYNAMIC EXCEL COLUMNS
-
-	public static class TestRowData {
+    public static class TestRowData {
         public String sheetName;
         public int rowIndex;
         public String testCaseId;
@@ -58,23 +57,28 @@ public class ChatbotTest {
     }
 
     // 2. CONFIGURATION & TIMEOUT CONSTANTS
+    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
+    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(60);
 
-	private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
-    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
+   private static final String APP_URL = System.getProperty(
+        "app.url","https://dtqponlzcij0l.cloudfront.net/");
 
-    private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
-    private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url", 
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
-    private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url", 
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
+private static final String CREDENTIALS_EXCEL_URL = System.getProperty(
+        "credentials.excel.url","https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
+
+private static final String FRAMEWORK_EXCEL_URL = System.getProperty(
+        "framework.excel.url","https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
+
+@SuppressWarnings("unused")
+private static final String RESULT_EXCEL_URL = System.getProperty(
+        "result.excel.url","https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx");
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
-
+    
     private WebDriver driver;
     private WebDriverWait wait;
 
     // 3. HTTP STREAM & EXCEL PARSING UTILITIES
-
     @SuppressWarnings("deprecation")
     private InputStream openUrlStream(String fileUrl) throws Exception {
         URL url = new URL(fileUrl);
@@ -193,7 +197,6 @@ public class ChatbotTest {
     }
 
     // 4. TESTNG LIFECYCLE HOOKS (SETUP & TEARDOWN)
-
     @BeforeMethod
     public void setUp() {
         initializeDriverAndLogin();
@@ -227,7 +230,6 @@ public class ChatbotTest {
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--remote-allow-origins=*");
         
-        // Prevent CloudFront/WAF from blocking headless browser detection
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
         options.setExperimentalOption("useAutomationExtension", false);
@@ -241,10 +243,8 @@ public class ChatbotTest {
             System.out.println("--> Opening application URL: " + APP_URL);
             driver.get(APP_URL);
 
-            // Ensure document is fully loaded
             wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
 
-            // 1. Wait for and fill the email/member ID field
             WebElement memberInput;
             try {
                 memberInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("vaa-email")));
@@ -253,25 +253,21 @@ public class ChatbotTest {
             } catch (org.openqa.selenium.TimeoutException e) {
                 System.out.println("--> TIMEOUT! Current URL: " + driver.getCurrentUrl());
                 System.out.println("--> TIMEOUT! Page Title: " + driver.getTitle());
-                System.out.println("--> PAGE SOURCE:\n" + driver.getPageSource());
                 throw e;
             }
             memberInput.clear();
             memberInput.sendKeys(memberId);
             System.out.println("--> Email entered.");
 
-            // 2. Wait for and fill the password field
             WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
             passwordInput.clear();
             passwordInput.sendKeys(password);
             System.out.println("--> Password entered.");
 
-            // 3. Click Login
             WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
             clickElement(loginButton);
             System.out.println("--> Login submitted.");
 
-            // 4. Wait for post-login view
             wait.until(ExpectedConditions.or(
                     ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
                     ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Conversational AI')]"))
@@ -298,7 +294,6 @@ public class ChatbotTest {
     }
     
     // 5. CHATBOT INTERACTION & LOCATOR METHODS
-
     private By getChatInputLocator() {
         return By.xpath("//input[@placeholder='Ask a question...'] | //textarea[@placeholder='Ask a question...'] | //input[contains(@placeholder,'Ask')] | //textarea[contains(@placeholder,'Ask')] | //div[@contenteditable='true']");
     }
@@ -317,9 +312,18 @@ public class ChatbotTest {
         }
     }
 
+    // Expanded locators to safely catch chat message containers across diverse UI frameworks
     private List<WebElement> getChatMessages() {
         try {
-            return driver.findElements(By.xpath("//div[contains(@class,'message')] | //div[contains(@class,'bot-response')] | //div[contains(@class,'chat-bubble')]"));
+            return driver.findElements(By.xpath(
+                "//div[contains(@class,'message')] | " +
+                "//div[contains(@class,'bot-response')] | " +
+                "//div[contains(@class,'chat-bubble')] | " +
+                "//div[contains(@class,'chat-message')] | " +
+                "//div[contains(@class,'response')] | " +
+                "//div[contains(@class,'markdown')] | " +
+                "//p[ancestor::div[contains(@class,'chat')]]"
+            ));
         } catch (Exception e) {
             return new ArrayList<>();
         }
@@ -355,13 +359,21 @@ public class ChatbotTest {
             chatInput.click();
             chatInput.clear();
         } catch (Exception ignored) {}
+        
         chatInput.sendKeys(question);
-        chatInput.sendKeys(Keys.ENTER);
+        
+        // Try submitting via Send button first, then fall back to Keys.ENTER
+        try {
+            WebElement sendButton = driver.findElement(By.xpath("//button[@type='submit'] | //button[contains(@aria-label, 'Send')] | //button[.//svg] | //button[contains(@class, 'send')]"));
+            sendButton.click();
+        } catch (Exception e) {
+            chatInput.sendKeys(Keys.ENTER);
+        }
+        
         return waitForChatbotResponse(previousResponse);
     }
 
     // 6. MAIN TEST EXECUTION METHOD
-
     @Test
     public void runAutomationFramework() {
         List<TestRowData> testDataList = fetchExcelDataFromGitHub(FRAMEWORK_EXCEL_URL);
@@ -405,7 +417,6 @@ public class ChatbotTest {
     }
 
     // 7. EXCEL RESULT WRITER (OUTPUT GENERATION)
-
     private void updateFrameworkExcel(List<TestRowData> results) {
         try (InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
