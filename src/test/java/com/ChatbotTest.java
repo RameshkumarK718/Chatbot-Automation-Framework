@@ -98,25 +98,35 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
     private String[] getCredentialsFromExcel() {
         String username = "";
         String password = "";
-        try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
-             Workbook workbook = new XSSFWorkbook(is)) {
-            if (workbook.getNumberOfSheets() == 0) {
-                throw new RuntimeException("Credentials Excel contains no sheets.");
+        
+        // Load from local classpath resources
+        try (InputStream is = ChatbotTest.class.getClassLoader().getResourceAsStream("credentials(2).xlsx")) {
+            
+            if (is == null) {
+                throw new RuntimeException("credentials(2).xlsx not found in classpath resources!");
             }
-            Sheet sheet = workbook.getSheetAt(0);
-            Row row = sheet.getRow(1);
-            if (row == null) {
-                row = sheet.getRow(3);
+            
+            try (Workbook workbook = new XSSFWorkbook(is)) {
+                if (workbook.getNumberOfSheets() == 0) {
+                    throw new RuntimeException("Credentials Excel contains no sheets.");
+                }
+                Sheet sheet = workbook.getSheetAt(0);
+                Row row = sheet.getRow(1);
+                if (row == null) {
+                    row = sheet.getRow(3);
+                }
+                if (row == null) {
+                    throw new RuntimeException("Credentials row was not found in Excel.");
+                }
+                username = getCellStringValue(row.getCell(0));
+                password = getCellStringValue(row.getCell(1));
+                System.out.println("--> Credentials loaded successfully.");
             }
-            if (row == null) {
-                throw new RuntimeException("Credentials row was not found in Excel.");
-            }
-            username = getCellStringValue(row.getCell(0));
-            password = getCellStringValue(row.getCell(1));
-            System.out.println("--> Credentials loaded successfully.");
+            
         } catch (Exception e) {
             throw new RuntimeException("Error reading credentials Excel: " + e.getMessage(), e);
         }
+        
         return new String[]{username, password};
     }
 
