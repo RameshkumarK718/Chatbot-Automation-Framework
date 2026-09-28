@@ -99,14 +99,22 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
         String username = "";
         String password = "";
         
+<<<<<<< Updated upstream
         // Safely load credentials(2).xlsx from src/main/resources via classpath
+=======
+        // Load from local classpath resources
+>>>>>>> Stashed changes
         try (InputStream is = ChatbotTest.class.getClassLoader().getResourceAsStream("credentials(2).xlsx")) {
             
             if (is == null) {
                 throw new RuntimeException("credentials(2).xlsx not found in classpath resources!");
             }
             
+<<<<<<< Updated upstream
             try (Workbook workbook = WorkbookFactory.create(is)) {
+=======
+            try (Workbook workbook = new XSSFWorkbook(is)) {
+>>>>>>> Stashed changes
                 if (workbook.getNumberOfSheets() == 0) {
                     throw new RuntimeException("Credentials Excel contains no sheets.");
                 }
@@ -120,7 +128,11 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
                 }
                 username = getCellStringValue(row.getCell(0));
                 password = getCellStringValue(row.getCell(1));
+<<<<<<< Updated upstream
                 System.out.println("--> Credentials loaded successfully from classpath.");
+=======
+                System.out.println("--> Credentials loaded successfully.");
+>>>>>>> Stashed changes
             }
             
         } catch (Exception e) {
