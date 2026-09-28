@@ -4,6 +4,7 @@ import difflib
 import argparse
 import pandas as pd
 from openai import OpenAI
+
 class AIEvaluator:
     """
     AI-based chatbot response evaluator.
@@ -112,9 +113,7 @@ Required JSON format:
         last_exception = None
 
         for attempt in models_to_try:
-
             try:
-
                 if attempt["client"] is None:
                     raise ValueError(
                         f"API key not configured for {attempt['desc']}"
@@ -199,7 +198,6 @@ Required JSON format:
                 return result
 
             except Exception as e:
-
                 last_exception = e
 
                 print(
@@ -224,9 +222,7 @@ def get_first_text(row, columns):
     """
     Return the first non-empty value from the specified columns.
     """
-
     for column in columns:
-
         if column not in row.index:
             continue
 
@@ -247,7 +243,6 @@ def calculate_match_percentage(expected, actual):
     """
     Calculate text similarity percentage using SequenceMatcher.
     """
-
     if not expected and not actual:
         return 100.0
 
@@ -267,9 +262,7 @@ def is_hallucinated(value):
     """
     Convert AI hallucination response to boolean.
     """
-
     if isinstance(value, str):
-
         return value.strip().lower() in {
             "true",
             "yes",
@@ -287,16 +280,12 @@ def update_html_dashboard(
     Dynamically read evaluated Excel results and
     generate/update the HTML dashboard.
     """
-
     try:
-
         if not os.path.exists(output_file):
-
             print(
                 f"Result file {output_file} "
                 "not found for HTML generation."
             )
-
             return
 
         excel_file = pd.ExcelFile(output_file)
@@ -308,7 +297,6 @@ def update_html_dashboard(
         summary_rows_html = ""
 
         for sheet_name in excel_file.sheet_names:
-
             df = pd.read_excel(
                 output_file,
                 sheet_name=sheet_name,
@@ -359,296 +347,138 @@ def update_html_dashboard(
 
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal Chatbot Automation Dashboard</title>
-
     <style>
-
         body {{
-            font-family:
-                'Segoe UI',
-                Tahoma,
-                Geneva,
-                Verdana,
-                sans-serif;
-
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 40px;
-
             background: #f8f9fa;
             color: #333;
         }}
-
         .container {{
             max-width: 1000px;
             margin: auto;
         }}
-
         h1 {{
             color: #2c3e50;
-
-            border-bottom:
-                2px solid #dee2e6;
-
+            border-bottom: 2px solid #dee2e6;
             padding-bottom: 10px;
         }}
-
         .card-grid {{
             display: grid;
-
-            grid-template-columns:
-                repeat(
-                    auto-fit,
-                    minmax(200px, 1fr)
-                );
-
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
-
             margin-top: 20px;
         }}
-
         .card {{
             background: white;
-
             padding: 20px;
-
             border-radius: 8px;
-
-            box-shadow:
-                0 4px 6px
-                rgba(0,0,0,0.05);
-
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
             text-align: center;
         }}
-
         .card h3 {{
-            margin:
-                0 0 10px 0;
-
+            margin: 0 0 10px 0;
             color: #6c757d;
-
             font-size: 14px;
-
             text-transform: uppercase;
         }}
-
         .card p {{
             margin: 0;
-
             font-size: 24px;
-
             font-weight: bold;
-
             color: #2c3e50;
         }}
-
         .pass {{
             color: #28a745;
             font-weight: bold;
         }}
-
         .fail {{
             color: #dc3545;
             font-weight: bold;
         }}
-
         table {{
             width: 100%;
-
             border-collapse: collapse;
-
             background: white;
-
             margin-top: 30px;
-
             border-radius: 8px;
-
             overflow: hidden;
-
-            box-shadow:
-                0 4px 6px
-                rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }}
-
-        th,
-        td {{
+        th, td {{
             padding: 12px 15px;
-
             text-align: left;
-
-            border-bottom:
-                1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
         }}
-
         th {{
             background-color: #343a40;
             color: white;
         }}
-
         tr:hover {{
             background-color: #f1f3f5;
         }}
-
     </style>
-
 </head>
-
 <body>
-
     <div class="container">
-
-        <h1>
-            Chatbot Automation Dashboard
-        </h1>
-
+        <h1>Chatbot Automation Dashboard</h1>
         <div class="card-grid">
-
             <div class="card">
-
-                <h3>
-                    Total Test Cases
-                </h3>
-
-                <p>
-                    {total_tests}
-                </p>
-
+                <h3>Total Test Cases</h3>
+                <p>{total_tests}</p>
             </div>
-
             <div class="card">
-
-                <h3>
-                    Passed
-                </h3>
-
-                <p class="pass">
-                    {total_passed}
-                </p>
-
+                <h3>Passed</h3>
+                <p class="pass">{total_passed}</p>
             </div>
-
             <div class="card">
-
-                <h3>
-                    Failed
-                </h3>
-
-                <p class="fail">
-                    {total_failed}
-                </p>
-
+                <h3>Failed</h3>
+                <p class="fail">{total_failed}</p>
             </div>
-
             <div class="card">
-
-                <h3>
-                    Pass Rate
-                </h3>
-
-                <p>
-                    {pass_percentage:.1f}%
-                </p>
-
+                <h3>Pass Rate</h3>
+                <p>{pass_percentage:.1f}%</p>
             </div>
-
         </div>
-
-        <h2>
-            Module Breakdown
-        </h2>
-
+        <h2>Module Breakdown</h2>
         <table>
-
             <thead>
-
                 <tr>
-
-                    <th>
-                        Module / Sheet Name
-                    </th>
-
-                    <th>
-                        Total Tests
-                    </th>
-
-                    <th>
-                        Passed
-                    </th>
-
-                    <th>
-                        Failed
-                    </th>
-
+                    <th>Module / Sheet Name</th>
+                    <th>Total Tests</th>
+                    <th>Passed</th>
+                    <th>Failed</th>
                 </tr>
-
             </thead>
-
             <tbody>
-
                 {summary_rows_html}
-
             </tbody>
-
         </table>
-
     </div>
-
 </body>
-
 </html>
 """
 
-        with open(
-            html_file,
-            "w",
-            encoding="utf-8"
-        ) as file:
-
+        with open(html_file, "w", encoding="utf-8") as file:
             file.write(html_content)
 
-        print(
-            f"Dashboard successfully updated: "
-            f"{html_file}"
-        )
+        print(f"Dashboard successfully updated: {html_file}")
 
     except Exception as e:
-
-        print(
-            f"Failed to update HTML dashboard: "
-            f"{str(e)}"
-        )
+        print(f"Failed to update HTML dashboard: {str(e)}")
 
 
-def create_skipped_report(
-    output_file,
-    status
-):
+def create_skipped_report(output_file, status):
     """
     Create a minimal skipped Excel report.
     """
-
-    pd.DataFrame(
-        {
-            "Status": [status]
-        }
-    ).to_excel(
-        output_file,
-        index=False
-    )
-
-    update_html_dashboard(
-        output_file=output_file,
-        html_file="index.html"
-    )
+    pd.DataFrame({"Status": [status]}).to_excel(output_file, index=False)
+    update_html_dashboard(output_file=output_file, html_file="index.html")
 
 
 def process_qa_framework_excel(
@@ -661,68 +491,31 @@ def process_qa_framework_excel(
     generate evaluated Excel report,
     and update index.html.
     """
-
-    # Check input file
     if not os.path.exists(input_file):
-
-        print(
-            f"Input file not found: {input_file}"
-        )
-
-        create_skipped_report(
-            output_file,
-            "Skipped - Missing Input File"
-        )
-
+        print(f"Input file not found: {input_file}")
+        create_skipped_report(output_file, "Skipped - Missing Input File")
         return
 
-    # Check API keys
     openai_key = os.getenv("OPENAI_API_KEY")
     openrouter_key = os.getenv("OPENROUTER_API_KEY")
 
     if not openai_key and not openrouter_key:
-
-        print(
-            "Neither OPENAI_API_KEY nor "
-            "OPENROUTER_API_KEY is set."
-        )
-
-        create_skipped_report(
-            output_file,
-            "Skipped - Missing API Keys"
-        )
-
+        print("Neither OPENAI_API_KEY nor OPENROUTER_API_KEY is set.")
+        create_skipped_report(output_file, "Skipped - Missing API Keys")
         return
 
-    # Initialize evaluator
     try:
-
         evaluator = AIEvaluator()
-
     except Exception as e:
-
-        print(
-            f"Unable to initialize AI evaluator: {str(e)}"
-        )
-
-        create_skipped_report(
-            output_file,
-            "Skipped - AI Evaluator Initialization Failed"
-        )
-
+        print(f"Unable to initialize AI evaluator: {str(e)}")
+        create_skipped_report(output_file, "Skipped - AI Evaluator Initialization Failed")
         return
 
-    # Read Excel
     excel_file = pd.ExcelFile(input_file)
-
     results = {}
 
-    # Process every sheet
     for sheet_name in excel_file.sheet_names:
-
-        print(
-            f"\nProcessing sheet: {sheet_name}"
-        )
+        print(f"\nProcessing sheet: {sheet_name}")
 
         df = pd.read_excel(
             input_file,
@@ -730,7 +523,6 @@ def process_qa_framework_excel(
             dtype=str
         )
 
-        # Remove unnamed Excel columns
         df = df.loc[
             :,
             ~df.columns.str.contains(
@@ -742,12 +534,9 @@ def process_qa_framework_excel(
 
         updated_rows = []
 
-        # Process every test case
         for index, row in df.iterrows():
-
             row_dict = row.to_dict()
 
-            # Read test data dynamically
             question = get_first_text(
                 row,
                 [
@@ -782,7 +571,6 @@ def process_qa_framework_excel(
                 ]
             )
 
-            # Match Percentage
             match_pct = calculate_match_percentage(
                 expected,
                 chatbot_answer
@@ -790,45 +578,26 @@ def process_qa_framework_excel(
 
             match_pct_str = f"{match_pct:.2f}%"
 
-            # Empty/Error response
             if (
                 not chatbot_answer
                 or chatbot_answer.lower() == "nan"
                 or chatbot_answer.lower().startswith("error")
                 or chatbot_answer.lower().startswith("exception")
             ):
-
-                row_dict["Match Percentage"] = (
-                    match_pct_str
-                )
-
+                row_dict["Match Percentage"] = match_pct_str
                 row_dict["Semantic Score"] = "0.00"
-
                 row_dict["Relevance"] = "Irrelevant"
-
                 row_dict["Hallucination"] = "Yes"
-
                 row_dict["Status"] = "FAIL"
-
-                row_dict[
-                    "Pass and Failure Reason"
-                ] = (
+                row_dict["Pass and Failure Reason"] = (
                     "Chatbot response was empty, "
                     "threw an exception, or "
                     "returned an error."
                 )
-
                 updated_rows.append(row_dict)
-
-                print(
-                    f"Row {index + 1}: FAIL | "
-                    f"Match: {match_pct_str} | "
-                    "Empty/Error response"
-                )
-
+                print(f"Row {index + 1}: FAIL | Match: {match_pct_str} | Empty/Error response")
                 continue
 
-            # AI Evaluation
             result = evaluator.evaluate_advanced(
                 question=question,
                 expected=expected,
@@ -836,7 +605,6 @@ def process_qa_framework_excel(
                 context=context
             )
 
-            # Read AI evaluation
             relevance = str(
                 result.get(
                     "relevance",
@@ -852,22 +620,15 @@ def process_qa_framework_excel(
             )
 
             try:
-
                 semantic_score = float(
                     result.get(
                         "score",
                         0.0
                     )
                 )
-
-            except (
-                TypeError,
-                ValueError
-            ):
-
+            except (TypeError, ValueError):
                 semantic_score = 0.0
 
-            # Keep score between 0 and 1
             semantic_score = max(
                 0.0,
                 min(
@@ -876,82 +637,46 @@ def process_qa_framework_excel(
                 )
             )
 
-            # PASS / FAIL Logic
             if (
                 match_pct >= 70.0
                 and relevance.lower() == "relevant"
                 and not hallucinated
             ):
-
                 status = "PASS"
-
                 reason = (
-                    f"Match Percentage is "
-                    f"{match_pct:.2f}% "
+                    f"Match Percentage is {match_pct:.2f}% "
                     "(>= 70.00%), the response "
                     "is relevant, and no "
                     "hallucination was detected."
                 )
-
             else:
-
                 status = "FAIL"
 
                 if match_pct < 70.0:
-
                     reason = (
-                        f"Match Percentage is "
-                        f"{match_pct:.2f}% "
+                        f"Match Percentage is {match_pct:.2f}% "
                         "(< 70.00% threshold "
                         "required for passing)."
                     )
-
                 elif relevance.lower() != "relevant":
-
-                    reason = (
-                        "Chatbot response was "
-                        "classified as irrelevant."
-                    )
-
+                    reason = "Chatbot response was classified as irrelevant."
                 elif hallucinated:
-
                     reason = result.get(
                         "reason",
-                        "Chatbot response contains "
-                        "hallucinated or misleading "
-                        "information."
+                        "Chatbot response contains hallucinated or misleading information."
                     )
-
                 else:
-
                     reason = result.get(
                         "reason",
-                        "Response did not satisfy "
-                        "the evaluation criteria."
+                        "Response did not satisfy the evaluation criteria."
                     )
 
-            # Store evaluation results
-            row_dict["Match Percentage"] = (
-                match_pct_str
-            )
-
-            row_dict["Semantic Score"] = (
-                f"{semantic_score:.2f}"
-            )
-
+            row_dict["Match Percentage"] = match_pct_str
+            row_dict["Semantic Score"] = f"{semantic_score:.2f}"
             row_dict["Relevance"] = relevance
-
-            row_dict["Hallucination"] = (
-                "Yes"
-                if hallucinated
-                else "No"
-            )
-
+            row_dict["Hallucination"] = "Yes" if hallucinated else "No"
             row_dict["Status"] = status
-
-            row_dict[
-                "Pass and Failure Reason"
-            ] = reason
+            row_dict["Pass and Failure Reason"] = reason
 
             updated_rows.append(row_dict)
 
@@ -960,11 +685,9 @@ def process_qa_framework_excel(
                 f"Match: {match_pct_str} | "
                 f"Semantic Score: {semantic_score:.2f} | "
                 f"Relevance: {relevance} | "
-                f"Hallucination: "
-                f"{'Yes' if hallucinated else 'No'}"
+                f"Hallucination: {'Yes' if hallucinated else 'No'}"
             )
 
-        # Output column ordering
         target_columns = [
             "Test Case ID",
             "Category",
@@ -980,49 +703,34 @@ def process_qa_framework_excel(
             "Pass and Failure Reason"
         ]
 
-        result_df = pd.DataFrame(
-            updated_rows
-        )
+        result_df = pd.DataFrame(updated_rows)
 
         existing_columns = [
-            col
-            for col in target_columns
-            if col in result_df.columns
+            col for col in target_columns if col in result_df.columns
         ]
 
         leftover_columns = [
-            col
-            for col in result_df.columns
-            if col not in target_columns
+            col for col in result_df.columns if col not in target_columns
         ]
 
         results[sheet_name] = result_df[
             existing_columns + leftover_columns
         ]
 
-    # Write evaluated Excel
     with pd.ExcelWriter(
         output_file,
         engine="openpyxl"
     ) as writer:
-
         for sheet_name, result_df in results.items():
-
             result_df.to_excel(
                 writer,
                 sheet_name=sheet_name,
                 index=False
             )
 
-    print(
-        "\nEvaluation completed successfully."
-    )
+    print("\nEvaluation completed successfully.")
+    print(f"Output file: {output_file}")
 
-    print(
-        f"Output file: {output_file}"
-    )
-
-    # Update HTML dashboard
     update_html_dashboard(
         output_file=output_file,
         html_file="index.html"
@@ -1030,30 +738,20 @@ def process_qa_framework_excel(
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(
-        description=(
-            "Run AI Evaluator on "
-            "Chatbot Results"
-        )
+        description="Run AI Evaluator on Chatbot Results"
     )
 
     parser.add_argument(
         "--input",
         default="Frameworks_Output.xlsx",
-        help=(
-            "Input Excel path generated "
-            "by Java runner"
-        )
+        help="Input Excel path generated by Java runner"
     )
 
     parser.add_argument(
         "--output",
         default="Frameworks-Result.xlsx",
-        help=(
-            "Final evaluated Excel "
-            "report path"
-        )
+        help="Final evaluated Excel report path"
     )
 
     args = parser.parse_args()
