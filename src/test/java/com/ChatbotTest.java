@@ -64,14 +64,14 @@ public class ChatbotTest {
         "app.url","https://dtqponlzcij0l.cloudfront.net/");
 
 private static final String CREDENTIALS_EXCEL_URL = System.getProperty(
-        "credentials.excel.url","https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
+        "credentials.excel.url", "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx");
 
 private static final String FRAMEWORK_EXCEL_URL = System.getProperty(
-        "framework.excel.url","https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
+        "framework.excel.url", "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks(EFI).xlsx");
 
 @SuppressWarnings("unused")
 private static final String RESULT_EXCEL_URL = System.getProperty(
-        "result.excel.url","https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx");
+        "result.excel.url", "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks-Result(EFI).xlsx");
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
     
