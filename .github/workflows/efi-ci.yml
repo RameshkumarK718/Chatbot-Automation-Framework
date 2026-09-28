@@ -8,7 +8,7 @@ on:
 
   workflow_dispatch:
     inputs:
-            app_url:
+      app_url:
         description: "Target EFI Chatbot App URL"
         required: true
         default: "https://dtqponlzcij0l.cloudfront.net/"
@@ -27,6 +27,7 @@ on:
         description: "EFI Result Excel URL (GitHub Raw)"
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx"
+
 jobs:
   run-tests:
     runs-on: ubuntu-latest
@@ -71,10 +72,10 @@ jobs:
       - name: Run Maven Tests
         run: |
           mvn clean test -e -Dsurefire.useFile=false \
-            -Dapp.url="${{ inputs.app_url || 'https://d3rl0fkw0q6ssb.cloudfront.net/' }}" \
-            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx' }}" \
-            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx' }}" \
-            -Dresult.excel.url="${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(Vedas).xlsx' }}"
+            -Dapp.url="${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}" \
+            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx' }}" \
+            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx' }}" \
+            -Dresult.excel.url="${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx' }}"
 
       - name: Run Python AI Evaluator
         if: always()
