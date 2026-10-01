@@ -60,18 +60,18 @@ public class ChatbotTest {
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(60);
 
-   private static final String APP_URL = System.getProperty(
-        "app.url","https://dtqponlzcij0l.cloudfront.net/");
+    private static final String APP_URL = System.getProperty(
+        "app.url", "https://dtqponlzcij0l.cloudfront.net/");
 
-private static final String CREDENTIALS_EXCEL_URL = System.getProperty(
-        "credentials.excel.url","https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
+    private static final String CREDENTIALS_EXCEL_URL = System.getProperty(
+        "credentials.excel.url", "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
 
-private static final String FRAMEWORK_EXCEL_URL = System.getProperty(
-        "framework.excel.url","https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
+    private static final String FRAMEWORK_EXCEL_URL = System.getProperty(
+        "framework.excel.url", "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
 
-@SuppressWarnings("unused")
-private static final String RESULT_EXCEL_URL = System.getProperty(
-        "result.excel.url","https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx");
+    @SuppressWarnings("unused")
+    private static final String RESULT_EXCEL_URL = System.getProperty(
+        "result.excel.url", "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx");
 
     private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
     
@@ -312,7 +312,6 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
         }
     }
 
-    // Expanded locators to safely catch chat message containers across diverse UI frameworks
     private List<WebElement> getChatMessages() {
         try {
             return driver.findElements(By.xpath(
@@ -362,7 +361,6 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
         
         chatInput.sendKeys(question);
         
-        // Try submitting via Send button first, then fall back to Keys.ENTER
         try {
             WebElement sendButton = driver.findElement(By.xpath("//button[@type='submit'] | //button[contains(@aria-label, 'Send')] | //button[.//svg] | //button[contains(@class, 'send')]"));
             sendButton.click();
@@ -416,7 +414,7 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
         }
     }
 
-    // 7. EXCEL RESULT WRITER (OUTPUT GENERATION)
+    // 7. EXCEL RESULT WRITER (OUTPUT GENERATION WITH COLUMN FALLBACK)
     private void updateFrameworkExcel(List<TestRowData> results) {
         try (InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
@@ -430,18 +428,36 @@ private static final String RESULT_EXCEL_URL = System.getProperty(
                 Row headerRow = sheet.getRow(0);
                 if (headerRow == null) continue;
 
+                boolean foundActualResult = false;
+                boolean foundStatus = false;
+
                 for (Cell cell : headerRow) {
                     String header = getCellStringValue(cell).toLowerCase();
                     int colIdx = cell.getColumnIndex();
                     if (header.contains("actual result")) {
-                        Cell c = row.getCell(colIdx);
-                        if (c == null) c = row.createCell(colIdx);
+                        foundActualResult = true;
+                        Cell c = row.getCell(colIdx, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                         c.setCellValue(result.actualResult);
                     } else if (header.contains("pass / fail") || header.contains("status")) {
-                        Cell c = row.getCell(colIdx);
-                        if (c == null) c = row.createCell(colIdx);
+                        foundStatus = true;
+                        Cell c = row.getCell(colIdx, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                         c.setCellValue(result.status);
                     }
+                }
+
+                if (!foundActualResult) {
+                    int lastCol = headerRow.getLastCellNum();
+                    Cell hCell = headerRow.getCell(lastCol, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    hCell.setCellValue("Actual Result");
+                    Cell c = row.getCell(lastCol, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    c.setCellValue(result.actualResult);
+                }
+                if (!foundStatus) {
+                    int lastCol = headerRow.getLastCellNum();
+                    Cell hCell = headerRow.getCell(lastCol, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    hCell.setCellValue("Status");
+                    Cell c = row.getCell(lastCol, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    c.setCellValue(result.status);
                 }
             }
             workbook.write(outputStream);
