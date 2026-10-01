@@ -61,11 +61,10 @@ public class BaseTest {
             // Ensure document is fully loaded
             wait.until(webDriver -> ((JavascriptExecutor) webDriver)
                 .executeScript("return document.readyState").equals("complete"));
-
-            // Locate email input field
+           // Broadened XPath to catch different email field attributes
             WebElement emailInput = wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.xpath("//input[@id='vaa-email' or contains(@name, 'email') or contains(@type, 'email')]")
-            ));
+           By.xpath("//input[@id='vaa-email' or contains(@name, 'email') or contains(@type, 'email') or contains(@placeholder, 'Email') or contains(@id, 'email') or contains(@class, 'email')]")
+               ));
             emailInput.clear();
             emailInput.sendKeys(username);
 
