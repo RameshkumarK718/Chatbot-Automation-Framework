@@ -1,92 +1,34 @@
 # Maven / Java build output
-.project/n.classpath/n.settings//ntarget//nbin//n
-# Java/Maven
 target/
-
 bin/
-
 *.class
 
-
-
-# Eclipse
-
+# Eclipse IDE files
 .metadata/
-
 .classpath
-
+.project
 .settings/
 
-
-
-# Python
-
+# Python cache and virtual environments
 __pycache__/
-
 *.pyc
-
 .pytest_cache/
-
 venv/
-
 .venv/
-
-
-
-# IDE / temporary files
-
-*.swp
-
-*.swo
-
-*.swn
-
-
 
 # TestNG generated reports
-
-# Maven
-
-target/
-
-*.class
-
-
-# Eclipse
-
-.classpath
-
-.project
-
-.settings/
-
-
-# Python
-
-__pycache__/
-
-*.pyc
-
-.pytest_cache/
-
-venv/
-
-.venv/
-
-
-# TestNG
-
 test-output/
 
+# Local credentials and sensitive configs (prevents leaking them)
+credentials.xlsx
+config.properties
 
-
-# Temporary / backup files
-
-*.backup
-
-
-# Temporary files
-
+# Temporary, backup, and log files
 *.swp
-
 *.swo
+*.backup
+*.log
+
+# Generated test results (if you want to keep them local)
+Frameworks-Result*.xlsx
+results.json
