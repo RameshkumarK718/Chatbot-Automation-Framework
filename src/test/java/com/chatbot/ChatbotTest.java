@@ -1,65 +1,26 @@
-package com;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-import org.openqa.selenium.support.ui.WebDriverWait;
+package com.chatbot;
+
 import org.testng.Assert;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-public class ChatbotTest {
+public class ChatbotTest extends BaseTest {
 
-    // 1. DATA MODEL SUPPORTING DYNAMIC EXCEL COLUMNS
-    public static class TestRowData {
-        public String sheetName;
-        public int rowIndex;
-        public String testCaseId;
-        public String role;
-        public String question;
-        public String expectedResult;
-        public String runnable;
-        public String actualResult;
-        public String reason;
-        public String status;
-
-        public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
-                            String question, String expectedResult, String runnable,
-                            String actualResult, String reason, String status) {
-            this.sheetName = sheetName;
-            this.rowIndex = rowIndex;
-            this.testCaseId = testCaseId;
-            this.role = role;
-            this.question = question;
-            this.expectedResult = expectedResult;
-            this.runnable = runnable;
-            this.actualResult = actualResult;
-            this.reason = reason;
-            this.status = status;
-        }
+    @DataProvider(name = "excelDataProvider", parallel = false)
+    public Object[][] provideTestData() {
+        // Call your Excel loading utility to return test rows
+        // Each row becomes a separate independent TestNG test execution!
+        return new Object[][]{
+            // Example structure: {sheetName, rowIndex, testCaseId, question, expectedResult}
+            {"Sheet1", 1, "TC001", "What is the error code?", "Expected description here"}
+        };
     }
 
-    // 2. CONFIGURATION & TIMEOUT CONSTANTS
-    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
-    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(60);
+    @Test(dataProvider = "excelDataProvider")
+    public void executeSingleTestCase(String sheetName, int rowIndex, String testCaseId, String question, String expectedResult) {
+        System.out.println("Running " + testCaseId + ": " + question);
 
+<<<<<<< HEAD
     private static final String APP_URL = System.getProperty(
         "app.url","https://dtqponlzcij0l.cloudfront.net/");
 
@@ -460,3 +421,15 @@ public class ChatbotTest {
         }
     }
 }
+=======
+        ChatbotPage chatPage = new ChatbotPage(driver);
+        chatPage.sendMessage(question);
+        String actualResponse = chatPage.waitForStreamingToComplete();
+
+        Assert.assertFalse(actualResponse.isBlank(), "Chatbot returned an empty response.");
+        
+        // Write result back
+        ExcelUtils.writeResult(sheetName, rowIndex, actualResponse, "PASS");
+    }
+}
+>>>>>>> 33054f4 (Add testng.xml, update pom.xml and test files)

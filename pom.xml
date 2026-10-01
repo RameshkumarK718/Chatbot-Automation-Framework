@@ -97,4 +97,8 @@
             </plugin>
         </plugins>
     </build>
+<<<<<<< HEAD
 </project>
+=======
+</project>
+>>>>>>> 33054f4 (Add testng.xml, update pom.xml and test files)
