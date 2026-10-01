@@ -34,7 +34,7 @@ public class BaseTest {
         wait = new WebDriverWait(driver, Duration.ofSeconds(60));
 
         try {
-            // Default fallbacks in case Excel is missing
+            // Default fallback in case Excel is missing
             String username = "user@example.com";
             String password = "password";
 
@@ -61,10 +61,11 @@ public class BaseTest {
             // Ensure document is fully loaded
             wait.until(webDriver -> ((JavascriptExecutor) webDriver)
                 .executeScript("return document.readyState").equals("complete"));
-           // Broadened XPath to catch different email field attributes
+
+            // Optimized XPath removing duplicate and redundant checks
             WebElement emailInput = wait.until(ExpectedConditions.presenceOfElementLocated(
-           By.xpath("//input[@id='vaa-email' or contains(@name, 'email') or contains(@type, 'email') or contains(@placeholder, 'Email') or contains(@id, 'email') or contains(@class, 'email')]")
-               ));
+                By.xpath("//input[@id='vaa-email' or contains(@name, 'email') or @type='email' or contains(@placeholder, 'Email') or contains(@class, 'email')]")
+            ));
             emailInput.clear();
             emailInput.sendKeys(username);
 
