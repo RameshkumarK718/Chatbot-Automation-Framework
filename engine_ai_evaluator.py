@@ -638,27 +638,20 @@ def process_qa_framework_excel(
             )
 
             if (
-                match_pct >= 70.0
+                semantic_score >= 0.75
                 and relevance.lower() == "relevant"
                 and not hallucinated
             ):
                 status = "PASS"
                 reason = (
-                    f"Match Percentage is {match_pct:.2f}% "
-                    "(>= 70.00%), the response "
-                    "is relevant, and no "
-                    "hallucination was detected."
+                    f"Semantic Score is {semantic_score:.2f} "
+                    "(>= 0.75), the response is relevant, "
+                    "and no hallucination was detected."
                 )
             else:
                 status = "FAIL"
 
-                if match_pct < 70.0:
-                    reason = (
-                        f"Match Percentage is {match_pct:.2f}% "
-                        "(< 70.00% threshold "
-                        "required for passing)."
-                    )
-                elif relevance.lower() != "relevant":
+                if relevance.lower() != "relevant":
                     reason = "Chatbot response was classified as irrelevant."
                 elif hallucinated:
                     reason = result.get(
@@ -666,9 +659,10 @@ def process_qa_framework_excel(
                         "Chatbot response contains hallucinated or misleading information."
                     )
                 else:
-                    reason = result.get(
-                        "reason",
-                        "Response did not satisfy the evaluation criteria."
+                    reason = (
+                        f"Semantic Score is {semantic_score:.2f} "
+                        "(< 0.75 threshold required for passing), "
+                        "or response did not satisfy evaluation criteria."
                     )
 
             row_dict["Match Percentage"] = match_pct_str
