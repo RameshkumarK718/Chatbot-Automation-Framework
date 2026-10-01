@@ -1,9 +1,7 @@
 package com.chatbot;
-
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
 public class ChatbotTest extends BaseTest {
 
     @DataProvider(name = "excelDataProvider", parallel = false)
@@ -20,7 +18,6 @@ public class ChatbotTest extends BaseTest {
     public void executeSingleTestCase(String sheetName, int rowIndex, String testCaseId, String question, String expectedResult) {
         System.out.println("Running " + testCaseId + ": " + question);
 
-<<<<<<< HEAD
     private static final String APP_URL = System.getProperty(
         "app.url","https://dtqponlzcij0l.cloudfront.net/");
 
@@ -421,7 +418,6 @@ public class ChatbotTest extends BaseTest {
         }
     }
 }
-=======
         ChatbotPage chatPage = new ChatbotPage(driver);
         chatPage.sendMessage(question);
         String actualResponse = chatPage.waitForStreamingToComplete();
@@ -432,4 +428,3 @@ public class ChatbotTest extends BaseTest {
         ExcelUtils.writeResult(sheetName, rowIndex, actualResponse, "PASS");
     }
 }
->>>>>>> 33054f4 (Add testng.xml, update pom.xml and test files)
