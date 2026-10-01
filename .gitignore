@@ -3,13 +3,13 @@ target/
 bin/
 *.class
 
-# Eclipse
+# Eclipse IDE files
 .metadata/
 .classpath
 .project
 .settings/
 
-# Python
+# Python cache and virtual environments
 __pycache__/
 *.pyc
 .pytest_cache/
@@ -19,10 +19,16 @@ venv/
 # TestNG generated reports
 test-output/
 
-# IDE / temporary files
+# Local credentials and sensitive configs (prevents leaking them)
+credentials.xlsx
+config.properties
+
+# Temporary, backup, and log files
 *.swp
 *.swo
-*.swn
-
-# Temporary / backup files
 *.backup
+*.log
+
+# Generated test results (if you want to keep them local)
+Frameworks-Result*.xlsx
+results.json
