@@ -15,9 +15,7 @@ public class TestListener implements ITestListener {
     public void onTestFailure(ITestResult result) {
         System.out.println("Test Failed: " + result.getName() + ". Capturing diagnostics...");
         
-        // Note: Make sure your ChatbotTest passes its WebDriver instance or exposes it statically
-        // For example, using a static getter in ChatbotTest: ChatbotTest.getDriver()
-        WebDriver driver = io.qameta.allure.ChatbotTest.getDriver(); 
+        WebDriver driver = io.qameta.allure.ChatbotTest.getDriver();
 
         if (driver != null) {
             String testName = result.getName();
