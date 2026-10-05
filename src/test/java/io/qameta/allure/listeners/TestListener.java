@@ -1,5 +1,4 @@
 package io.qameta.allure.listeners;
-import io.qameta.allure.Attachment; 
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 import org.openqa.selenium.WebDriver;
@@ -49,24 +48,10 @@ public class TestListener implements ITestListener {
                     logWriter.write("FAILURE: Test [" + testName + "] failed.\n");
                 }
 
-                // 4. Attach to Allure Report automatically using annotations
-                saveScreenshotToAllure(driverInstance);
-                savePageSourceToAllure(pageSource);
-
                 logger.info("Diagnostics saved successfully for: " + testName);
             } catch (Exception e) {
                 logger.severe("Error capturing test diagnostics: " + e.getMessage());
             }
         }
-    }
-
-    @Attachment(value = "Failure Screenshot", type = "image/png")
-    public byte[] saveScreenshotToAllure(WebDriver driver) {
-        return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
-    }
-
-    @Attachment(value = "Page HTML Source", type = "text/html")
-    public String savePageSourceToAllure(String pageSource) {
-        return pageSource;
     }
 }
