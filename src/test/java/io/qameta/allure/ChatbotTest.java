@@ -13,7 +13,6 @@ public class ChatbotTest {
     private static WebDriver driver;
     private static ChatbotPage chatbotPage;
 
-    // --- FIX: Login and role selection happen ONCE per class session ---
     @BeforeClass
     public static void setUpClass() {
         driver = new ChromeDriver();
@@ -22,19 +21,14 @@ public class ChatbotTest {
         // 1. Open application URL
         driver.get("https://your-chatbot-application-url.com");
         
-        // 2. Perform Login (Implement your login logic here once)
-        // e.g., LoginPage loginPage = new LoginPage(driver);
-        // loginPage.login("username", "password");
-
-        // 3. Select Role (Implement your role selection here once)
-        // e.g., RoleSelectionPage rolePage = new RoleSelectionPage(driver);
-        // rolePage.selectRole("Admin / End User");
+        // 2. Perform Login & Role Selection here if needed
 
         chatbotPage = new ChatbotPage(driver);
     }
 
+    // FIXED: Added 'static' keyword here
     @DataProvider(name = "chatbotTestData")
-    public Object[][] provideChatbotData() {
+    public static Object[][] provideChatbotData() {
         return ExcelUtils.getDataFromExcel("Frameworks_Output.xlsx", "Sheet1");
     }
 
@@ -42,7 +36,6 @@ public class ChatbotTest {
     public void testChatbotQuestion(String testCaseId, String question, String expectedAnswer) {
         System.out.println("Executing Test ID: " + testCaseId + " | Question: " + question);
 
-        // Send question and wait for the fully streamed response
         chatbotPage.sendMessage(question);
         String actualAnswer = chatbotPage.getLatestResponse();
 
