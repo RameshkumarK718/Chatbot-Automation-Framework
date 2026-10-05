@@ -11,14 +11,16 @@ public class ChatbotPage {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    // Locators
-    private By chatInput = By.xpath("//textarea[@placeholder='Type a message...' or @id='chat-input']"); // Update with your actual locator
-    private By sendButton = By.xpath("//button[@type='submit' or contains(@class, 'send')]"); // Update with your actual locator
-    private By chatbotMessages = By.xpath("//div[contains(@class, 'message-bubble') or contains(@class, 'bot-response')]"); // Update with your actual locator
+    // 1. Specific Locators (Update these to match your exact DOM attributes like data-testid or specific classes)
+    private By chatInput = By.xpath("//textarea[@id='chat-input' or @placeholder='Type a message...']");
+    private By sendButton = By.xpath("//button[@data-testid='send-button' or @type='submit']");
+    
+    // Targeted specifically at bot/assistant response containers (avoiding user messages)
+    private By botMessages = By.xpath("//div[@data-sender='bot' or contains(@class, 'bot-message') or contains(@class, 'assistant-response')]");
 
     public ChatbotPage(WebDriver driver) {
         this.driver = driver;
-        this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
+        this.wait = new WebDriverWait(driver, Duration.ofSeconds(20));
     }
 
     public void sendMessage(String question) {
@@ -30,28 +32,52 @@ public class ChatbotPage {
         sendBtn.click();
     }
 
-    public void waitForResponse() {
-        // Wait until at least one response message appears or updates
-        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(chatbotMessages, 0));
+    /**
+     * 2. Streaming Stabilization Loop
+     * Polls the response text at intervals until it stops changing, 
+     * ensuring you capture the final fully-streamed answer.
+     */
+    public String getLatestResponse() {
+        wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(botMessages, 0));
+
+        WebElement latestBotMsg = null;
+        String previousText = "";
+        String currentText = "";
+        
+        int maxAttempts = 30; // Max timeout protection (~15 seconds)
+        int stableCount = 0;   // Consecutive identical checks required to confirm completion
+
+        for (int i = 0; i < maxAttempts; i++) {
+            List<WebElement> messages = driver.findElements(botMessages);
+            if (messages.isEmpty()) {
+                sleep(500);
+                continue;
+            }
+
+            latestBotMsg = messages.get(messages.size() - 1);
+            currentText = latestBotMsg.getText().trim();
+
+            if (!currentText.isEmpty() && currentText.equals(previousText)) {
+                stableCount++;
+                if (stableCount >= 2) { // Text has stopped changing for ~1 second
+                    break;
+                }
+            } else {
+                stableCount = 0; // Still streaming/updating
+            }
+
+            previousText = currentText;
+            sleep(500);
+        }
+
+        return currentText;
     }
 
-    public void waitForStreamingToFinish() {
-        // Optional: Add logic here if your chatbot streams text and you need to wait for it to stop changing
+    private void sleep(long millis) {
         try {
-            Thread.sleep(2000); // Simple buffer or implement custom attribute check
+            Thread.sleep(millis);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-    }
-
-    public String getLatestResponse() {
-        waitForResponse();
-        waitForStreamingToFinish();
-        
-        List<WebElement> messages = driver.findElements(chatbotMessages);
-        if (!messages.isEmpty()) {
-            return messages.get(messages.size() - 1).getText().trim();
-        }
-        return "";
     }
 }
