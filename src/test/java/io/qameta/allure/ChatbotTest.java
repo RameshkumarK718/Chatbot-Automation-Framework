@@ -18,15 +18,12 @@ public class ChatbotTest {
         driver = new ChromeDriver();
         driver.manage().window().maximize();
         
-        // 1. Open application URL
+        // Open application URL
         driver.get("https://your-chatbot-application-url.com");
         
-        // 2. Perform Login & Role Selection here if needed
-
         chatbotPage = new ChatbotPage(driver);
     }
 
-    // FIXED: Added 'static' keyword here
     @DataProvider(name = "chatbotTestData")
     public static Object[][] provideChatbotData() {
         return ExcelUtils.getDataFromExcel("Frameworks_Output.xlsx", "Sheet1");
