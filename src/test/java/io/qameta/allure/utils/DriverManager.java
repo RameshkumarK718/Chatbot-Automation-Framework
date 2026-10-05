@@ -4,27 +4,28 @@ import org.testng.ITestResult;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.OutputType;
-import io.qameta.allure.utils.DriverManager; // <-- CRITICAL: This import resolves the "cannot find symbol" error
+import io.qameta.allure.utils.DriverManager;
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 public class TestListener implements ITestListener {
+    private static final Logger logger = Logger.getLogger(TestListener.class.getName());
 
     @Override
     public void onTestFailure(ITestResult result) {
-        System.out.println("Test Failed: " + result.getName() + ". Capturing diagnostics...");
+        String testName = result.getName();
+        logger.severe("Test Failed: " + testName + ". Capturing diagnostics...");
         
-        // Fetches the thread-safe driver from your utils package
         WebDriver driver = DriverManager.getDriver();
 
         if (driver != null) {
-            String testName = result.getName();
             try {
                 // 1. Save Screenshot
-                File dir = new File("screenshots");
-                if (!dir.exists()) dir.mkdirs();
+                File shotDir = new File("screenshots");
+                if (!shotDir.exists()) shotDir.mkdirs();
                 File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
                 Files.copy(srcFile.toPath(), Paths.get("screenshots/" + testName + ".png"));
                 
@@ -36,9 +37,16 @@ public class TestListener implements ITestListener {
                     writer.write(pageSource);
                 }
 
-                System.out.println("Diagnostics saved successfully for: " + testName);
+                // 3. Save Execution Log
+                File logDir = new File("logs");
+                if (!logDir.exists()) logDir.mkdirs();
+                try (FileWriter logWriter = new FileWriter("logs/test-execution.log", true)) {
+                    logWriter.write("FAILURE: Test [" + testName + "] failed and diagnostics were captured.\n");
+                }
+
+                logger.info("Diagnostics saved successfully for: " + testName);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.severe("Error saving test diagnostics: " + e.getMessage());
             }
         }
     }
