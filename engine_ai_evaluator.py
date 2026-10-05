@@ -4,7 +4,6 @@ import difflib
 import argparse
 import pandas as pd
 from openai import OpenAI
-
 class AIEvaluator:
     """
     AI-based chatbot response evaluator.
@@ -69,14 +68,14 @@ Evaluation Rules:
 1. Relevance:
 - "Relevant" if the chatbot directly addresses the user's question.
 - "Irrelevant" if it does not answer the question, is unrelated,
-  or fails to address the requested information.
+ or fails to address the requested information.
 
 2. Hallucination:
 - true if the chatbot contains factually incorrect,
-  fabricated, or misleading information.
+ fabricated, or misleading information.
 - false if the response is factually correct.
 - Additional valid information must NOT be considered hallucination
-  simply because it is not present in the expected answer.
+ simply because it is not present in the expected answer.
 
 3. Semantic Score:
 - Give a score between 0.0 and 1.0.
@@ -571,33 +570,39 @@ def process_qa_framework_excel(
                 ]
             )
 
+            # 1. Keep difflib strictly as a diagnostic metric (does not block passing)
             match_pct = calculate_match_percentage(
                 expected,
                 chatbot_answer
             )
-
             match_pct_str = f"{match_pct:.2f}%"
 
-            if (
+            # 2. Check if the answer is blank or an explicit runtime exception/error
+            is_blank = (
                 not chatbot_answer
+                or not chatbot_answer.strip()
                 or chatbot_answer.lower() == "nan"
-                or chatbot_answer.lower().startswith("error")
+            )
+            
+            is_error_response = (
+                chatbot_answer.lower().startswith("error")
                 or chatbot_answer.lower().startswith("exception")
-            ):
+            )
+
+            if is_blank or is_error_response:
                 row_dict["Match Percentage"] = match_pct_str
                 row_dict["Semantic Score"] = "0.00"
                 row_dict["Relevance"] = "Irrelevant"
                 row_dict["Hallucination"] = "Yes"
                 row_dict["Status"] = "FAIL"
                 row_dict["Pass and Failure Reason"] = (
-                    "Chatbot response was empty, "
-                    "threw an exception, or "
-                    "returned an error."
+                    "Chatbot response was blank, threw an exception, or returned an error."
                 )
                 updated_rows.append(row_dict)
-                print(f"Row {index + 1}: FAIL | Match: {match_pct_str} | Empty/Error response")
+                print(f"Row {index + 1}: FAIL | Match: {match_pct_str} | Blank or Error response")
                 continue
 
+            # 3. Perform AI Evaluation via LLM
             result = evaluator.evaluate_advanced(
                 question=question,
                 expected=expected,
@@ -637,23 +642,25 @@ def process_qa_framework_excel(
                 )
             )
 
-            if (
-                semantic_score >= 0.75
-                and relevance.lower() == "relevant"
-                and not hallucinated
-            ):
+            # 4. Apply Manager's Rule for PASS / FAIL
+            # PASS = Not blank AND LLM says Relevant AND Hallucination = No AND Semantic Score >= Threshold
+            SEMANTIC_THRESHOLD = 0.75  # Adjust threshold here if needed (e.g. 0.80)
+
+            is_relevant = (relevance.lower() == "relevant")
+            no_hallucination = (not hallucinated)
+            score_meets_threshold = (semantic_score >= SEMANTIC_THRESHOLD)
+
+            if is_relevant and no_hallucination and score_meets_threshold:
                 status = "PASS"
                 reason = (
-                    f"Semantic Score is {semantic_score:.2f} "
-                    "(>= 0.75), the response is relevant, "
-                    "and no hallucination was detected."
+                    f"Passed: Response is relevant, no hallucination detected, "
+                    f"and semantic score ({semantic_score:.2f}) meets the threshold (>= {SEMANTIC_THRESHOLD})."
                 )
             else:
                 status = "FAIL"
-
-                if relevance.lower() != "relevant":
+                if not is_relevant:
                     reason = "Chatbot response was classified as irrelevant."
-                elif hallucinated:
+                elif not no_hallucination:
                     reason = result.get(
                         "reason",
                         "Chatbot response contains hallucinated or misleading information."
@@ -661,8 +668,7 @@ def process_qa_framework_excel(
                 else:
                     reason = (
                         f"Semantic Score is {semantic_score:.2f} "
-                        "(< 0.75 threshold required for passing), "
-                        "or response did not satisfy evaluation criteria."
+                        f"(below the required threshold of {SEMANTIC_THRESHOLD})."
                     )
 
             row_dict["Match Percentage"] = match_pct_str
