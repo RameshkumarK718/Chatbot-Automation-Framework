@@ -1,4 +1,5 @@
 package io.qameta.allure.listeners;
+import io.qameta.allure.Attachment; 
 import org.testng.ITestListener;
 import org.testng.ITestResult;
 import org.openqa.selenium.WebDriver;
@@ -8,8 +9,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.logging.Logger;
 
 public class TestListener implements ITestListener {
+    private static final Logger logger = Logger.getLogger(TestListener.class.getName());
 
     // Store driver directly to avoid cross-class missing symbol issues
     private static WebDriver driverInstance;
@@ -20,18 +23,18 @@ public class TestListener implements ITestListener {
 
     @Override
     public void onTestFailure(ITestResult result) {
-        System.out.println("Test Failed: " + result.getName() + ". Capturing diagnostics...");
+        String testName = result.getName();
+        logger.severe("Test Failed: " + testName + ". Capturing diagnostics...");
         
         if (driverInstance != null) {
-            String testName = result.getName();
             try {
-                // 1. Save Screenshot
+                // 1. Save local screenshot file
                 File dir = new File("screenshots");
                 if (!dir.exists()) dir.mkdirs();
                 File srcFile = ((TakesScreenshot) driverInstance).getScreenshotAs(OutputType.FILE);
                 Files.copy(srcFile.toPath(), Paths.get("screenshots/" + testName + ".png"));
                 
-                // 2. Save Page Source HTML
+                // 2. Save local Page Source HTML file
                 File htmlDir = new File("page-source");
                 if (!htmlDir.exists()) htmlDir.mkdirs();
                 String pageSource = driverInstance.getPageSource();
@@ -39,10 +42,31 @@ public class TestListener implements ITestListener {
                     writer.write(pageSource);
                 }
 
-                System.out.println("Diagnostics saved successfully for: " + testName);
+                // 3. Save Execution Log
+                File logDir = new File("logs");
+                if (!logDir.exists()) logDir.mkdirs();
+                try (FileWriter logWriter = new FileWriter("logs/test-execution.log", true)) {
+                    logWriter.write("FAILURE: Test [" + testName + "] failed.\n");
+                }
+
+                // 4. Attach to Allure Report automatically using annotations
+                saveScreenshotToAllure(driverInstance);
+                savePageSourceToAllure(pageSource);
+
+                logger.info("Diagnostics saved successfully for: " + testName);
             } catch (Exception e) {
-                e.printStackTrace();
+                logger.severe("Error capturing test diagnostics: " + e.getMessage());
             }
         }
+    }
+
+    @Attachment(value = "Failure Screenshot", type = "image/png")
+    public byte[] saveScreenshotToAllure(WebDriver driver) {
+        return ((TakesScreenshot) driver).getScreenshotAs(OutputType.BYTES);
+    }
+
+    @Attachment(value = "Page HTML Source", type = "text/html")
+    public String savePageSourceToAllure(String pageSource) {
+        return pageSource;
     }
 }
