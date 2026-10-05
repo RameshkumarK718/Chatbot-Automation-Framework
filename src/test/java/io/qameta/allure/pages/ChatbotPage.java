@@ -11,11 +11,8 @@ public class ChatbotPage {
     private WebDriver driver;
     private WebDriverWait wait;
 
-    // 1. Specific Locators (Update these to match your exact DOM attributes like data-testid or specific classes)
     private By chatInput = By.xpath("//textarea[@id='chat-input' or @placeholder='Type a message...']");
     private By sendButton = By.xpath("//button[@data-testid='send-button' or @type='submit']");
-    
-    // Targeted specifically at bot/assistant response containers (avoiding user messages)
     private By botMessages = By.xpath("//div[@data-sender='bot' or contains(@class, 'bot-message') or contains(@class, 'assistant-response')]");
 
     public ChatbotPage(WebDriver driver) {
@@ -32,11 +29,6 @@ public class ChatbotPage {
         sendBtn.click();
     }
 
-    /**
-     * 2. Streaming Stabilization Loop
-     * Polls the response text at intervals until it stops changing, 
-     * ensuring you capture the final fully-streamed answer.
-     */
     public String getLatestResponse() {
         wait.until(ExpectedConditions.numberOfElementsToBeMoreThan(botMessages, 0));
 
@@ -44,8 +36,8 @@ public class ChatbotPage {
         String previousText = "";
         String currentText = "";
         
-        int maxAttempts = 30; // Max timeout protection (~15 seconds)
-        int stableCount = 0;   // Consecutive identical checks required to confirm completion
+        int maxAttempts = 30;
+        int stableCount = 0;
 
         for (int i = 0; i < maxAttempts; i++) {
             List<WebElement> messages = driver.findElements(botMessages);
@@ -59,11 +51,11 @@ public class ChatbotPage {
 
             if (!currentText.isEmpty() && currentText.equals(previousText)) {
                 stableCount++;
-                if (stableCount >= 2) { // Text has stopped changing for ~1 second
+                if (stableCount >= 2) {
                     break;
                 }
             } else {
-                stableCount = 0; // Still streaming/updating
+                stableCount = 0;
             }
 
             previousText = currentText;
