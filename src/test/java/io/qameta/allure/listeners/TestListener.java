@@ -4,7 +4,6 @@ import org.testng.ITestResult;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.OutputType;
-import io.qameta.allure.DriverManager; // Imported from main package
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -12,25 +11,30 @@ import java.nio.file.Paths;
 
 public class TestListener implements ITestListener {
 
+    // Store driver directly to avoid cross-class missing symbol issues
+    private static WebDriver driverInstance;
+
+    public static void setDriver(WebDriver driver) {
+        driverInstance = driver;
+    }
+
     @Override
     public void onTestFailure(ITestResult result) {
         System.out.println("Test Failed: " + result.getName() + ". Capturing diagnostics...");
         
-        WebDriver driver = DriverManager.getDriver();
-
-        if (driver != null) {
+        if (driverInstance != null) {
             String testName = result.getName();
             try {
                 // 1. Save Screenshot
                 File dir = new File("screenshots");
                 if (!dir.exists()) dir.mkdirs();
-                File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+                File srcFile = ((TakesScreenshot) driverInstance).getScreenshotAs(OutputType.FILE);
                 Files.copy(srcFile.toPath(), Paths.get("screenshots/" + testName + ".png"));
                 
                 // 2. Save Page Source HTML
                 File htmlDir = new File("page-source");
                 if (!htmlDir.exists()) htmlDir.mkdirs();
-                String pageSource = driver.getPageSource();
+                String pageSource = driverInstance.getPageSource();
                 try (FileWriter writer = new FileWriter("page-source/" + testName + ".html")) {
                     writer.write(pageSource);
                 }
