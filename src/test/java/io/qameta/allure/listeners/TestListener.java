@@ -4,6 +4,7 @@ import org.testng.ITestResult;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.OutputType;
+import io.qameta.allure.DriverManager; // Imported from main package
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -15,7 +16,7 @@ public class TestListener implements ITestListener {
     public void onTestFailure(ITestResult result) {
         System.out.println("Test Failed: " + result.getName() + ". Capturing diagnostics...");
         
-        WebDriver driver = io.qameta.allure.ChatbotTest.getDriver();
+        WebDriver driver = DriverManager.getDriver();
 
         if (driver != null) {
             String testName = result.getName();
