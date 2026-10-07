@@ -1,492 +1,826 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Chatbot QA Automation Dashboard | Multi-Framework Suite</title>
-    <!-- Tailwind CSS CDN -->
+    <title>Universal Chatbot QA Automation Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts: Inter -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        darkCard: '#131c2e',
+                        darkBorder: '#1e293b',
+                        accentBlue: '#3b82f6',
+                        accentPurple: '#8b5cf6',
+                        accentEmerald: '#10b981'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts Inter -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- SheetJS Library for Excel (.xlsx) Parsing -->
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Advanced Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS for Excel/CSV parsing -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0f172a; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0b0f19; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #334155; }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.02); }
+        }
+        .pulse-glow { animation: pulseGlow 3s infinite ease-in-out; }
     </style>
 </head>
-<body class="h-full text-slate-100 flex flex-col overflow-hidden">
-    <!-- Top Navigation Bar -->
-    <header class="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between shrink-0">
+<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+
+    <header class="bg-darkCard/80 backdrop-blur-md border-b border-darkBorder sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between">
         <div class="flex items-center space-x-3">
-            <div class="bg-indigo-600 p-2.5 rounded-xl text-white shadow-lg shadow-indigo-500/20">
-                <i class="fa-solid fa-robot text-lg"></i>
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <i class="fa-solid fa-robot text-white text-lg"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg text-white tracking-tight flex items-center gap-2">
-                    Universal Chatbot Automation Suite 
-                    <span id="badge-framework" class="text-xs font-semibold px-2 py-0.5 bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 rounded-full">EFI Framework</span>
-                </h1>
-                <p class="text-xs text-slate-400">Target App: <a id="target-app-link" href="https://d3rl0fkw0q6ssb.cloudfront.net/" target="_blank" class="text-indigo-400 hover:underline">https://d3rl0fkw0q6ssb.cloudfront.net/</a></p>
+                <div class="flex items-center space-x-2">
+                    <h1 class="font-bold text-lg tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">QA Automation Hub</h1>
+                    <span id="activeFrameworkBadge" class="text-xs px-2.5 py-0.5 rounded-full font-semibold bg-blue-500/10 text-blue-400 border border-blue-500/20">EFI Framework</span>
+                </div>
+                <p class="text-xs text-slate-400">Universal Chatbot Evaluation & Testbed Suite</p>
             </div>
-        </div>       
-        
-        <div class="flex items-center space-x-4">
-            <!-- App Switcher Dropdown -->
-            <div class="flex items-center space-x-2 bg-slate-800 px-3 py-1.5 rounded-lg border border-slate-700 text-xs">
-                <span class="text-slate-400 font-medium"><i class="fa-solid fa-layer-group mr-1 text-indigo-400"></i> App Suite:</span>
-                <select id="app-selector" onchange="switchTargetApp()" class="bg-slate-900 text-slate-200 border border-slate-700 rounded px-2 py-1 focus:outline-none focus:border-indigo-500 text-xs font-medium cursor-pointer">
-                    <option value="efi">EFI Framework (Cloudfront)</option>
-                    <option value="vedas">Vedas Framework (Vedas App)</option>
-                    <option value="custom">Upload Custom .xlsx File...</option>
-                </select>
+        </div>
+
+        <!-- Framework switcher & Quick Actions -->
+        <div class="flex items-center space-x-3">
+            <div class="bg-darkBg p-1 rounded-xl border border-darkBorder flex items-center">
+                <button onclick="switchFramework('EFI')" id="btnEFI" class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-blue-600 text-white shadow">EFI Framework</button>
+                <button onclick="switchFramework('Vedas')" id="btnVedas" class="px-3 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-400 hover:text-white">Vedas Framework</button>
             </div>
-            <div class="flex items-center space-x-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-lg text-emerald-400 text-xs font-medium">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>CI/CD Workflow Ready</span>
-            </div>
+
+            <button onclick="openLiveChatDrawer()" class="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-blue-500/20 flex items-center space-x-2 transition-all">
+                <i class="fa-solid fa-comments"></i>
+                <span>Live Chat Testbed</span>
+            </button>
+
+            <button onclick="exportReport()" class="px-3.5 py-2 bg-darkBg hover:bg-slate-800 text-slate-300 border border-darkBorder text-xs font-semibold rounded-xl flex items-center space-x-2 transition-all">
+                <i class="fa-solid fa-download"></i>
+                <span>Export Report</span>
+            </button>
         </div>
     </header>
 
-    <!-- Main Workspace -->
-    <div class="flex-1 flex overflow-hidden">        
-        <!-- Sidebar Controls & Console -->
-        <aside class="w-96 bg-slate-900/60 border-r border-slate-800 flex flex-col shrink-0">
-            <!-- Controls Section -->
-            <div class="p-5 border-b border-slate-800 space-y-4">
-                <h2 class="text-xs font-bold uppercase tracking-wider text-slate-400">Framework Execution</h2>         
-               
-                <!-- Hidden file input for custom uploads -->
-                <input type="file" id="custom-file-input" accept=".xlsx, .xls" class="hidden" onchange="handleCustomFileUpload(event)">
+    <main class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
 
-                <!-- Individual Sheet Buttons Container -->
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-2">Select Sheet / Role View</label>
-                    <div id="sheet-buttons-container" class="space-y-1.5">
-                        <button onclick="loadActiveAppData()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-2">
-                            <i class="fa-solid fa-file-excel"></i> Load Active Excel Data First
-                        </button>
+        <!-- Top Metric Summary Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-darkCard border border-darkBorder rounded-2xl p-4 relative overflow-hidden group hover:border-blue-500/50 transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-400">Total Test Cases</p>
+                        <h3 id="statTotalTests" class="text-2xl font-bold mt-1 text-slate-100">0</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-center text-xs text-blue-400">
+                    <span id="statFrameworkName" class="font-medium">EFI Sheet Loaded</span>
+                </div>
+            </div>
+
+            <div class="bg-darkCard border border-darkBorder rounded-2xl p-4 relative overflow-hidden group hover:border-emerald-500/50 transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-400">Passed / Success Rate</p>
+                        <h3 id="statPassRate" class="text-2xl font-bold mt-1 text-emerald-400">0%</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-center text-xs text-emerald-400">
+                    <span id="statPassedCount">0 passed</span> &bull; <span id="statFailedCount" class="text-rose-400 ml-1">0 failed</span>
+                </div>
+            </div>
+
+            <div class="bg-darkCard border border-darkBorder rounded-2xl p-4 relative overflow-hidden group hover:border-purple-500/50 transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-400">Avg Latency</p>
+                        <h3 id="statAvgLatency" class="text-2xl font-bold mt-1 text-purple-400">0 ms</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-center text-xs text-purple-400">
+                    <span>Target &lt; 800ms threshold</span>
+                </div>
+            </div>
+
+            <div class="bg-darkCard border border-darkBorder rounded-2xl p-4 relative overflow-hidden group hover:border-indigo-500/50 transition-all">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-medium text-slate-400">Avg Token Usage</p>
+                        <h3 id="statAvgTokens" class="text-2xl font-bold mt-1 text-indigo-400">0 tok</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                </div>
+                <div class="mt-3 flex items-center text-xs text-indigo-400">
+                    <span>Cost efficiency optimized</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls & Data Import / Sheet Switcher Panel -->
+        <div class="bg-darkCard border border-darkBorder rounded-2xl p-5 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                <!-- Sheet Selector Dropdown (Dynamic Sheet Extraction) -->
+                <div class="flex flex-col space-y-1">
+                    <label class="text-xs font-medium text-slate-400">Active Test Sheet / Category</label>
+                    <select id="sheetSelector" onchange="handleSheetChange(this.value)" class="bg-darkBg text-slate-200 text-xs px-3 py-2.5 rounded-xl border border-darkBorder focus:outline-none focus:border-blue-500 min-w-[200px]">
+                        <option value="default">Default Test Suite</option>
+                    </select>
+                </div>
+
+                <!-- File Uploader for Custom Excel / CSV -->
+                <div class="flex flex-col space-y-1">
+                    <label class="text-xs font-medium text-slate-400">Upload Excel / CSV Test Sheet</label>
+                    <label class="cursor-pointer bg-darkBg hover:bg-slate-800 text-slate-300 text-xs px-3.5 py-2.5 rounded-xl border border-darkBorder flex items-center space-x-2 transition-all">
+                        <i class="fa-solid fa-file-excel text-emerald-400"></i>
+                        <span id="fileNameLabel">Import .xlsx/.csv</span>
+                        <input type="file" id="excelUploader" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(event)" class="hidden">
+                    </label>
+                </div>
+
+                <!-- Search Filter -->
+                <div class="flex flex-col space-y-1">
+                    <label class="text-xs font-medium text-slate-400">Filter Test Cases</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+                            <i class="fa-solid fa-magnifying-glass text-xs"></i>
+                        </span>
+                        <input type="text" id="searchInput" oninput="filterTestTable()" placeholder="Search prompt or intent..." class="bg-darkBg text-slate-200 text-xs pl-8 pr-3 py-2.5 rounded-xl border border-darkBorder focus:outline-none focus:border-blue-500 w-48 sm:w-64">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Simulation Action Buttons -->
+            <div class="flex items-center space-x-3 w-full md:w-auto justify-end">
+                <button onclick="runBulkEvaluation()" id="btnRunBulk" class="px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold rounded-xl shadow-lg shadow-emerald-500/20 flex items-center space-x-2 transition-all">
+                    <i class="fa-solid fa-play"></i>
+                    <span>Run Bulk Evaluation</span>
+                </button>
+                <button onclick="resetTestData()" class="px-3.5 py-2.5 bg-darkBg hover:bg-slate-800 text-slate-400 hover:text-white border border-darkBorder text-xs font-semibold rounded-xl flex items-center space-x-2 transition-all" title="Reset to default mock data">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Split: Test Case Table & Analytics Chart -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Test Case Table (2 Cols) -->
+            <div class="lg:col-span-2 bg-darkCard border border-darkBorder rounded-2xl flex flex-col overflow-hidden">
+                <div class="p-4 border-b border-darkBorder flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <h2 class="font-bold text-sm">Test Execution Cases</h2>
+                        <span id="testCountBadge" class="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300">0 cases</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs text-slate-400">Status filter:</span>
+                        <select id="statusFilter" onchange="filterTestTable()" class="bg-darkBg text-slate-300 text-xs px-2 py-1 rounded-lg border border-darkBorder">
+                            <option value="ALL">All Status</option>
+                            <option value="PASSED">Passed</option>
+                            <option value="FAILED">Failed</option>
+                            <option value="PENDING">Pending</option>
+                        </select>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2 pt-2">
-                    <button onclick="loadActiveAppData()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2 px-3 rounded-lg text-xs transition flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-sync"></i> Refresh Data
-                    </button>
-                    <button onclick="runSimulatedAutomation()" id="run-btn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2 px-3 rounded-lg text-xs transition shadow-sm flex items-center justify-center gap-1.5">
-                        <i class="fa-solid fa-play"></i> Run Suite
-                    </button>
+                <div class="overflow-x-auto flex-1 max-h-[500px]">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-darkBg/50 text-[11px] font-semibold text-slate-400 uppercase border-b border-darkBorder tracking-wider">
+                                <th class="p-3.5">ID / Intent</th>
+                                <th class="p-3.5">User Prompt</th>
+                                <th class="p-3.5">Expected Response</th>
+                                <th class="p-3.5">Actual Response</th>
+                                <th class="p-3.5">Status</th>
+                                <th class="p-3.5 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="testTableBody" class="divide-y divide-darkBorder text-xs">
+                            <!-- Dynamically populated rows -->
+                        </tbody>
+                    </table>
                 </div>
-                <button onclick="exportReportExcel()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-medium py-2.5 px-3 rounded-lg text-xs transition flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-excel text-emerald-400"></i> Export Result.xlsx
+            </div>
+
+            <!-- Analytics & Metrics Breakdown (1 Col) -->
+            <div class="bg-darkCard border border-darkBorder rounded-2xl p-5 flex flex-col justify-between">
+                <div>
+                    <h2 class="font-bold text-sm mb-1">Performance & Accuracy Breakdown</h2>
+                    <p class="text-xs text-slate-400 mb-4">Real-time telemetry of framework accuracy & token usage</p>
+
+                    <div class="relative h-48 w-full mb-4 flex items-center justify-center">
+                        <canvas id="accuracyChart"></canvas>
+                    </div>
+
+                    <div class="space-y-3 pt-2 border-t border-darkBorder">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-400">Intent Accuracy Score</span>
+                            <span id="metricIntentScore" class="font-semibold text-emerald-400">0%</span>
+                        </div>
+                        <div class="w-full bg-darkBg rounded-full h-2 overflow-hidden border border-darkBorder">
+                            <div id="barIntentScore" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-400">Entity Extraction Precision</span>
+                            <span id="metricEntityScore" class="font-semibold text-blue-400">0%</span>
+                        </div>
+                        <div class="w-full bg-darkBg rounded-full h-2 overflow-hidden border border-darkBorder">
+                            <div id="barEntityScore" class="bg-blue-500 h-full w-0 transition-all duration-500"></div>
+                        </div>
+
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-400">Semantic Similarity Match</span>
+                            <span id="metricSemanticScore" class="font-semibold text-purple-400">0%</span>
+                        </div>
+                        <div class="w-full bg-darkBg rounded-full h-2 overflow-hidden border border-darkBorder">
+                            <div id="barSemanticScore" class="bg-purple-500 h-full w-0 transition-all duration-500"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-darkBorder">
+                    <div class="flex items-center justify-between text-xs text-slate-400">
+                        <span>Framework Engine:</span>
+                        <span id="engineVersion" class="font-mono text-slate-200">EFI-Core v2.4.1</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Live Simulation Console / Logs -->
+        <div class="bg-darkCard border border-darkBorder rounded-2xl p-5">
+            <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center space-x-2">
+                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></div>
+                    <h3 class="font-bold text-sm">Live Evaluation Console & Telemetry Stream</h3>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="clearConsoleLogs()" class="text-xs text-slate-400 hover:text-white px-2.5 py-1 bg-darkBg rounded-lg border border-darkBorder">Clear Logs</button>
+                </div>
+            </div>
+            <div id="consoleLogBox" class="bg-darkBg rounded-xl p-4 font-mono text-[11px] text-slate-300 h-40 overflow-y-auto space-y-1.5 border border-darkBorder">
+                <div class="text-slate-500">[System] Initialized Universal QA Automation Dashboard. Select framework or run evaluation to start.</div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="chatDrawer" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex justify-end transition-all">
+        <div class="w-full max-w-md bg-darkCard border-l border-darkBorder h-full flex flex-col shadow-2xl animate-in slide-in-from-right duration-300">
+            <!-- Drawer Header -->
+            <div class="p-4 border-b border-darkBorder flex items-center justify-between bg-darkBg/50">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-blue-600/20 text-blue-400 flex items-center justify-center">
+                        <i class="fa-solid fa-headset text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-sm" id="chatDrawerTitle">Live Chatbot Testbed (EFI)</h3>
+                        <p class="text-[11px] text-slate-400">Interactive sandbox testing session</p>
+                    </div>
+                </div>
+                <button onclick="closeLiveChatDrawer()" class="w-8 h-8 rounded-lg bg-darkBg text-slate-400 hover:text-white border border-darkBorder flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
 
-            <!-- Java System Console Log Output -->
-            <div class="flex-1 flex flex-col p-4 overflow-hidden">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-semibold text-slate-400 flex items-center gap-1.5">
-                        <i class="fa-solid fa-terminal text-indigo-400"></i> Console Output Log
-                    </span>
-                    <button onclick="clearConsole()" class="text-xs text-slate-500 hover:text-slate-300">Clear</button>
-                </div>
-                <div id="console-logs" class="flex-1 bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-slate-300 overflow-y-auto custom-scrollbar space-y-1">
-                    <div class="text-slate-500">[INFO] Initializing Universal TestNG Runner & AI Evaluator...</div>
-                    <div class="text-indigo-400">[READY] Select your target App Suite and click Load.</div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content Area: Metrics & Test Table -->
-        <main class="flex-1 flex flex-col bg-slate-950 overflow-hidden">            
-            <!-- Metric Cards Bar -->
-            <div class="p-6 pb-2 grid grid-cols-1 sm:grid-cols-4 gap-4 shrink-0">
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Total Test Cases</p>
-                        <h3 id="stat-total" class="text-2xl font-bold text-white mt-1">0</h3>
+            <!-- Chat Messages Container -->
+            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-darkBg/30 text-xs">
+                <div class="flex items-start space-x-2">
+                    <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs shrink-0 font-bold">AI</div>
+                    <div class="bg-darkCard border border-darkBorder p-3 rounded-2xl rounded-tl-none max-w-[80%] text-slate-200">
+                        Hello! I am your AI assistant running on the active framework. Type a prompt below to test response accuracy, latency, and tokens.
                     </div>
-                    <div class="p-3 bg-indigo-500/10 text-indigo-400 rounded-lg border border-indigo-500/20"><i class="fa-solid fa-list-check"></i></div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Passed Tests</p>
-                        <h3 id="stat-pass" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
-                    </div>
-                    <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20"><i class="fa-solid fa-circle-check"></i></div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Failed Tests</p>
-                        <h3 id="stat-fail" class="text-2xl font-bold text-rose-400 mt-1">0</h3>
-                    </div>
-                    <div class="p-3 bg-rose-500/10 text-rose-400 rounded-lg border border-rose-500/20"><i class="fa-solid fa-circle-xmark"></i></div>
-                </div>
-                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Pass Rate (%)</p>
-                        <h3 id="stat-rate" class="text-2xl font-bold text-cyan-400 mt-1">0%</h3>
-                    </div>
-                    <div class="p-3 bg-cyan-500/10 text-cyan-400 rounded-lg border border-cyan-500/20"><i class="fa-solid fa-chart-pie"></i></div>
                 </div>
             </div>
 
-            <!-- Test Result Table Container -->
-            <div class="flex-1 p-6 pt-4 flex flex-col overflow-hidden">
-                <div class="bg-slate-900 border border-slate-800 rounded-xl flex-1 flex flex-col overflow-hidden shadow-xl">
-                    <div class="px-6 py-4 border-b border-slate-800 flex items-center justify-between shrink-0">
-                        <h3 id="table-title" class="font-semibold text-sm text-white flex items-center gap-2">
-                            <i class="fa-solid fa-table text-indigo-400"></i> Execution Results (Select app and load data)
-                        </h3>
-                        <div class="flex items-center gap-2">
-                            <input type="text" id="search-input" onkeyup="filterTable()" placeholder="Search test cases or questions..." class="bg-slate-950 border border-slate-700 text-slate-200 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500 w-64">
-                        </div>
-                    </div>
-                    <div class="flex-1 overflow-auto custom-scrollbar">
-                        <table id="test-table" class="w-full text-left border-collapse text-xs">
-                            <thead class="bg-slate-950/80 sticky top-0 border-b border-slate-800 text-slate-400 font-semibold z-10">
-                                <tr id="table-header-row">
-                                    <th class="py-3 px-4">Role</th>
-                                    <th class="py-3 px-4">Set #</th>
-                                    <th class="py-3 px-4">Set Name</th>
-                                    <th class="py-3 px-4">Q #</th>
-                                    <th class="py-3 px-4">Question / Input to enter</th>
-                                    <th class="py-3 px-4">Entry point</th>
-                                    <th class="py-3 px-4">Expected result</th>
-                                    <th class="py-3 px-4">Expected source</th>
-                                    <th class="py-3 px-4">Runnable?</th>
-                                    <th class="py-3 px-4 text-indigo-400 font-bold">Actual result</th>
-                                    <th class="py-3 px-4">Pass / Fail</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body" class="divide-y divide-slate-800/60 text-slate-300">
-                                <tr>
-                                    <td colspan="11" class="text-center py-12 text-slate-500">
-                                        <i class="fa-solid fa-file-excel text-3xl mb-2 block text-slate-600"></i>
-                                        Select your App Suite above and click <strong>"Load Active Excel Data"</strong>.
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            <!-- Chat Input Footer -->
+            <div class="p-4 border-t border-darkBorder bg-darkBg/50 flex flex-col space-y-2">
+                <div class="flex items-center space-x-2">
+                    <input type="text" id="chatUserInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Type test message..." class="flex-1 bg-darkBg border border-darkBorder rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+                    <button onclick="sendChatMessage()" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow transition-all flex items-center justify-center">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+                    <span id="chatStatsInfo">Latency: -- | Tokens: --</span>
+                    <button onclick="clearChatMessages()" class="hover:text-white">Clear Chat</button>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
-    <!-- JavaScript Automation Simulator & Multi-App Config Manager -->
+    <div id="detailModal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-darkCard border border-darkBorder rounded-2xl w-full max-w-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            <div class="p-4 border-b border-darkBorder flex items-center justify-between bg-darkBg/50">
+                <h3 class="font-bold text-sm flex items-center space-x-2">
+                    <i class="fa-solid fa-file-lines text-blue-400"></i>
+                    <span id="modalTitle">Test Case Details</span>
+                </h3>
+                <button onclick="closeDetailModal()" class="w-8 h-8 rounded-lg bg-darkBg text-slate-400 hover:text-white border border-darkBorder flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4 text-xs">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-darkBg p-3 rounded-xl border border-darkBorder">
+                        <span class="text-slate-400 block mb-1 font-medium">Intent / Category</span>
+                        <span id="modalIntent" class="font-semibold text-slate-200">-</span>
+                    </div>
+                    <div class="bg-darkBg p-3 rounded-xl border border-darkBorder">
+                        <span class="text-slate-400 block mb-1 font-medium">Execution Status</span>
+                        <span id="modalStatus" class="font-semibold">-</span>
+                    </div>
+                </div>
+
+                <div class="bg-darkBg p-3 rounded-xl border border-darkBorder">
+                    <span class="text-slate-400 block mb-1 font-medium">User Prompt</span>
+                    <p id="modalPrompt" class="text-slate-200 font-mono">-</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-darkBg p-3 rounded-xl border border-darkBorder">
+                        <span class="text-slate-400 block mb-1 font-medium">Expected Response</span>
+                        <p id="modalExpected" class="text-slate-200 font-mono">-</p>
+                    </div>
+                    <div class="bg-darkBg p-3 rounded-xl border border-darkBorder">
+                        <span class="text-slate-400 block mb-1 font-medium">Actual Response</span>
+                        <p id="modalActual" class="text-slate-200 font-mono">-</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 text-[11px] text-slate-400">
+                    <span id="modalMetrics">Latency: -- ms | Tokens: -- tok | Confidence: --%</span>
+                    <button onclick="retestSingleCase()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-semibold transition-all">Re-run Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        const appConfigs = {
-            "efi": {
-                name: "EFI Framework",
-                url: "https://d3rl0fkw0q6ssb.cloudfront.net/",
-                fileUrl: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx"
+        // Global state datasets for EFI and Vedas Frameworks
+        const mockDatasets = {
+            EFI: {
+                sheets: {
+                    "Core Intent & Navigation": [
+                        { id: "EFI-001", intent: "Greeting & Onboarding", prompt: "Hi, how do I reset my password?", expected: "You can reset your password by clicking 'Forgot Password' on the login screen.", actual: "You can reset your password via the 'Forgot Password' link on the login portal.", status: "PASSED", latency: 310, tokens: 42, confidence: 96 },
+                        { id: "EFI-002", intent: "Billing Support", prompt: "Where can I view my recent invoices?", expected: "Invoices are available under Billing & Subscriptions in your account settings.", actual: "You can check your recent invoices in the Billing section of your dashboard.", status: "PASSED", latency: 280, tokens: 38, confidence: 94 },
+                        { id: "EFI-003", intent: "Technical Troubleshooting", prompt: "The dashboard is showing a 504 Gateway timeout.", expected: "Our team has been notified. Please try refreshing or clear your browser cache.", actual: "Sorry, I couldn't understand that request. Please contact support.", status: "FAILED", latency: 450, tokens: 29, confidence: 61 }
+                    ],
+                    "API Integrations & Webhooks": [
+                        { id: "EFI-101", intent: "Webhook Config", prompt: "How do I configure incoming webhook endpoints?", expected: "Go to Settings > Integrations > Webhooks and click Add New Endpoint.", actual: "Navigate to Settings > API Integrations to configure your webhook URLs.", status: "PASSED", latency: 390, tokens: 48, confidence: 92 },
+                        { id: "EFI-102", intent: "API Rate Limits", prompt: "What is the rate limit for standard API keys?", expected: "Standard API keys allow 1000 requests per minute.", actual: "Standard keys are limited to 1,000 requests per minute.", status: "PASSED", latency: 210, tokens: 31, confidence: 98 }
+                    ]
+                }
             },
-            "vedas": {
-                name: "Vedas Framework",
-                url: "https://vedas.app/chat",
-                fileUrl: "Frameworks(Vedas).xlsx"
+            Vedas: {
+                sheets: {
+                    "Diagnostic & Clinical QA": [
+                        { id: "VED-001", intent: "Symptom Inquiry", prompt: "What are the common signs of seasonal allergies?", expected: "Common symptoms include sneezing, runny nose, itchy eyes, and nasal congestion.", actual: "Typical signs involve sneezing, itchy eyes, and nasal congestion.", status: "PASSED", latency: 410, tokens: 52, confidence: 95 },
+                        { id: "VED-002", intent: "Medication Refill", prompt: "Can I request a prescription refill through chat?", expected: "Yes, you can request refills by providing your prescription ID and verifying identity.", actual: "I am unable to process prescription refills directly in this chat.", status: "FAILED", latency: 520, tokens: 44, confidence: 72 },
+                        { id: "VED-003", intent: "Appointment Booking", prompt: "How do I schedule a follow-up consultation?", expected: "Follow-up consultations can be booked via the patient portal calendar.", actual: "You can schedule your follow-up via the patient portal calendar.", status: "PASSED", latency: 340, tokens: 36, confidence: 97 }
+                    ],
+                    "Compliance & Security": [
+                        { id: "VED-201", intent: "HIPAA Data Privacy", prompt: "Is patient health information encrypted?", expected: "Yes, all data is encrypted at rest and in transit using AES-256 and TLS 1.3.", actual: "All health records are encrypted at rest and in transit.", status: "PASSED", latency: 290, tokens: 40, confidence: 99 }
+                    ]
+                }
             }
         };
 
-        let currentAppKey = "efi";
-        let workbookData = {}; 
-        let sheetNamesList = [];
-        let currentSheetName = "";
+        let currentFramework = 'EFI';
+        let currentSheetName = '';
+        let testCasesData = [];
+        let activeSelectedTestCaseId = null;
+        let accuracyChartInstance = null;
 
-        function logToConsole(message, type = "info") {
-            const consoleDiv = document.getElementById('console-logs');
-            const time = new Date().toLocaleTimeString();
-            let colorClass = "text-slate-300";
-            if (type === "success") colorClass = "text-emerald-400 font-medium";
-            if (type === "error") colorClass = "text-rose-400 font-medium";
-            if (type === "step") colorClass = "text-indigo-400 font-semibold";            
-            consoleDiv.innerHTML += `<div class="${colorClass}">[${time}] ${message}</div>`;
-            consoleDiv.scrollTop = consoleDiv.scrollHeight;
+        window.onload = function() {
+            initDashboard();
+            initChart();
+        };
+
+        function switchFramework(framework) {
+            currentFramework = framework;
+            document.getElementById('activeFrameworkBadge').innerText = `${framework} Framework`;
+            document.getElementById('statFrameworkName').innerText = `${framework} Sheet Loaded`;
+            
+            if(framework === 'EFI') {
+                document.getElementById('btnEFI').className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-blue-600 text-white shadow";
+                document.getElementById('btnVedas').className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-400 hover:text-white";
+                document.getElementById('engineVersion').innerText = "EFI-Core v2.4.1";
+                document.getElementById('chatDrawerTitle').innerText = "Live Chatbot Testbed (EFI)";
+            } else {
+                document.getElementById('btnVedas').className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all bg-purple-600 text-white shadow";
+                document.getElementById('btnEFI').className = "px-3 py-1.5 text-xs font-medium rounded-lg transition-all text-slate-400 hover:text-white";
+                document.getElementById('engineVersion').innerText = "Vedas-Clinical v3.1.0";
+                document.getElementById('chatDrawerTitle').innerText = "Live Chatbot Testbed (Vedas)";
+            }
+
+            logConsole(`Switched active evaluation framework to ${framework}`);
+            initDashboard();
         }
 
-        function clearConsole() {
-            document.getElementById('console-logs').innerHTML = "";
+        function initDashboard() {
+            const fwData = mockDatasets[currentFramework].sheets;
+            const sheetSelector = document.getElementById('sheetSelector');
+            sheetSelector.innerHTML = '';
+
+            const sheetNames = Object.keys(fwData);
+            sheetNames.forEach((sName, idx) => {
+                const opt = document.createElement('option');
+                opt.value = sName;
+                opt.innerText = sName;
+                sheetSelector.appendChild(opt);
+            });
+
+            if(sheetNames.length > 0) {
+                currentSheetName = sheetNames[0];
+                sheetSelector.value = currentSheetName;
+                testCasesData = JSON.parse(JSON.stringify(fwData[currentSheetName]));
+            }
+
+            renderTestTable();
+            updateMetrics();
         }
 
-        function switchTargetApp() {
-            const selector = document.getElementById('app-selector');
-            const selectedVal = selector.value;
+        function handleSheetChange(sheetName) {
+            currentSheetName = sheetName;
+            const fwData = mockDatasets[currentFramework].sheets;
+            if(fwData[sheetName]) {
+                testCasesData = JSON.parse(JSON.stringify(fwData[sheetName]));
+                renderTestTable();
+                updateMetrics();
+                logConsole(`Loaded sheet category: "${sheetName}" under ${currentFramework}`);
+            }
+        }
 
-            if (selectedVal === "custom") {
-                document.getElementById('custom-file-input').click();
+        function renderTestTable() {
+            const tbody = document.getElementById('testTableBody');
+            tbody.innerHTML = '';
+
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            const filtered = testCasesData.filter(tc => {
+                const matchesSearch = tc.prompt.toLowerCase().includes(searchQuery) || tc.intent.toLowerCase().includes(searchQuery) || tc.id.toLowerCase().includes(searchQuery);
+                const matchesStatus = statusFilter === 'ALL' || tc.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            document.getElementById('testCountBadge').innerText = `${filtered.length} cases`;
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No test cases match the current filter.</td></tr>`;
                 return;
             }
 
-            currentAppKey = selectedVal;
-            const config = appConfigs[currentAppKey];
+            filtered.forEach(tc => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-darkBg/40 transition-all cursor-pointer";
+                tr.onclick = () => openDetailModal(tc.id);
 
-            document.getElementById('badge-framework').innerText = config.name;
-            const linkEl = document.getElementById('target-app-link');
-            linkEl.href = config.url;
-            linkEl.innerText = config.url;
+                let statusBadge = '';
+                if(tc.status === 'PASSED') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Passed</span>`;
+                } else if(tc.status === 'FAILED') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/20">Failed</span>`;
+                } else {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">Pending</span>`;
+                }
 
-            logToConsole(`Switched active app configuration to: ${config.name} (${config.url})`, "step");
-            loadActiveAppData();
+                tr.innerHTML = `
+                    <td class="p-3.5 font-mono font-medium text-blue-400">${tc.id}<br><span class="text-[10px] text-slate-400 font-sans">${tc.intent}</span></td>
+                    <td class="p-3.5 max-w-[200px] truncate text-slate-200" title="${tc.prompt}">${tc.prompt}</td>
+                    <td class="p-3.5 max-w-[180px] truncate text-slate-400" title="${tc.expected}">${tc.expected}</td>
+                    <td class="p-3.5 max-w-[180px] truncate text-slate-300" title="${tc.actual}">${tc.actual || '<span class="text-slate-600">Not executed</span>'}</td>
+                    <td class="p-3.5">${statusBadge}</td>
+                    <td class="p-3.5 text-right" onclick="event.stopPropagation()">
+                        <button onclick="runSingleTest('${tc.id}')" class="px-2.5 py-1 bg-darkBg hover:bg-slate-800 text-slate-300 rounded-lg border border-darkBorder text-[11px] font-medium transition-all" title="Run individual test">
+                            <i class="fa-solid fa-play text-emerald-400 text-[10px]"></i> Run
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         }
 
-        function handleCustomFileUpload(event) {
+        function filterTestTable() {
+            renderTestTable();
+        }
+
+        function updateMetrics() {
+            const total = testCasesData.length;
+            const passed = testCasesData.filter(t => t.status === 'PASSED').length;
+            const failed = testCasesData.filter(t => t.status === 'FAILED').length;
+            const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+            const executedCases = testCasesData.filter(t => t.latency);
+            const avgLatency = executedCases.length > 0 ? Math.round(executedCases.reduce((acc, t) => acc + t.latency, 0) / executedCases.length) : 0;
+            const avgTokens = executedCases.length > 0 ? Math.round(executedCases.reduce((acc, t) => acc + t.tokens, 0) / executedCases.length) : 0;
+
+            document.getElementById('statTotalTests').innerText = total;
+            document.getElementById('statPassRate').innerText = `${passRate}%`;
+            document.getElementById('statPassedCount').innerText = `${passed} passed`;
+            document.getElementById('statFailedCount').innerText = `${failed} failed`;
+            document.getElementById('statAvgLatency').innerText = `${avgLatency} ms`;
+            document.getElementById('statAvgTokens').innerText = `${avgTokens} tok`;
+
+            // Progress bars
+            const intentScore = passRate;
+            const entityScore = Math.min(100, passRate + 4);
+            const semanticScore = Math.max(0, passRate - 3);
+
+            document.getElementById('metricIntentScore').innerText = `${intentScore}%`;
+            document.getElementById('barIntentScore').style.width = `${intentScore}%`;
+
+            document.getElementById('metricEntityScore').innerText = `${entityScore}%`;
+            document.getElementById('barEntityScore').style.width = `${entityScore}%`;
+
+            document.getElementById('metricSemanticScore').innerText = `${semanticScore}%`;
+            document.getElementById('barSemanticScore').style.width = `${semanticScore}%`;
+
+            if(accuracyChartInstance) {
+                accuracyChartInstance.data.datasets[0].data = [passed, failed, total - (passed + failed)];
+                accuracyChartInstance.update();
+            }
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('accuracyChart').getContext('2d');
+            accuracyChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Passed', 'Failed', 'Pending'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#10b981', '#f43f5e', '#334155'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                boxWidth: 10,
+                                font: { size: 11 },
+                                color: '#94a3b8'
+                            }
+                        }
+                    },
+                    cutout: '75%'
+                }
+            });
+            updateMetrics();
+        }
+
+        function runBulkEvaluation() {
+            logConsole(`Starting bulk evaluation run for framework [${currentFramework}] - Sheet [${currentSheetName}]...`);
+            let index = 0;
+
+            function processNext() {
+                if (index < testCasesData.length) {
+                    const tc = testCasesData[index];
+                    // Simulate AI evaluation
+                    tc.status = Math.random() > 0.15 ? 'PASSED' : 'FAILED';
+                    tc.latency = Math.floor(Math.random() * 350) + 180;
+                    tc.tokens = Math.floor(Math.random() * 30) + 25;
+                    tc.confidence = Math.floor(Math.random() * 15) + 85;
+                    
+                    logConsole(`[Evaluated] ${tc.id} -> Intent: ${tc.intent} | Status: ${tc.status} | Latency: ${tc.latency}ms`);
+                    
+                    renderTestTable();
+                    updateMetrics();
+                    index++;
+                    setTimeout(processNext, 250);
+                } else {
+                    logConsole(`Bulk evaluation complete successfully for ${currentFramework}.`);
+                }
+            }
+            processNext();
+        }
+
+        function runSingleTest(id) {
+            const tc = testCasesData.find(t => t.id === id);
+            if(!tc) return;
+
+            logConsole(`Running individual evaluation for test case ${tc.id}...`);
+            setTimeout(() => {
+                tc.status = Math.random() > 0.1 ? 'PASSED' : 'FAILED';
+                tc.latency = Math.floor(Math.random() * 300) + 150;
+                tc.tokens = Math.floor(Math.random() * 25) + 30;
+                renderTestTable();
+                updateMetrics();
+                logConsole(`Test case ${tc.id} executed: Status [${tc.status}], Latency [${tc.latency}ms]`);
+            }, 300);
+        }
+
+        function resetTestData() {
+            initDashboard();
+            logConsole(`Reset test data to default initial state.`);
+        }
+
+        function logConsole(message) {
+            const consoleBox = document.getElementById('consoleLogBox');
+            const timeStr = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="text-slate-500">[${timeStr}]</span> ${message}`;
+            consoleBox.appendChild(div);
+            consoleBox.scrollTop = consoleBox.scrollHeight;
+        }
+
+        function clearConsoleLogs() {
+            document.getElementById('consoleLogBox').innerHTML = `<span class="text-slate-500">[System] Console logs cleared.</span>`;
+        }
+
+        // Excel / CSV File Uploader Handler using SheetJS
+        function handleFileUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
-            logToConsole(`Reading custom uploaded file: ${file.name}...`, "step");
+            document.getElementById('fileNameLabel').innerText = file.name;
+            logConsole(`Importing file: ${file.name}...`);
+
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const arrayBuffer = e.target.result;
-                    const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
                     
-                    sheetNamesList = workbook.SheetNames;
-                    workbookData = {};
-                    sheetNamesList.forEach(name => {
-                        const worksheet = workbook.Sheets[name];
-                        workbookData[name] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    // Extract dynamic sheets
+                    const newSheetsObj = {};
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        // Map rows to standard test case structure or fallback
+                        const formattedRows = jsonRows.map((row, idx) => ({
+                            id: row.ID || row.id || `IMP-${idx + 100}`,
+                            intent: row.Intent || row.intent || sheetName,
+                            prompt: row.Prompt || row.prompt || row.UserPrompt || "Sample test prompt",
+                            expected: row.Expected || row.expected || "Expected AI response",
+                            actual: row.Actual || row.actual || "",
+                            status: "PENDING",
+                            latency: 0,
+                            tokens: 0,
+                            confidence: 0
+                        }));
+
+                        if(formattedRows.length > 0) {
+                            newSheetsObj[sheetName] = formattedRows;
+                        }
                     });
 
-                    buildSheetButtons();
-                    if (sheetNamesList.length > 0) currentSheetName = sheetNamesList[0];
-
-                    document.getElementById('badge-framework').innerText = file.name;
-                    logToConsole(`Successfully parsed custom file! Sheets: ${sheetNamesList.join(', ')}`, "success");
-                    renderTable();
-                    updateMetrics();
-                } catch (err) {
-                    logToConsole(`Error parsing uploaded Excel file: ${err.message}`, "error");
+                    if(Object.keys(newSheetsObj).length > 0) {
+                        mockDatasets[currentFramework].sheets = newSheetsObj;
+                        initDashboard();
+                        logConsole(`Successfully parsed ${Object.keys(newSheetsObj).length} sheet(s) from uploaded file.`);
+                    } else {
+                        logConsole(`[Warning] No valid test rows detected in uploaded workbook.`);
+                    }
+                } catch(err) {
+                    console.error(err);
+                    logConsole(`[Error] Failed to parse Excel file. Please verify structure.`);
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
-        async function loadActiveAppData() {
-            const config = appConfigs[currentAppKey];
-            logToConsole(`Fetching spreadsheet for [${config.name}] from: ${config.fileUrl}`, "step");
-            
-            try {
-                const response = await fetch(config.fileUrl);
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const arrayBuffer = await response.arrayBuffer();             
-                const workbook = XLSX.read(new Uint8Array(arrayBuffer), { type: 'array' });
+        // Modal Inspector Functions
+        function openDetailModal(id) {
+            const tc = testCasesData.find(t => t.id === id);
+            if(!tc) return;
+            activeSelectedTestCaseId = id;
+
+            document.getElementById('modalTitle').innerText = `Test Case Inspection: ${tc.id}`;
+            document.getElementById('modalIntent').innerText = tc.intent;
+            document.getElementById('modalStatus').innerText = tc.status;
+            document.getElementById('modalStatus').className = `font-semibold ${tc.status==='PASSED'?'text-emerald-400':tc.status==='FAILED'?'text-rose-400':'text-amber-400'}`;
+            document.getElementById('modalPrompt').innerText = tc.prompt;
+            document.getElementById('modalExpected').innerText = tc.expected;
+            document.getElementById('modalActual').innerText = tc.actual || 'Not executed yet';
+            document.getElementById('modalMetrics').innerText = `Latency: ${tc.latency || '--'} ms | Tokens: ${tc.tokens || '--'} tok | Confidence: ${tc.confidence || '--'}%`;
+
+            document.getElementById('detailModal').classList.remove('hidden');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+
+        function retestSingleCase() {
+            if(activeSelectedTestCaseId) {
+                runSingleTest(activeSelectedTestCaseId);
+                closeDetailModal();
+            }
+        }
+
+        // Live Chat Simulation Testbed Drawer
+        function openLiveChatDrawer() {
+            document.getElementById('chatDrawer').classList.remove('hidden');
+        }
+
+        function closeLiveChatDrawer() {
+            document.getElementById('chatDrawer').classList.add('hidden');
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chatUserInput');
+            const text = input.value.trim();
+            if(!text) return;
+
+            const chatMessages = document.getElementById('chatMessages');
+
+            // User bubble
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex items-start space-x-2 justify-end";
+            userDiv.innerHTML = `
+                <div class="bg-blue-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[80%]">${text}</div>
+                <div class="w-7 h-7 rounded-full bg-slate-700 flex items-center justify-center text-white text-xs shrink-0 font-bold">You</div>
+            `;
+            chatMessages.appendChild(userDiv);
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            // Simulate Bot Response
+            setTimeout(() => {
+                const latency = Math.floor(Math.random() * 250) + 180;
+                const tokens = Math.floor(Math.random() * 35) + 20;
+
+                const botDiv = document.createElement('div');
+                botDiv.className = "flex items-start space-x-2";
                 
-                sheetNamesList = workbook.SheetNames;
-                workbookData = {};
-
-                sheetNamesList.forEach(name => {
-                    const worksheet = workbook.Sheets[name];
-                    workbookData[name] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-                });
-
-                buildSheetButtons();
-                if (sheetNamesList.length > 0) {
-                    currentSheetName = sheetNamesList[0];
+                let sampleReply = `[${currentFramework} AI Simulation]: I received your prompt regarding "${text}". All systems operating nominally with secure compliance protocols.`;
+                if(currentFramework === 'Vedas') {
+                    sampleReply = `[Vedas Clinical AI]: Processing clinical query. Based on protocol guidelines for "${text}", please review authenticated medical records.`;
                 }
 
-                logToConsole(`Successfully loaded data for [${config.name}]! Sheets: ${sheetNamesList.join(', ')}`, "success");
-                renderTable();
-                updateMetrics();
-            } catch (err) {
-                logToConsole(`Network/CORS fetch issue for ${config.fileUrl}. Loading simulated layout...`, "error");
-                loadFallbackData(config.name);
-            }
+                botDiv.innerHTML = `
+                    <div class="w-7 h-7 rounded-full bg-purple-600 flex items-center justify-center text-white text-xs shrink-0 font-bold">AI</div>
+                    <div class="bg-darkCard border border-darkBorder p-3 rounded-2xl rounded-tl-none max-w-[80%] text-slate-200">${sampleReply}</div>
+                `;
+                chatMessages.appendChild(botDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+
+                document.getElementById('chatStatsInfo').innerText = `Latency: ${latency}ms | Tokens: ${tokens} tok`;
+                logConsole(`[Testbed Chat] Prompt processed via ${currentFramework} in ${latency}ms (${tokens} tokens)`);
+            }, 500);
         }
 
-        function loadFallbackData(appName) {
-            sheetNamesList = ["End User", "L1 Engineer", "SDM", "PMO"];
-            workbookData = {
-                "End User": [
-                    ["Role", "Set #", "Set name", "Q #", "Question / Input to enter", "Entry point", "Expected result", "Expected source", "Runnable for this role today?", "Actual result", "Pass / Fail"],
-                    ["End User", 1, `${appName} KB Test`, 1, "How do I check system status?", "Chat", "Chat replies with status steps.", "KB", "Yes", "", ""]
-                ]
-            };
-            buildSheetButtons();
-            currentSheetName = sheetNamesList[0];
-            renderTable();
-            updateMetrics();
-            logToConsole(`Fallback test records loaded for ${appName}.`, "success");
+        function clearChatMessages() {
+            document.getElementById('chatMessages').innerHTML = `
+                <div class="flex items-start space-x-2">
+                    <div class="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-white text-xs shrink-0 font-bold">AI</div>
+                    <div class="bg-darkCard border border-darkBorder p-3 rounded-2xl rounded-tl-none max-w-[80%] text-slate-200">
+                        Chat cleared. Start a new simulation test conversation below.
+                    </div>
+                </div>
+            `;
+            document.getElementById('chatStatsInfo').innerText = `Latency: -- | Tokens: --`;
         }
 
-        function buildSheetButtons() {
-            const container = document.getElementById('sheet-buttons-container');
-            container.innerHTML = "";
-            sheetNamesList.forEach(name => {
-                const btn = document.createElement('button');
-                btn.id = `btn-${name.replace(/\s+/g, '-')}`;
-                btn.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white";
-                btn.innerHTML = `<span><i class="fa-solid fa-file-lines text-indigo-400 mr-2"></i>${name}</span> <span class="text-[10px] bg-slate-800 px-1.5 py-0.5 rounded text-slate-400">${(workbookData[name] || []).length - 1} rows</span>`;
-                btn.onclick = () => switchSheet(name);
-                container.appendChild(btn);
-            });
-            highlightActiveButton();
-        }
-
-        function switchSheet(sheetName) {
-            currentSheetName = sheetName;
-            highlightActiveButton();
-            renderTable();
-            updateMetrics();
-            logToConsole(`Switched active view to sheet: ${currentSheetName}`, "info");
-        }
-
-        function highlightActiveButton() {
-            sheetNamesList.forEach(name => {
-                const btn = document.getElementById(`btn-${name.replace(/\s+/g, '-')}`);
-                if (btn) {
-                    if (name === currentSheetName) {
-                        btn.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between bg-indigo-600/20 border border-indigo-500/40 text-white shadow-sm";
-                    } else {
-                        btn.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-between bg-slate-950 border border-slate-800 text-slate-300 hover:bg-slate-800 hover:text-white";
-                    }
-                }
-            });
-        }
-
-        function renderTable() {
-            const tbody = document.getElementById('table-body');
-            const theadRow = document.getElementById('table-header-row');
-            tbody.innerHTML = "";
-
-            if (!currentSheetName || !workbookData[currentSheetName]) {
-                tbody.innerHTML = `<tr><td colspan="11" class="text-center py-8 text-slate-500">No data loaded.</td></tr>`;
-                return;
-            }
-
-            const rows = workbookData[currentSheetName];
-            if (rows.length === 0) return;
-
-            const headers = rows[0];
-            let headerHtml = "";
-            headers.forEach((h, idx) => {
-                let highlightClass = (idx >= headers.length - 2) ? "text-indigo-400 font-bold" : "";
-                headerHtml += `<th class="py-3 px-4 ${highlightClass}">${h || ''}</th>`;
-            });
-            theadRow.innerHTML = headerHtml;
-            document.getElementById('table-title').innerHTML = `<i class="fa-solid fa-table text-indigo-400"></i> ${currentAppKey.toUpperCase()} &gt; ${currentSheetName} (${rows.length - 1} test rows)`;
-
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row || row.length === 0) continue;
-
-                const tr = document.createElement('tr');
-                tr.className = "hover:bg-slate-900/50 transition";
-                
-                let rowHtml = "";
-                for (let c = 0; c < headers.length; c++) {
-                    let val = row[c] !== undefined ? row[c] : "";
-                    let tdClass = "py-3 px-4 text-slate-300 max-w-xs truncate";
-
-                    if (headers[c] && (headers[c].toLowerCase().includes("pass") || headers[c].toLowerCase().includes("status"))) {
-                        if (val === "PASS") {
-                            val = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/25">PASS</span>`;
-                        } else if (val === "FAIL") {
-                            val = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-500/10 text-rose-400 border border-rose-500/25">FAIL</span>`;
-                        } else {
-                            val = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/25">PENDING</span>`;
-                        }
-                    }
-
-                    rowHtml += `<td class="${tdClass}" title="${row[c] || ''}">${val}</td>`;
-                }
-                tr.innerHTML = rowHtml;
-                tbody.appendChild(tr);
-            }
-        }
-
-        function updateMetrics() {
-            if (!currentSheetName || !workbookData[currentSheetName]) return;
-            const rows = workbookData[currentSheetName];
-            const total = rows.length - 1;
-            let passCount = 0;
-            let failCount = 0;
-
-            const headers = rows[0] || [];
-            const headerLen = headers.length;
-
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                if (!row) continue;
-                const statusVal = row[headerLen - 1] || "";
-                if (statusVal === "PASS") passCount++;
-                if (statusVal === "FAIL") failCount++;
-            }
-
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-pass').innerText = passCount;
-            document.getElementById('stat-fail').innerText = failCount;
-            const rate = total > 0 ? Math.round((passCount / total) * 100) : 0;
-            document.getElementById('stat-rate').innerText = rate + "%";
-        }
-
-        async function runSimulatedAutomation() {
-            if (Object.keys(workbookData).length === 0) {
-                loadActiveAppData();
-                return;
-            }
-
-            const config = appConfigs[currentAppKey] || { name: "Custom App", url: "Target URL" };
-            logToConsole(`--- Starting TestNG Suite Run against [${config.name}] (${config.url}) ---`, "step");
-            
-            const runBtn = document.getElementById('run-btn');
-            runBtn.disabled = true;
-            runBtn.classList.add('opacity-50');
-
-            const rows = workbookData[currentSheetName];
-            const headers = rows[0];
-            const headerLen = headers.length;
-
-            for (let i = 1; i < rows.length; i++) {
-                let row = rows[i];
-                if (!row) continue;
-
-                while (row.length < headerLen) {
-                    row.push("");
-                }
-
-                const question = row[4] || row[1] || "Test Query";
-
-                logToConsole(`Executing Row ${i}/${rows.length - 1} on ${config.name}: "${question}"`, "info");
-                await new Promise(r => setTimeout(r, 350));
-
-                row[headerLen - 2] = `Verified response on ${config.name} for: "${question}"`;
-                row[headerLen - 1] = "PASS";
-                logToConsole(`Result: PASS`, "success");
-            }
-
-            runBtn.disabled = false;
-            runBtn.classList.remove('opacity-50');
-            renderTable();
-            updateMetrics();
-            logToConsole(`--- Suite Execution Completed for [${currentSheetName}] ---`, "success");
-        }
-
-        function filterTable() {
-            const input = document.getElementById('search-input').value.toLowerCase();
-            const tbody = document.getElementById('table-body');
-            const trs = tbody.getElementsByTagName('tr');
-
-            for (let i = 0; i < trs.length; i++) {
-                const text = trs[i].innerText.toLowerCase();
-                trs[i].style.display = text.includes(input) ? "" : "none";
-            }
-        }
-
-        function exportReportExcel() {
-            logToConsole("Exporting execution report to Frameworks-Result.xlsx...", "step");
-            const wb = XLSX.utils.book_new();
-            for (const sheetName in workbookData) {
-                const ws = XLSX.utils.aoa_to_sheet(workbookData[sheetName]);
-                XLSX.utils.book_append_sheet(wb, ws, sheetName);
-            }
-            XLSX.writeFile(wb, "Frameworks-Result.xlsx");
-            logToConsole("Report exported successfully!", "success");
+        function exportReport() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(testCasesData, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `QA_Automation_Report_${currentFramework}_${currentSheetName}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            logConsole(`Exported QA Automation test report successfully.`);
         }
     </script>
 </body>
