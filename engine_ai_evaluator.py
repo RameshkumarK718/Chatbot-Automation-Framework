@@ -4,6 +4,7 @@ import difflib
 import argparse
 import pandas as pd
 from openai import OpenAI
+
 class AIEvaluator:
     """
     AI-based chatbot response evaluator.
@@ -162,7 +163,6 @@ Required JSON format:
                         .split("```", 1)[0]
                         .strip()
                     )
-
                 elif "```" in content:
                     content = (
                         content
@@ -198,12 +198,10 @@ Required JSON format:
 
             except Exception as e:
                 last_exception = e
-
                 print(
                     f"Warning: {attempt['desc']} failed: "
                     f"{str(e)}"
                 )
-
                 print("Attempting next evaluation engine...")
 
         return {
@@ -339,9 +337,9 @@ def update_html_dashboard(
             """
 
         pass_percentage = (
-            total_passed / total_tests * 100
+            (total_passed / total_tests) * 100
             if total_tests > 0
-            else 0
+            else 0.0
         )
 
         html_content = f"""<!DOCTYPE html>
@@ -570,7 +568,7 @@ def process_qa_framework_excel(
                 ]
             )
 
-            # 1. Keep difflib strictly as a diagnostic metric (does not block passing)
+            # 1. Keep difflib strictly as a diagnostic metric
             match_pct = calculate_match_percentage(
                 expected,
                 chatbot_answer
@@ -643,8 +641,7 @@ def process_qa_framework_excel(
             )
 
             # 4. Apply Manager's Rule for PASS / FAIL
-            # PASS = Not blank AND LLM says Relevant AND Hallucination = No AND Semantic Score >= Threshold
-            SEMANTIC_THRESHOLD = 0.75  # Adjust threshold here if needed (e.g. 0.80)
+            SEMANTIC_THRESHOLD = 0.75
 
             is_relevant = (relevance.lower() == "relevant")
             no_hallucination = (not hallucinated)
