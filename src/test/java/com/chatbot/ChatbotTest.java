@@ -1,12 +1,7 @@
 package com.chatbot;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.StaleElementReferenceException;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.logging.LogType;
@@ -60,22 +55,15 @@ public class ChatbotTest {
             this.status = status;
         }
     }
+
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
 
-    // EFI Configuration URLs
     private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
-
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url",
             "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx");
-
     private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url",
             "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks(EFI).xlsx");
-
-    @SuppressWarnings("unused")
-	private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
-            "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks-Result(EFI).xlsx");
-
     private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI)_Output.xlsx";
     private static final String OUTPUT_JSON_FILE = "target/test_results.json";
     
@@ -83,7 +71,6 @@ public class ChatbotTest {
     private WebDriverWait wait;
     private final List<TestRowData> executedResults = new ArrayList<>();
 
-    @SuppressWarnings("deprecation")
     private InputStream openUrlStream(String fileUrl) throws Exception {
         URL url = new URL(fileUrl);
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -94,6 +81,7 @@ public class ChatbotTest {
         connection.setRequestProperty("Accept", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         int responseCode = connection.getResponseCode();
         if (responseCode != HttpURLConnection.HTTP_OK) {
+            connection.disconnect();
             throw new RuntimeException("Unable to download file. HTTP response code: " + responseCode + " | URL: " + fileUrl);
         }
         return connection.getInputStream();
@@ -263,7 +251,6 @@ public class ChatbotTest {
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1920,1080");
         options.addArguments("--remote-allow-origins=*");
-
         options.addArguments("--disable-blink-features=AutomationControlled");
         options.setExperimentalOption("excludeSwitches", new String[]{"enable-automation"});
         options.setExperimentalOption("useAutomationExtension", false);
@@ -409,12 +396,10 @@ public class ChatbotTest {
     @Test(dataProvider = "excelQuestions")
     public void runSingleQuestionTest(TestRowData rowData) {
         try {
-            // Self-healing check: If the driver crashed previously, re-initialize it and wait for chat input
             if (driver == null) {
                 System.out.println("--> Driver session lost. Re-initializing session for " + rowData.testCaseId);
                 initializeDriverAndLogin();
             } else {
-                // Ensure the chat input is ready before typing the next question
                 waitForChatInput();
             }
 
@@ -435,7 +420,6 @@ public class ChatbotTest {
             rowData.status = "FAIL";
             rowData.reason = e.getMessage();
             
-            // If session died or threw session errors, set driver to null to trigger recovery on next test case
             if (e.getMessage() != null && (e.getMessage().contains("invalid session id") || e.getMessage().contains("Session ID is null"))) {
                 driver = null; 
             }
