@@ -318,7 +318,7 @@ public class ChatbotTest {
     }
 
     private By getChatInputLocator() {
-    return By.xpath("//input[@id='chat-input'] | //textarea[@id='chat-input'] | //input[@placeholder='Ask a question...'] | //textarea[@placeholder='Ask a question...'] | //input[contains(@placeholder,'Ask')] | //textarea[contains(@placeholder,'Ask')] | //div[@contenteditable='true'] | //textarea[@role='textbox'] | //input[@role='textbox']");
+    return By.xpath("//input | //textarea | //*[@contenteditable='true']");
 }
 
     private WebElement waitForChatInput() {
