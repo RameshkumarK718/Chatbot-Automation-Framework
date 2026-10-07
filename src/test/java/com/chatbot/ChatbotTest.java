@@ -56,7 +56,7 @@ public class ChatbotTest {
         }
     }
 
-    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
+  private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
 
     private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
@@ -64,8 +64,12 @@ public class ChatbotTest {
             "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx");
     private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url",
             "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks(EFI).xlsx");
+    @SuppressWarnings("unused")
+	private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
+            "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks-Result(EFI).xlsx");
     private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI)_Output.xlsx";
     private static final String OUTPUT_JSON_FILE = "target/test_results.json";
+    
     
     private WebDriver driver;
     private WebDriverWait wait;
