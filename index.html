@@ -743,12 +743,10 @@
             };
             reader.readAsArrayBuffer(file);
         }
-
         function exportReport() {
             const csvContent = "data:text/csv;charset=utf-8," + 
                 ["ID,Intent,Prompt,Expected,Actual,Status,Latency,Tokens,Confidence"].join(",") + "\n" +
-                testCasesData.map(t => [t.id, `"${t.intent}"`, `"${t.prompt}"`, `"${t.expected}"`, `"${t.actual}"`, t.status, t.latency, t.tokens, t.confidence].join(",")).join("\n");
-            
+                testCasesData.map(t => [t.id, `"${t.intent}"`, `"${t.prompt}"`, `"${t.expected}"`, `"${t.actual}"`, t.status, t.latency, t.tokens, t.confidence].join(",")).join("\n");      
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
