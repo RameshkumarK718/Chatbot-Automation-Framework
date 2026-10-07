@@ -46,8 +46,8 @@ public class ChatbotTest {
         public String status;
 
         public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
-                           String question, String expectedResult, String runnable,
-                           String actualResult, String reason, String status) {
+                            String question, String expectedResult, String runnable,
+                            String actualResult, String reason, String status) {
             this.sheetName = sheetName;
             this.rowIndex = rowIndex;
             this.testCaseId = testCaseId;
@@ -60,21 +60,25 @@ public class ChatbotTest {
             this.status = status;
         }
     }
-
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
 
-    private static final String APP_URL = System.getProperty("app.url", "https://d3rl0fkw0q6ssb.cloudfront.net/");
+    // EFI Configuration URLs
+    private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
 
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url",
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx");
+            "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx");
 
     private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url",
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx");
+            "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks(EFI).xlsx");
 
-    private static final String OUTPUT_EXCEL_FILE = "Frameworks_Output.xlsx";
+    @SuppressWarnings("unused")
+	private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
+            "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks-Result(EFI).xlsx");
+
+    private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI)_Output.xlsx";
     private static final String OUTPUT_JSON_FILE = "target/test_results.json";
-
+    
     private WebDriver driver;
     private WebDriverWait wait;
     private final List<TestRowData> executedResults = new ArrayList<>();
@@ -318,8 +322,8 @@ public class ChatbotTest {
     }
 
     private By getChatInputLocator() {
-    return By.xpath("//input | //textarea | //*[@contenteditable='true']");
-}
+        return By.xpath("//input | //textarea | //*[@contenteditable='true']");
+    }
 
     private WebElement waitForChatInput() {
         return wait.until(ExpectedConditions.elementToBeClickable(getChatInputLocator()));
@@ -405,10 +409,13 @@ public class ChatbotTest {
     @Test(dataProvider = "excelQuestions")
     public void runSingleQuestionTest(TestRowData rowData) {
         try {
-            // Self-healing check: If the driver crashed previously, re-initialize it
+            // Self-healing check: If the driver crashed previously, re-initialize it and wait for chat input
             if (driver == null) {
                 System.out.println("--> Driver session lost. Re-initializing session for " + rowData.testCaseId);
                 initializeDriverAndLogin();
+            } else {
+                // Ensure the chat input is ready before typing the next question
+                waitForChatInput();
             }
 
             selectRole(rowData.role);
@@ -428,8 +435,8 @@ public class ChatbotTest {
             rowData.status = "FAIL";
             rowData.reason = e.getMessage();
             
-            // If session died, set driver to null so it re-opens cleanly on the next test row
-            if (e.getMessage() != null && e.getMessage().contains("invalid session id")) {
+            // If session died or threw session errors, set driver to null to trigger recovery on next test case
+            if (e.getMessage() != null && (e.getMessage().contains("invalid session id") || e.getMessage().contains("Session ID is null"))) {
                 driver = null; 
             }
         }
@@ -440,7 +447,7 @@ public class ChatbotTest {
 
         Assert.assertEquals(rowData.status, "PASS", "Test failed for TC " + rowData.testCaseId + ": " + rowData.reason);
     }
-
+    
     private void updateFrameworkExcel(List<TestRowData> results) {
         try (InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
