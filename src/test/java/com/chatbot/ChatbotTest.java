@@ -318,8 +318,8 @@ public class ChatbotTest {
     }
 
     private By getChatInputLocator() {
-        return By.xpath("//input[contains(@placeholder,'Ask')] | //textarea[contains(@placeholder,'Ask')] | //*[@contenteditable='true']");
-    }
+    return By.xpath("//input[@id='chat-input'] | //textarea[@id='chat-input'] | //input[@placeholder='Ask a question...'] | //textarea[@placeholder='Ask a question...'] | //input[contains(@placeholder,'Ask')] | //textarea[contains(@placeholder,'Ask')] | //div[@contenteditable='true'] | //textarea[@role='textbox'] | //input[@role='textbox']");
+}
 
     private WebElement waitForChatInput() {
         return wait.until(ExpectedConditions.elementToBeClickable(getChatInputLocator()));
