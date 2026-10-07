@@ -405,6 +405,12 @@ public class ChatbotTest {
     @Test(dataProvider = "excelQuestions")
     public void runSingleQuestionTest(TestRowData rowData) {
         try {
+            // Self-healing check: If the driver crashed previously, re-initialize it
+            if (driver == null) {
+                System.out.println("--> Driver session lost. Re-initializing session for " + rowData.testCaseId);
+                initializeDriverAndLogin();
+            }
+
             selectRole(rowData.role);
 
             String chatbotResponse = sendQuestion(rowData.question);
@@ -421,6 +427,11 @@ public class ChatbotTest {
             rowData.actualResult = "EXCEPTION: " + e.getMessage();
             rowData.status = "FAIL";
             rowData.reason = e.getMessage();
+            
+            // If session died, set driver to null so it re-opens cleanly on the next test row
+            if (e.getMessage() != null && e.getMessage().contains("invalid session id")) {
+                driver = null; 
+            }
         }
 
         synchronized (executedResults) {
