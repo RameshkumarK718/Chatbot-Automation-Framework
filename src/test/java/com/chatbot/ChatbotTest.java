@@ -436,8 +436,8 @@ public class ChatbotTest {
         Assert.assertEquals(rowData.status, "PASS", "Test failed for TC " + rowData.testCaseId + ": " + rowData.reason);
     }
     
-    private void updateFrameworkExcel(List<TestRowData> results) {
-        try (InputStream is = openUrlStream(FRAMEWORK_EXCEL_URL);
+   private void updateFrameworkExcel(List<TestRowData> results) {
+        try (InputStream is = openUrlStream(RESULT_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
              FileOutputStream outputStream = new FileOutputStream(OUTPUT_EXCEL_FILE)) {
             for (TestRowData result : results) {
@@ -469,7 +469,6 @@ public class ChatbotTest {
             System.err.println("Failed to update Excel: " + e.getMessage());
         }
     }
-
     private void exportResultsToJson(List<TestRowData> results) {
         try {
             File file = new File(OUTPUT_JSON_FILE);
