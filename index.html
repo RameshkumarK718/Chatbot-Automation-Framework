@@ -70,13 +70,8 @@
         <div class="flex items-center space-x-3">
             <div class="bg-darkBg p-1 rounded-lg border border-darkBorder flex items-center">
                 <button onclick="switchFramework('EFI')" id="btnEFI" class="px-3 py-1 text-xs font-medium rounded transition-all bg-blue-600 text-white shadow-sm">EFI Core</button>
-                <button onclick="switchFramework('Vedas')" id="btnVedas" class="px-3 py-1 text-xs font-medium rounded transition-all text-slate-400 hover:text-white">Vedas Core</button>
+                <button onclick="switchFramework('Vedas')" id="btnVedas" class="px-3 py-1 text-xs font-medium rounded transition-all text-slate-400 hover:text-white">Vedas Clinical</button>
             </div>
-
-            <button onclick="openLiveChatDrawer()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-lg shadow-sm flex items-center space-x-2 transition-all">
-                <i class="fa-solid fa-terminal text-[11px]"></i>
-                <span>Interactive Sandbox</span>
-            </button>>
 
             <button onclick="exportReport()" class="px-3.5 py-1.5 bg-darkBg hover:bg-slate-800 text-slate-300 border border-darkBorder text-xs font-medium rounded-lg flex items-center space-x-2 transition-all">
                 <i class="fa-solid fa-file-arrow-down text-[11px]"></i>
@@ -163,10 +158,10 @@
                 </div>
 
                 <div class="flex flex-col space-y-1">
-                    <label class="text-[11px] font-medium text-slate-400">Upload Excel Dataset (.xlsx)</label>
+                    <label class="text-[11px] font-medium text-slate-400">Upload Excel / CSV Dataset (.xlsx, .csv)</label>
                     <label class="cursor-pointer bg-darkBg hover:bg-slate-800 text-slate-300 text-xs px-3 py-2 rounded-lg border border-darkBorder flex items-center space-x-2 transition-all">
                         <i class="fa-solid fa-file-excel text-emerald-400 text-xs"></i>
-                        <span id="fileNameLabel">Choose .xlsx File</span>
+                        <span id="fileNameLabel">Choose Dataset File</span>
                         <input type="file" id="excelUploader" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(event)" class="hidden">
                     </label>
                 </div>
@@ -291,39 +286,11 @@
                 <button onclick="clearConsoleLogs()" class="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 bg-darkBg rounded border border-darkBorder">Clear Logs</button>
             </div>
             <div id="consoleLogBox" class="bg-darkBg rounded-lg p-3 font-mono text-[11px] text-slate-300 h-36 overflow-y-auto space-y-1 border border-darkBorder">
-                <div class="text-slate-500">[System] Upload your Excel files (Frameworks(EFI).xlsx or Frameworks(Vedas).xlsx) to load live test data dynamically.</div>
+                <div class="text-slate-500">[System] Fully dynamic runtime initialized. Upload your test suite Excel (.xlsx) or CSV dataset to begin.</div>
             </div>
         </div>
 
     </main>
-
-    <!-- Interactive Live Sandbox Drawer (Live Cloudfront iFrame Preview) -->
-    <div id="chatDrawer" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex justify-end transition-all">
-        <div class="w-full max-w-2xl bg-darkCard border-l border-darkBorder h-full flex flex-col shadow-xl">
-            <div class="p-4 border-b border-darkBorder flex items-center justify-between bg-darkBg/40">
-                <div class="flex items-center space-x-2.5">
-                    <div class="w-7 h-7 rounded bg-blue-600/10 text-blue-400 border border-blue-500/20 flex items-center justify-center">
-                        <i class="fa-solid fa-globe text-xs"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-semibold text-xs text-slate-200" id="chatDrawerTitle">Live Chatbot Sandbox</h3>
-                        <p class="text-[10px] text-slate-400" id="chatDrawerSubtitle">Target URL: Live Cloudfront Instance</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                    <button onclick="refreshSandboxFrame()" class="px-2.5 py-1 bg-darkBg text-slate-300 hover:text-white border border-darkBorder rounded text-[11px]" title="Refresh"><i class="fa-solid fa-rotate-right"></i></button>
-                    <button onclick="closeLiveChatDrawer()" class="w-7 h-7 rounded bg-darkBg text-slate-400 hover:text-white border border-darkBorder flex items-center justify-center">
-                        <i class="fa-solid fa-xmark text-xs"></i>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Live App iFrame Preview Container -->
-            <div class="flex-1 bg-black relative">
-                <iframe id="sandboxIframe" src="" class="w-full h-full border-0"></iframe>
-            </div>
-        </div>
-    </div>
 
     <!-- Test Case Details Modal -->
     <div id="detailModal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex items-center justify-center p-4">
@@ -369,17 +336,18 @@
     </div>
 
     <script>
-        // Pure dynamic runtime storage (populated solely by uploaded Excel workbooks)
+        // Pure dynamic runtime storage (zero static/mock recorded data)
         let dynamicWorkbookSheets = {};
         let currentFramework = 'EFI';
         let currentSheetName = '';
         let testCasesData = [];
-        let activeSelectedTestCaseId = null;
         let accuracyChartInstance = null;
 
         window.onload = function() {
             initDoughnutChart();
-            logConsole("System ready. Please upload your framework Excel workbooks (.xlsx).");
+            renderTestTable();
+            updateMetrics();
+            logConsole("System ready. Please upload your test dataset (.xlsx or .csv).");
         };
 
         function switchFramework(framework) {
@@ -394,16 +362,13 @@
                 document.getElementById('btnEFI').className = "px-3 py-1 text-xs font-medium rounded transition-all bg-blue-600 text-white shadow-sm";
                 document.getElementById('btnVedas').className = "px-3 py-1 text-xs font-medium rounded transition-all text-slate-400 hover:text-white";
                 document.getElementById('engineVersion').innerText = "EFI-Core v2.4.1";
-                document.getElementById('chatDrawerTitle').innerText = "Live Chatbot Sandbox (EFI)";
             } else {
                 document.getElementById('btnVedas').className = "px-3 py-1 text-xs font-medium rounded transition-all bg-purple-600 text-white shadow-sm";
                 document.getElementById('btnEFI').className = "px-3 py-1 text-xs font-medium rounded transition-all text-slate-400 hover:text-white";
                 document.getElementById('engineVersion').innerText = "Vedas-Clinical v3.1.0";
-                document.getElementById('chatDrawerTitle').innerText = "Live Chatbot Sandbox (Vedas)";
             }
 
             logConsole(`Switched active framework to ${framework} (${appUrl})`);
-            populateSheetSelector();
         }
 
         function handleFileUpload(event) {
@@ -413,41 +378,46 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, {type: 'array'});
-                
-                dynamicWorkbookSheets = {};
-                workbook.SheetNames.forEach(sheetName => {
-                    const sheet = workbook.Sheets[sheetName];
-                    const jsonRows = XLSX.utils.sheet_to_json(sheet);
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
                     
-                    let parsedRows = [];
-                    jsonRows.forEach((row, idx) => {
-                        const prompt = row['Question / Input to enter'] || row['User Question'] || row['Question'] || row['Prompt'] || '';
-                        const expected = row['Expected result'] || row['Expected Answer'] || row['What it tests / expected answer'] || '';
+                    dynamicWorkbookSheets = {};
+                    workbook.SheetNames.forEach(sheetName => {
+                        const sheet = workbook.Sheets[sheetName];
+                        const jsonRows = XLSX.utils.sheet_to_json(sheet);
                         
-                        if(prompt && String(prompt).trim() !== '') {
-                            parsedRows.push({
-                                id: row['Test Case ID'] || row['#'] || `${sheetName.substring(0,3).toUpperCase()}-${idx+1}`,
-                                intent: row['Set name'] || row['Category'] || row['Subcategory'] || row['Role'] || sheetName,
-                                prompt: String(prompt),
-                                expected: String(expected),
-                                actual: String(expected),
-                                status: 'PENDING',
-                                latency: 0,
-                                tokens: 0,
-                                confidence: 0
-                            });
+                        let parsedRows = [];
+                        jsonRows.forEach((row, idx) => {
+                            const prompt = row['Question / Input to enter'] || row['User Question'] || row['Question'] || row['Prompt'] || row['prompt'] || '';
+                            const expected = row['Expected result'] || row['Expected Answer'] || row['What it tests / expected answer'] || row['Expected'] || '';
+                            
+                            if(prompt && String(prompt).trim() !== '') {
+                                parsedRows.push({
+                                    id: row['Test Case ID'] || row['ID'] || row['#'] || `${sheetName.substring(0,3).toUpperCase()}-${idx+1}`,
+                                    intent: row['Set name'] || row['Category'] || row['Subcategory'] || row['Role'] || row['Intent'] || sheetName,
+                                    prompt: String(prompt),
+                                    expected: String(expected),
+                                    actual: String(expected),
+                                    status: 'PENDING',
+                                    latency: 0,
+                                    tokens: 0,
+                                    confidence: 0
+                                });
+                            }
+                        });
+
+                        if(parsedRows.length > 0) {
+                            dynamicWorkbookSheets[sheetName] = parsedRows;
                         }
                     });
 
-                    if(parsedRows.length > 0) {
-                        dynamicWorkbookSheets[sheetName] = parsedRows;
-                    }
-                });
-
-                logConsole(`Successfully parsed live workbook: ${file.name} (${Object.keys(dynamicWorkbookSheets).length} sheets loaded).`);
-                populateSheetSelector();
+                    logConsole(`Successfully parsed live workbook: ${file.name} (${Object.keys(dynamicWorkbookSheets).length} sheets loaded).`);
+                    populateSheetSelector();
+                } catch(err) {
+                    console.error(err);
+                    alert("Error parsing dataset file. Please ensure it is a valid Excel or CSV spreadsheet.");
+                }
             };
             reader.readAsArrayBuffer(file);
         }
@@ -505,7 +475,7 @@
             document.getElementById('testCountBadge').innerText = `${filtered.length} cases`;
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500">No test cases found. Please upload a valid framework Excel spreadsheet.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No test cases found. Please upload a valid test suite Excel or CSV spreadsheet (.xlsx, .csv).</td></tr>`;
                 return;
             }
 
@@ -535,7 +505,7 @@
 
         function runBulkEvaluation() {
             if(testCasesData.length === 0) {
-                alert("Please upload an Excel file first.");
+                alert("Please upload an Excel or CSV dataset file first.");
                 return;
             }
             logConsole(`Executing live bulk evaluation across ${testCasesData.length} records in sheet '${currentSheetName}'...`);
@@ -576,9 +546,9 @@
             document.getElementById('statAvgLatency').innerText = `${avgLat} ms`;
             document.getElementById('statAvgTokens').innerText = `${avgTok} tok`;
 
-            const intentAcc = passRate > 0 ? passRate : 92;
-            const entityPrec = passRate > 0 ? Math.min(100, passRate + 4) : 89;
-            const semanticSim = passRate > 0 ? Math.min(100, passRate + 6) : 95;
+            const intentAcc = passRate > 0 ? passRate : 0;
+            const entityPrec = passRate > 0 ? Math.min(100, passRate + 4) : 0;
+            const semanticSim = passRate > 0 ? Math.min(100, passRate + 6) : 0;
 
             document.getElementById('metricIntentScore').innerText = `${intentAcc}%`;
             document.getElementById('barIntentScore').style.width = `${intentAcc}%`;
@@ -605,34 +575,6 @@
             div.innerText = `[${timeStr}] ${msg}`;
             box.appendChild(div);
             box.scrollTop = box.scrollHeight;
-        }
-
-        function openLiveChatDrawer() {
-            const drawer = document.getElementById('chatDrawer');
-            const iframe = document.getElementById('sandboxIframe');
-            const subtitle = document.getElementById('chatDrawerSubtitle');
-
-            const targetUrl = currentFramework === 'EFI' 
-                ? 'https://dtqponlzcij0l.cloudfront.net/' 
-                : 'https://d3rl0fkw0q6ssb.cloudfront.net/';
-
-            iframe.src = targetUrl;
-            subtitle.innerText = `Target URL: ${targetUrl}`;
-            drawer.classList.remove('hidden');
-            logConsole(`[Sandbox] Opened live application preview for ${currentFramework} at ${targetUrl}`);
-        }
-
-        function closeLiveChatDrawer() {
-            const drawer = document.getElementById('chatDrawer');
-            const iframe = document.getElementById('sandboxIframe');
-            drawer.classList.add('hidden');
-            iframe.src = '';
-        }
-
-        function refreshSandboxFrame() {
-            const iframe = document.getElementById('sandboxIframe');
-            iframe.src = iframe.src;
-            logConsole("[Sandbox] Refreshed live application frame.");
         }
 
         function openDetailModal(id) {
@@ -677,7 +619,7 @@
                 data: {
                     labels: ['Intent Accuracy', 'Entity Precision', 'Semantic Similarity'],
                     datasets: [{
-                        data: [94, 91, 96],
+                        data: [0, 0, 0],
                         backgroundColor: ['#10b981', '#2563eb', '#9333ea'],
                         borderWidth: 0,
                         hoverOffset: 4
