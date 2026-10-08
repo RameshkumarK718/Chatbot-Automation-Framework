@@ -15,7 +15,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
@@ -27,55 +26,46 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ChatbotTest {
+public class TestRowData {
+    public String sheetName;
+    public int rowIndex;
+    public String testCaseId;
+    public String role;
+    public String question;
+    public String expectedResult;
+    public String runnable;
+    public String actualResult;
+    public String reason;
+    public String status;
 
-    public static class TestRowData {
-        public String sheetName;
-        public int rowIndex;
-        public String testCaseId;
-        public String role;
-        public String question;
-        public String expectedResult;
-        public String runnable;
-        public String actualResult;
-        public String reason;
-        public String status;
-
-        public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
-                            String question, String expectedResult, String runnable,
-                            String actualResult, String reason, String status) {
-            this.sheetName = sheetName;
-            this.rowIndex = rowIndex;
-            this.testCaseId = testCaseId;
-            this.role = role;
-            this.question = question;
-            this.expectedResult = expectedResult;
-            this.runnable = runnable;
-            this.actualResult = actualResult;
-            this.reason = reason;
-            this.status = status;
-        }
+    public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
+                        String question, String expectedResult, String runnable,
+                        String actualResult, String reason, String status) {
+        this.sheetName = sheetName;
+        this.rowIndex = rowIndex;
+        this.testCaseId = testCaseId;
+        this.role = role;
+        this.question = question;
+        this.expectedResult = expectedResult;
+        this.runnable = runnable;
+        this.actualResult = actualResult;
+        this.reason = reason;
+        this.status = status;
     }
+}
+
+public class ChatbotTest {
 
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
 
     private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
-    
-    // Local paths and remote fallback URLs
-    private static final String CREDENTIALS_LOCAL_PATH = "credentials(2).xlsx";
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url",
             "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx");
-
-    private static final String FRAMEWORK_LOCAL_PATH = "Frameworks(EFI).xlsx";
     private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url",
             "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks(EFI).xlsx");
-
-    private static final String RESULT_LOCAL_PATH = "Frameworks-Result(EFI).xlsx";
-    @SuppressWarnings("unused")
     private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
             "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks-Result(EFI).xlsx");
-
     private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI)_Output.xlsx";
     private static final String OUTPUT_JSON_FILE = "target/test_results.json";
     
@@ -83,37 +73,27 @@ public class ChatbotTest {
     private WebDriverWait wait;
     private final List<TestRowData> executedResults = new ArrayList<>();
 
-    /**
-     * Checks local directory first. If file exists, loads it locally.
-     * Otherwise, falls back to downloading it from the remote URL.
-     */
-    private InputStream openExcelStream(String localPath, String fileUrl) throws Exception {
-        File localFile = new File(localPath);
-        if (localFile.exists()) {
-            System.out.println("--> Loading Excel file locally from: " + localFile.getAbsolutePath());
-            return new FileInputStream(localFile);
-        } else {
-            System.out.println("--> Local file '" + localPath + "' not found. Downloading from URL: " + fileUrl);
-            URL url = new URL(fileUrl);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(30000);
-            connection.setReadTimeout(60000);
-            connection.setRequestProperty("User-Agent", "Mozilla/5.0");
-            connection.setRequestProperty("Accept", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            int responseCode = connection.getResponseCode();
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                connection.disconnect();
-                throw new RuntimeException("Unable to download file. HTTP response code: " + responseCode + " | URL: " + fileUrl);
-            }
-            return connection.getInputStream();
+    private InputStream openUrlStream(String fileUrl) throws Exception {
+        @SuppressWarnings("deprecation")
+        URL url = new URL(fileUrl);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setConnectTimeout(30000);
+        connection.setReadTimeout(60000);
+        connection.setRequestProperty("User-Agent", "Mozilla/5.0");
+        connection.setRequestProperty("Accept", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        int responseCode = connection.getResponseCode();
+        if (responseCode != HttpURLConnection.HTTP_OK) {
+            connection.disconnect();
+            throw new RuntimeException("Unable to download file. HTTP response code: " + responseCode + " | URL: " + fileUrl);
         }
+        return connection.getInputStream();
     }
 
     private String[] getCredentialsFromExcel() {
         String username = "";
         String password = "";
-        try (InputStream is = openExcelStream(CREDENTIALS_LOCAL_PATH, CREDENTIALS_EXCEL_URL);
+        try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is)) {
             if (workbook.getNumberOfSheets() == 0) {
                 throw new RuntimeException("Credentials Excel contains no sheets.");
@@ -147,10 +127,10 @@ public class ChatbotTest {
         }
     }
 
-    private List<TestRowData> fetchExcelDataFromSource(String localPath, String fileUrl) {
+    private List<TestRowData> fetchExcelDataFromGitHub(String fileUrl) {
         List<TestRowData> dataList = new ArrayList<>();
 
-        try (InputStream is = openExcelStream(localPath, fileUrl);
+        try (InputStream is = openUrlStream(fileUrl);
              Workbook workbook = new XSSFWorkbook(is)) {
             if (workbook.getNumberOfSheets() == 0) {
                 throw new RuntimeException("Framework Excel contains no sheets.");
@@ -181,9 +161,11 @@ public class ChatbotTest {
                     if (question.isBlank()) {
                         continue;
                     }
-                    if ("no".equalsIgnoreCase(runnable)) {
-                        continue;
-                    }
+                    
+                    // REMOVED/SKIPPED the check that filters out rows where runnable is not explicitly "yes"
+                    // if ("no".equalsIgnoreCase(runnable)) {
+                    //     continue;
+                    // }
 
                     String testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
 
@@ -264,8 +246,8 @@ public class ChatbotTest {
         String memberId = credentials[0];
         String password = credentials[1];
 
-        Assert.assertFalse(memberId.isBlank(), "Member ID is missing from credentials Excel.");
-        Assert.assertFalse(password.isBlank(), "Password is missing from credentials Excel.");
+        Assert.assertFalse(memberId.isBlank(), "Member ID is missing from Cloud Excel.");
+        Assert.assertFalse(password.isBlank(), "Password is missing from Cloud Excel.");
 
         ChromeOptions options = new ChromeOptions();
         options.addArguments("--headless=new");
@@ -408,7 +390,7 @@ public class ChatbotTest {
 
     @DataProvider(name = "excelQuestions")
     public Object[][] provideExcelData() {
-        List<TestRowData> rawData = fetchExcelDataFromSource(FRAMEWORK_LOCAL_PATH, FRAMEWORK_EXCEL_URL);
+        List<TestRowData> rawData = fetchExcelDataFromGitHub(FRAMEWORK_EXCEL_URL);
         Object[][] data = new Object[rawData.size()][1];
         for (int i = 0; i < rawData.size(); i++) {
             data[i][0] = rawData.get(i);
@@ -456,7 +438,7 @@ public class ChatbotTest {
     }
     
     private void updateFrameworkExcel(List<TestRowData> results) {
-        try (InputStream is = openExcelStream(RESULT_LOCAL_PATH, RESULT_EXCEL_URL);
+        try (InputStream is = openUrlStream(RESULT_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
              FileOutputStream outputStream = new FileOutputStream(OUTPUT_EXCEL_FILE)) {
             for (TestRowData result : results) {
