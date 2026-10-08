@@ -297,44 +297,30 @@
 
     </main>
 
-    <!-- Interactive Live Sandbox Drawer -->
+    <!-- Interactive Live Sandbox Drawer (Live Cloudfront iFrame Preview) -->
     <div id="chatDrawer" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex justify-end transition-all">
-        <div class="w-full max-w-md bg-darkCard border-l border-darkBorder h-full flex flex-col shadow-xl">
+        <div class="w-full max-w-2xl bg-darkCard border-l border-darkBorder h-full flex flex-col shadow-xl">
             <div class="p-4 border-b border-darkBorder flex items-center justify-between bg-darkBg/40">
                 <div class="flex items-center space-x-2.5">
                     <div class="w-7 h-7 rounded bg-blue-600/10 text-blue-400 border border-blue-500/20 flex items-center justify-center">
-                        <i class="fa-solid fa-terminal text-xs"></i>
+                        <i class="fa-solid fa-globe text-xs"></i>
                     </div>
                     <div>
                         <h3 class="font-semibold text-xs text-slate-200" id="chatDrawerTitle">Live Chatbot Sandbox</h3>
-                        <p class="text-[10px] text-slate-400">Interactive telemetry session</p>
+                        <p class="text-[10px] text-slate-400" id="chatDrawerSubtitle">Target URL: Live Cloudfront Instance</p>
                     </div>
                 </div>
-                <button onclick="closeLiveChatDrawer()" class="w-7 h-7 rounded bg-darkBg text-slate-400 hover:text-white border border-darkBorder flex items-center justify-center">
-                    <i class="fa-solid fa-xmark text-xs"></i>
-                </button>
-            </div>
-
-            <div id="chatMessages" class="flex-1 p-4 overflow-y-auto space-y-3 bg-darkBg/30 text-xs">
-                <div class="flex items-start space-x-2">
-                    <div class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] shrink-0 font-bold font-mono">AI</div>
-                    <div class="bg-darkCard border border-darkBorder p-2.5 rounded-lg text-slate-300">
-                        Live sandbox ready. Test prompts against target Cloudfront URL.
-                    </div>
-                </div>
-            </div>
-
-            <div class="p-4 border-t border-darkBorder bg-darkBg/40 flex flex-col space-y-2">
                 <div class="flex items-center space-x-2">
-                    <input type="text" id="chatUserInput" onkeydown="if(event.key==='Enter') sendChatMessage()" placeholder="Enter prompt..." class="flex-1 bg-darkBg border border-darkBorder rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-600 font-mono">
-                    <button onclick="sendChatMessage()" class="px-3 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-medium shadow-sm transition-all flex items-center justify-center">
-                        <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                    <button onclick="refreshSandboxFrame()" class="px-2.5 py-1 bg-darkBg text-slate-300 hover:text-white border border-darkBorder rounded text-[11px]" title="Refresh"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button onclick="closeLiveChatDrawer()" class="w-7 h-7 rounded bg-darkBg text-slate-400 hover:text-white border border-darkBorder flex items-center justify-center">
+                        <i class="fa-solid fa-xmark text-xs"></i>
                     </button>
                 </div>
-                <div class="flex items-center justify-between text-[10px] text-slate-400 px-0.5 font-mono">
-                    <span id="chatStatsInfo">Latency: -- ms | Tokens: -- tok</span>
-                    <button onclick="clearChatMessages()" class="hover:text-white">Clear</button>
-                </div>
+            </div>
+
+            <!-- Live App iFrame Preview Container -->
+            <div class="flex-1 bg-black relative">
+                <iframe id="sandboxIframe" src="" class="w-full h-full border-0"></iframe>
             </div>
         </div>
     </div>
@@ -621,43 +607,33 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        function openLiveChatDrawer() { document.getElementById('chatDrawer').classList.remove('hidden'); }
-        function closeLiveChatDrawer() { document.getElementById('chatDrawer').classList.add('hidden'); }
+        function openLiveChatDrawer() {
+            const drawer = document.getElementById('chatDrawer');
+            const iframe = document.getElementById('sandboxIframe');
+            const subtitle = document.getElementById('chatDrawerSubtitle');
 
-        function sendChatMessage() {
-            const input = document.getElementById('chatUserInput');
-            const msg = input.value.trim();
-            if(!msg) return;
+            const targetUrl = currentFramework === 'EFI' 
+                ? 'https://dtqponlzcij0l.cloudfront.net/' 
+                : 'https://d3rl0fkw0q6ssb.cloudfront.net/';
 
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML += `
-                <div class="flex items-start justify-end space-x-2">
-                    <div class="bg-blue-600 text-white p-2.5 rounded-lg max-w-[80%]">${msg}</div>
-                    <div class="w-6 h-6 rounded bg-slate-700 flex items-center justify-center text-white text-[10px] shrink-0 font-bold font-mono">USR</div>
-                </div>
-            `;
-            input.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            setTimeout(() => {
-                const latency = Math.floor(Math.random() * 200) + 140;
-                const tokens = Math.floor(Math.random() * 25) + 18;
-                document.getElementById('chatStatsInfo').innerText = `Latency: ${latency} ms | Tokens: ${tokens} tok`;
-
-                chatMessages.innerHTML += `
-                    <div class="flex items-start space-x-2">
-                        <div class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] shrink-0 font-bold font-mono">AI</div>
-                        <div class="bg-darkCard border border-darkBorder p-2.5 rounded-lg text-slate-300 max-w-[80%]">
-                            Live telemetry response verified successfully against cloud instance for prompt: "${msg}".
-                        </div>
-                    </div>
-                `;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                logConsole(`[Sandbox] Live query processed -> Latency: ${latency}ms, Tokens: ${tokens}`);
-            }, 400);
+            iframe.src = targetUrl;
+            subtitle.innerText = `Target URL: ${targetUrl}`;
+            drawer.classList.remove('hidden');
+            logConsole(`[Sandbox] Opened live application preview for ${currentFramework} at ${targetUrl}`);
         }
 
-        function clearChatMessages() { document.getElementById('chatMessages').innerHTML = ''; }
+        function closeLiveChatDrawer() {
+            const drawer = document.getElementById('chatDrawer');
+            const iframe = document.getElementById('sandboxIframe');
+            drawer.classList.add('hidden');
+            iframe.src = '';
+        }
+
+        function refreshSandboxFrame() {
+            const iframe = document.getElementById('sandboxIframe');
+            iframe.src = iframe.src;
+            logConsole("[Sandbox] Refreshed live application frame.");
+        }
 
         function openDetailModal(id) {
             const tc = testCasesData.find(t => t.id === id);
