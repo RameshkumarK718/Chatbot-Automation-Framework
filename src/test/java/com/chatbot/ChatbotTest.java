@@ -26,35 +26,35 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class TestRowData {
-    public String sheetName;
-    public int rowIndex;
-    public String testCaseId;
-    public String role;
-    public String question;
-    public String expectedResult;
-    public String runnable;
-    public String actualResult;
-    public String reason;
-    public String status;
-
-    public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
-                        String question, String expectedResult, String runnable,
-                        String actualResult, String reason, String status) {
-        this.sheetName = sheetName;
-        this.rowIndex = rowIndex;
-        this.testCaseId = testCaseId;
-        this.role = role;
-        this.question = question;
-        this.expectedResult = expectedResult;
-        this.runnable = runnable;
-        this.actualResult = actualResult;
-        this.reason = reason;
-        this.status = status;
-    }
-}
-
 public class ChatbotTest {
+
+    public static class TestRowData {
+        public String sheetName;
+        public int rowIndex;
+        public String testCaseId;
+        public String role;
+        public String question;
+        public String expectedResult;
+        public String runnable;
+        public String actualResult;
+        public String reason;
+        public String status;
+
+        public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
+                            String question, String expectedResult, String runnable,
+                            String actualResult, String reason, String status) {
+            this.sheetName = sheetName;
+            this.rowIndex = rowIndex;
+            this.testCaseId = testCaseId;
+            this.role = role;
+            this.question = question;
+            this.expectedResult = expectedResult;
+            this.runnable = runnable;
+            this.actualResult = actualResult;
+            this.reason = reason;
+            this.status = status;
+        }
+    }
 
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
@@ -161,11 +161,6 @@ public class ChatbotTest {
                     if (question.isBlank()) {
                         continue;
                     }
-                    
-                    // REMOVED/SKIPPED the check that filters out rows where runnable is not explicitly "yes"
-                    // if ("no".equalsIgnoreCase(runnable)) {
-                    //     continue;
-                    // }
 
                     String testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
 
