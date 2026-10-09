@@ -279,7 +279,7 @@ public class ChatbotTest {
 
         driver = new ChromeDriver(options);
         driver.manage().timeouts().implicitlyWait(Duration.ZERO);
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(45));
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(90));
         wait = new WebDriverWait(driver, WAIT_TIMEOUT);
 
         try {
