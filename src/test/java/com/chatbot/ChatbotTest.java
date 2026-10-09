@@ -90,7 +90,7 @@ public class ChatbotTest {
         return connection.getInputStream();
     }
 
-    private String[] getCredentialsFromExcel() {
+   private String[] getCredentialsFromExcel() {
         String username = "";
         String password = "";
         try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
@@ -99,22 +99,22 @@ public class ChatbotTest {
                 throw new RuntimeException("Credentials Excel contains no sheets.");
             }
             Sheet sheet = workbook.getSheetAt(0);
-            Row row = sheet.getRow(1);
+            Row row = sheet.getRow(1); // Row 1 or 0 depending on your header
             if (row == null) {
-                row = sheet.getRow(3);
+                row = sheet.getRow(0);
             }
             if (row == null) {
                 throw new RuntimeException("Credentials row was not found in Excel.");
             }
-            username = getCellStringValue(row.getCell(0));
-            password = getCellStringValue(row.getCell(1));
-            System.out.println("--> Credentials loaded successfully.");
+            // Column 1 contains the login string (e.g., "ramesh")
+            username = getCellStringValue(row.getCell(1));
+            password = username; 
+            System.out.println("--> Credentials loaded successfully: " + username);
         } catch (Exception e) {
             throw new RuntimeException("Error reading credentials Excel: " + e.getMessage(), e);
         }
         return new String[]{username, password};
     }
-
     private String getCellStringValue(Cell cell) {
         if (cell == null) {
             return "";
