@@ -136,6 +136,7 @@ public class ChatbotTest {
                 throw new RuntimeException("Framework Excel contains no sheets.");
             }
 
+            // Iterate through every sheet in the workbook (e.g., all 5 sheets in Frameworks(EFI).xlsx)
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
@@ -149,6 +150,7 @@ public class ChatbotTest {
                     colMap.put(getCellStringValue(cell).toLowerCase(), cell.getColumnIndex());
                 }
 
+                // Process every single row without skipping based on runnable status
                 for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                     Row row = sheet.getRow(r);
                     if (row == null) continue;
@@ -156,7 +158,6 @@ public class ChatbotTest {
                     String role = getCellByAnyHeader(row, colMap, "role", "set #");
                     String question = getCellByAnyHeader(row, colMap, "question / input to enter", "question");
                     String expectedResult = getCellByAnyHeader(row, colMap, "expected result", "what it tests / expected answer");
-                    String runnable = getCellByAnyHeader(row, colMap, "runnable for this role today?");
 
                     if (question.isBlank()) {
                         continue;
@@ -166,11 +167,11 @@ public class ChatbotTest {
 
                     dataList.add(new TestRowData(
                             sheetName, r, testCaseId, role, question, expectedResult,
-                            runnable, "", "", ""
+                            "", "", "", ""
                     ));
                 }
             }
-            System.out.println("--> Successfully parsed " + dataList.size() + " test cases dynamically.");
+            System.out.println("--> Successfully parsed " + dataList.size() + " test cases dynamically across all sheets.");
         } catch (Exception e) {
             throw new RuntimeException("Error fetching Frameworks Excel: " + e.getMessage(), e);
         }
