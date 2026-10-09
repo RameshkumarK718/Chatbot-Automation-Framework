@@ -384,15 +384,16 @@ public class ChatbotTest {
         } catch (Exception ignored) {}
     }
 
-    @DataProvider(name = "excelQuestions")
-    public Object[][] provideExcelData() {
-        List<TestRowData> rawData = fetchExcelDataFromGitHub(FRAMEWORK_EXCEL_URL);
-        Object[][] data = new Object[rawData.size()][1];
-        for (int i = 0; i < rawData.size(); i++) {
-            data[i][0] = rawData.get(i);
-        }
-        return data;
+    @DataProvider(name = "excelTestData")
+public Object[][] provideExcelData() {
+    List<TestRowData> dataList = fetchExcelDataFromGitHub(FRAMEWORK_EXCEL_URL);
+    // Make sure there is NO subList or limit here!
+    Object[][] data = new Object[dataList.size()][1];
+    for (int i = 0; i < dataList.size(); i++) {
+        data[i][0] = dataList.get(i);
     }
+    return data;
+}
 
     @Test(dataProvider = "excelQuestions")
     public void runSingleQuestionTest(TestRowData rowData) {
