@@ -46,20 +46,18 @@
     <!-- Enterprise Top Navigation Bar -->
     <header class="bg-darkCard/90 backdrop-blur-md border-b border-darkBorder sticky top-0 z-40 px-6 py-3 flex items-center justify-between">
         <div class="flex items-center space-x-3">
-    <!----AspireNXT Logo----->
-           <div class="w-10 h-10 rounded-xl bg-white border border-darkBorder flex flex-col items-center justify-center p-1 shadow-sm">
-    <!-- 3D Red Split Triangle Symbol -->
-    <svg viewBox="0 0 500 340" class="w-6 h-6 object-contain" xmlns="http://www.w3.org/2000/svg">
-        <polygon points="250,20 20,280 250,200" fill="#f87171"/>
-        <polygon points="250,20 250,200 480,280" fill="#dc2626"/>
-        <polygon points="250,200 20,280 250,320" fill="#b91c1c"/>
-        <polygon points="250,200 250,320 480,280" fill="#991b1b"/>
-    </svg>
-    <!-- ASPIRENXT Text -->
-    <div class="text-[7px] font-bold tracking-tighter leading-none mt-0.5">
-        <span class="text-slate-700">ASPIRE</span><span class="text-red-600">NXT</span>
-    </div>
-</div>
+            <!-- AspireNXT Logo -->
+            <div class="w-10 h-10 rounded-xl bg-white border border-darkBorder flex flex-col items-center justify-center p-1 shadow-sm">
+                <svg viewBox="0 0 500 340" class="w-6 h-6 object-contain" xmlns="http://www.w3.org/2000/svg">
+                    <polygon points="250,20 20,280 250,200" fill="#f87171"/>
+                    <polygon points="250,20 250,200 480,280" fill="#dc2626"/>
+                    <polygon points="250,200 20,280 250,320" fill="#b91c1c"/>
+                    <polygon points="250,200 250,320 480,280" fill="#991b1b"/>
+                </svg>
+                <div class="text-[7px] font-bold tracking-tighter leading-none mt-0.5">
+                    <span class="text-slate-700">ASPIRE</span><span class="text-red-600">NXT</span>
+                </div>
+            </div>
             <div>
                 <div class="flex items-center space-x-2.5">
                     <h1 class="font-semibold text-sm tracking-tight text-slate-100">Universal Chatbot QA Automation Dashboard & AI Evaluation Center</h1>
@@ -102,7 +100,7 @@
                         <i class="fa-solid fa-layer-group text-xs"></i>
                     </div>
                 </div>
-                <div class="mt-3 text-[11px] text-slate-400 flex items-center">
+                <div class="mt-3 text-[11px] text-slate-400">
                     <span id="statFrameworkName">EFI Suite Loaded</span>
                 </div>
             </div>
@@ -292,7 +290,7 @@
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <h3 class="font-semibold text-xs uppercase tracking-wider text-slate-300">Execution  Console</h3>
+                    <h3 class="font-semibold text-xs uppercase tracking-wider text-slate-300">Execution Console</h3>
                 </div>
                 <button onclick="clearConsoleLogs()" class="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 bg-darkBg rounded border border-darkBorder">Clear Logs</button>
             </div>
@@ -501,35 +499,34 @@
                 return matchesStatus && matchesSearch;
             });
 
-            document.getElementById('testCountBadge.innerText', `${filtered.length} cases`);
             document.getElementById('testCountBadge').innerText = `${filtered.length} cases`;
 
             if(filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-500">No test cases match the active filter criteria.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500 font-sans">No matching test cases found.</td></tr>`;
                 return;
             }
 
             filtered.forEach(tc => {
                 const tr = document.createElement('tr');
-                tr.className = "hover:bg-darkBg/50 transition-all border-b border-darkBorder/50";
+                tr.className = "hover:bg-darkBg/40 transition-colors border-b border-darkBorder/50";
                 
-                let badgeColor = tc.status === 'PASSED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
-                                 tc.status === 'FAILED' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 
-                                 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+                const statusBadge = tc.status === 'PASSED' 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 font-medium">PASSED</span>`
+                    : tc.status === 'FAILED'
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/10 text-rose-400 font-medium">FAILED</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] bg-amber-500/10 text-amber-400 font-medium">PENDING</span>`;
 
                 tr.innerHTML = `
-                    <td class="p-3">
-                        <div class="font-semibold text-slate-200">${tc.id}</div>
-                        <div class="text-[10px] text-slate-400 font-sans">${tc.intent}</div>
+                    <td class="p-3 font-semibold text-slate-200">
+                        <div>${tc.id}</div>
+                        <div class="text-[10px] text-slate-400 font-sans font-normal">${tc.intent}</div>
                     </td>
-                    <td class="p-3 text-slate-300 max-w-[200px] truncate" title="${tc.prompt}">${tc.prompt}</td>
-                    <td class="p-3 text-slate-400 max-w-[180px] truncate" title="${tc.expected}">${tc.expected}</td>
-                    <td class="p-3 text-slate-300 max-w-[180px] truncate" title="${tc.actual}">${tc.actual}</td>
-                    <td class="p-3">
-                        <span class="px-2 py-0.5 rounded text-[10px] font-medium border font-sans ${badgeColor}">${tc.status}</span>
-                    </td>
+                    <td class="p-3 text-slate-300 max-w-xs truncate" title="${tc.prompt}">${tc.prompt}</td>
+                    <td class="p-3 text-slate-400 max-w-xs truncate" title="${tc.expected}">${tc.expected}</td>
+                    <td class="p-3 text-slate-300 max-w-xs truncate" title="${tc.actual}">${tc.actual}</td>
+                    <td class="p-3">${statusBadge}</td>
                     <td class="p-3 text-right">
-                        <button onclick="openDetailModal('${tc.id}')" class="px-2.5 py-1 bg-darkBg hover:bg-slate-800 text-slate-300 border border-darkBorder rounded text-[11px] font-sans transition-all">Inspect</button>
+                        <button onclick="openDetailModal('${tc.id}')" class="px-2.5 py-1 bg-darkBg hover:bg-slate-800 text-slate-300 border border-darkBorder rounded text-[11px] transition-all">Inspect</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
@@ -542,13 +539,13 @@
 
         function updateMetrics() {
             const total = testCasesData.length;
-            const passed = testCasesData.filter(t => t.status === 'PASSED').length;
-            const failed = testCasesData.filter(t => t.status === 'FAILED').length;
-            const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+            const passed = testCasesData.filter(tc => tc.status === 'PASSED').length;
+            const failed = testCasesData.filter(tc => tc.status === 'FAILED').length;
+            const passRate = total > 0 ? ((passed / total) * 100).toFixed(1) : 0;
 
-            const avgLatency = total > 0 ? Math.round(testCasesData.reduce((acc, t) => acc + t.latency, 0) / total) : 0;
-            const avgTokens = total > 0 ? Math.round(testCasesData.reduce((acc, t) => acc + t.tokens, 0) / total) : 0;
-            const avgConfidence = total > 0 ? Math.round(testCasesData.reduce((acc, t) => acc + t.confidence, 0) / total) : 0;
+            const avgLatency = total > 0 ? Math.round(testCasesData.reduce((acc, tc) => acc + (tc.latency || 0), 0) / total) : 0;
+            const avgTokens = total > 0 ? Math.round(testCasesData.reduce((acc, tc) => acc + (tc.tokens || 0), 0) / total) : 0;
+            const avgConfidence = total > 0 ? Math.round(testCasesData.reduce((acc, tc) => acc + (tc.confidence || 0), 0) / total) : 0;
 
             document.getElementById('statTotalTests').innerText = total;
             document.getElementById('statPassRate').innerText = `${passRate}%`;
@@ -557,17 +554,18 @@
             document.getElementById('statAvgLatency').innerText = `${avgLatency} ms`;
             document.getElementById('statAvgTokens').innerText = `${avgTokens} tok`;
 
-            document.getElementById('metricIntentScore').innerText = `${passRate}%`;
-            document.getElementById('barIntentScore').style.width = `${passRate}%`;
+            document.getElementById('metricIntentScore').innerText = `${avgConfidence}%`;
+            document.getElementById('barIntentScore').style.width = `${avgConfidence}%`;
 
-            document.getElementById('metricEntityScore').innerText = `${Math.min(100, passRate + 4)}%`;
-            document.getElementById('barEntityScore').style.width = `${Math.min(100, passRate + 4)}%`;
+            const entityScore = Math.min(100, avgConfidence + 2);
+            document.getElementById('metricEntityScore').innerText = `${entityScore}%`;
+            document.getElementById('barEntityScore').style.width = `${entityScore}%`;
 
-            document.getElementById('metricSemanticScore').innerText = `${avgConfidence}%`;
-            document.getElementById('barSemanticScore').style.width = `${avgConfidence}%`;
+            document.getElementById('metricSemanticScore').innerText = `${passRate}%`;
+            document.getElementById('barSemanticScore').style.width = `${passRate}%`;
 
             if(accuracyChartInstance) {
-                accuracyChartInstance.data.datasets[0].data = [passRate, Math.min(100, passRate + 4), avgConfidence];
+                accuracyChartInstance.data.datasets[0].data = [avgConfidence, entityScore, parseFloat(passRate)];
                 accuracyChartInstance.update();
             }
         }
@@ -579,56 +577,105 @@
                 data: {
                     labels: ['Intent Accuracy', 'Entity Precision', 'Semantic Match'],
                     datasets: [{
-                        data: [85, 89, 92],
-                        backgroundColor: ['#10b981', '#2563eb', '#8b5cf6'],
-                        borderWidth: 0,
-                        cutout: '75%'
+                        data: [95, 98, 92],
+                        backgroundColor: ['#10b981', '#2563eb', '#9333ea'],
+                        borderWidth: 0
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, family: 'Inter' }, color: '#94a3b8' } }
-                    }
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                color: '#94a3b8',
+                                boxWidth: 10,
+                                font: { size: 10 }
+                            }
+                        }
+                    },
+                    cutout: '70%'
                 }
             });
         }
 
-        function runBulkEvaluation() {
-            logConsole(`Initiating bulk evaluation run across ${testCasesData.length} cases for ${currentFramework}...`);
-            let index = 0;
-            const interval = setInterval(() => {
-                if(index < testCasesData.length) {
-                    const tc = testCasesData[index];
-                    tc.status = Math.random() > 0.15 ? 'PASSED' : 'FAILED';
-                    tc.latency = Math.floor(Math.random() * 250) + 180;
-                    tc.confidence = Math.floor(Math.random() * 15) + 85;
-                    logConsole(`[Executed] Case ${tc.id} -> Status: ${tc.status} (${tc.latency}ms)`);
-                    renderTestTable();
-                    updateMetrics();
-                    index++;
-                } else {
-                    clearInterval(interval);
-                    logConsole(`[Complete] Bulk evaluation finished successfully.`);
-                }
-            }, 300);
-        }
-
-        function resetTestData() {
-            initDashboard();
-            logConsole(`Reset dataset back to default mock configuration.`);
-        }
-
         function logConsole(message) {
             const box = document.getElementById('consoleLogBox');
-            const timeStr = new Date().toLocaleTimeString();
-            box.innerHTML += `<div><span class="text-slate-500">[${timeStr}]</span> ${message}</div>`;
+            const time = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.innerHTML = `<span class="text-slate-500">[${time}]</span> ${message}`;
+            box.appendChild(div);
             box.scrollTop = box.scrollHeight;
         }
 
         function clearConsoleLogs() {
-            document.getElementById('consoleLogBox').innerHTML = `<div class="text-slate-500">[System] Console logs cleared.</div>`;
+            document.getElementById('consoleLogBox').innerHTML = '<div class="text-slate-500">[System] Console logs cleared.</div>';
+        }
+
+        function runBulkEvaluation() {
+            logConsole(`Starting bulk test evaluation across sheet: ${currentSheetName}...`);
+            let index = 0;
+            const interval = setInterval(() => {
+                if(index < testCasesData.length) {
+                    const tc = testCasesData[index];
+                    if(tc.status === 'PENDING') {
+                        tc.status = Math.random() > 0.2 ? 'PASSED' : 'FAILED';
+                    }
+                    renderTestTable();
+                    updateMetrics();
+                    logConsole(`Evaluated ${tc.id}: Status -> ${tc.status}`);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    logConsole(`Bulk evaluation completed successfully.`);
+                }
+            }, 400);
+        }
+
+        function resetTestData() {
+            initDashboard();
+            logConsole("Dataset reset to initial state.");
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+
+            document.getElementById('fileNameLabel').innerText = file.name;
+            logConsole(`Uploading and parsing dataset: ${file.name}...`);
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const json = XLSX.utils.sheet_to_json(worksheet);
+
+                    if(json.length > 0) {
+                        testCasesData = json.map((row, idx) => ({
+                            id: row['Test Case ID'] || row['ID'] || `TC-${idx+1}`,
+                            intent: row['Category'] || row['Intent'] || 'General Validation',
+                            prompt: row['User Question'] || row['Question'] || row['Prompt'] || 'N/A',
+                            expected: row['Expected Answer'] || row['Expected'] || 'N/A',
+                            actual: row['Chatbot Answer'] || row['Actual'] || 'Pending evaluation',
+                            status: 'PENDING',
+                            latency: Math.floor(Math.random() * 200) + 250,
+                            tokens: Math.floor(Math.random() * 30) + 25,
+                            confidence: 90
+                        }));
+
+                        renderTestTable();
+                        updateMetrics();
+                        logConsole(`Successfully imported ${testCasesData.length} test cases from ${file.name}`);
+                    }
+                } catch (err) {
+                    logConsole(`Error parsing uploaded file: ${err.message}`);
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         function openLiveChatDrawer() {
@@ -641,32 +688,38 @@
 
         function sendChatMessage() {
             const input = document.getElementById('chatUserInput');
-            const msg = input.value.trim();
-            if(!msg) return;
+            const prompt = input.value.trim();
+            if(!prompt) return;
 
             const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML += `
-                <div class="flex items-start justify-end space-x-2">
-                    <div class="bg-blue-600 text-white p-2.5 rounded-lg max-w-[80%]">${msg}</div>
-                    <div class="w-6 h-6 rounded bg-slate-700 flex items-center justify-center text-white text-[10px] shrink-0 font-bold">U</div>
-                </div>
+            
+            // Append User message
+            const userDiv = document.createElement('div');
+            userDiv.className = "flex items-start space-x-2 justify-end";
+            userDiv.innerHTML = `
+                <div class="bg-blue-600 text-white p-2.5 rounded-lg max-w-[80%]">${prompt}</div>
+                <div class="w-6 h-6 rounded bg-slate-700 flex items-center justify-center text-white text-[10px] shrink-0 font-bold font-mono">U</div>
             `;
+            chatMessages.appendChild(userDiv);
             input.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
+            // Simulate bot response
             setTimeout(() => {
-                const latency = Math.floor(Math.random() * 200) + 220;
-                const tokens = Math.floor(Math.random() * 30) + 25;
+                const latency = Math.floor(Math.random() * 250) + 200;
+                const tokens = Math.floor(Math.random() * 35) + 30;
+                
                 document.getElementById('chatStatsInfo').innerText = `Latency: ${latency} ms | Tokens: ${tokens} tok`;
 
-                chatMessages.innerHTML += `
-                    <div class="flex items-start space-x-2">
-                        <div class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] shrink-0 font-bold">AI</div>
-                        <div class="bg-darkCard border border-darkBorder p-2.5 rounded-lg max-w-[80%] text-slate-300">
-                            Processed query successfully via ${currentFramework} inference pipeline. Intent verified with high confidence.
-                        </div>
+                const botDiv = document.createElement('div');
+                botDiv.className = "flex items-start space-x-2";
+                botDiv.innerHTML = `
+                    <div class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] shrink-0 font-bold font-mono">AI</div>
+                    <div class="bg-darkCard border border-darkBorder p-2.5 rounded-lg text-slate-300 max-w-[80%]">
+                        [${currentFramework} Sandbox] Received prompt. Response verified successfully against enterprise KB.
                     </div>
                 `;
+                chatMessages.appendChild(botDiv);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 400);
         }
@@ -674,24 +727,27 @@
         function clearChatMessages() {
             document.getElementById('chatMessages').innerHTML = `
                 <div class="flex items-start space-x-2">
-                    <div class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] shrink-0 font-bold">AI</div>
-                    <div class="bg-darkCard border border-darkBorder p-2.5 rounded-lg text-slate-300">Chat history cleared. Sandbox ready.</div>
+                    <div class="w-6 h-6 rounded bg-blue-600 flex items-center justify-center text-white text-[10px] shrink-0 font-bold font-mono">AI</div>
+                    <div class="bg-darkCard border border-darkBorder p-2.5 rounded-lg text-slate-300">
+                        Sandbox chat history cleared.
+                    </div>
                 </div>
             `;
         }
 
-        function openDetailModal(id) {
-            const tc = testCasesData.find(t => t.id === id);
+        function openDetailModal(tcId) {
+            const tc = testCasesData.find(t => t.id === tcId);
             if(!tc) return;
 
-            activeSelectedTestCaseId = id;
-            document.getElementById('modalTitle').innerText = `Test Case Audit: ${tc.id}`;
+            activeSelectedTestCaseId = tcId;
+            document.getElementById('modalTitle').innerText = `Audit Details — ${tc.id}`;
             document.getElementById('modalIntent').innerText = tc.intent;
             document.getElementById('modalStatus').innerText = tc.status;
+            document.getElementById('modalStatus').className = `font-medium font-mono ${tc.status === 'PASSED' ? 'text-emerald-400' : 'text-rose-400'}`;
             document.getElementById('modalPrompt').innerText = tc.prompt;
             document.getElementById('modalExpected').innerText = tc.expected;
             document.getElementById('modalActual').innerText = tc.actual;
-            document.getElementById('modalMetrics').innerText = `Latency: ${tc.latency} ms | Tokens: ${tc.tokens} tok | Confidence: ${tc.confidence}%`;
+            document.getElementById('modalMetrics').innerText = `Latency: ${tc.latency || 300} ms | Tokens: ${tc.tokens || 40} tok | Confidence: ${tc.confidence || 95}%`;
 
             document.getElementById('detailModal').classList.remove('hidden');
         }
@@ -705,67 +761,20 @@
             const tc = testCasesData.find(t => t.id === activeSelectedTestCaseId);
             if(tc) {
                 tc.status = 'PASSED';
-                tc.latency = Math.floor(Math.random() * 150) + 200;
+                openDetailModal(tc.id);
                 renderTestTable();
                 updateMetrics();
-                closeDetailModal();
-                logConsole(`Re-tested case ${tc.id} -> Status: PASSED`);
+                logConsole(`Re-tested ${tc.id}: PASSED`);
             }
         }
 
-        function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if(!file) return;
-
-            document.getElementById('fileNameLabel').innerText = file.name;
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const jsonSheet = XLSX.utils.sheet_to_json(worksheet);
-
-                    if(jsonSheet.length > 0) {
-                        const newSheetName = file.name.replace(/\.[^/.]+$/, "");
-                        mockDatasets[currentFramework].sheets[newSheetName] = jsonSheet.map((row, idx) => ({
-                            id: row.ID || `IMP-${100 + idx}`,
-                            intent: row.Intent || row.Category || 'Custom Imported Intent',
-                            prompt: row.Prompt || row.UserPrompt || 'Sample prompt text',
-                            expected: row.Expected || row.ExpectedResponse || 'Expected response text',
-                            actual: row.Actual || row.ActualResponse || 'Generated response text',
-                            status: row.Status || (Math.random() > 0.2 ? 'PASSED' : 'FAILED'),
-                            latency: Number(row.Latency) || Math.floor(Math.random() * 250) + 200,
-                            tokens: Number(row.Tokens) || Math.floor(Math.random() * 30) + 30,
-                            confidence: Number(row.Confidence) || Math.floor(Math.random() * 10) + 90
-                        }));
-
-                        initDashboard();
-                        document.getElementById('sheetSelector').value = newSheetName;
-                        handleSheetChange(newSheetName);
-                        logConsole(`Successfully imported and parsed dataset: ${file.name}`);
-                    }
-                } catch(err) {
-                    console.error(err);
-                    alert("Error parsing file. Please ensure it is a valid Excel or CSV spreadsheet.");
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
         function exportReport() {
-            const csvContent = "data:text/csv;charset=utf-8," + 
-                ["ID,Intent,Prompt,Expected,Actual,Status,Latency,Tokens,Confidence"].join(",") + "\n" +
-                testCasesData.map(t => [t.id, `"${t.intent}"`, `"${t.prompt}"`, `"${t.expected}"`, `"${t.actual}"`, t.status, t.latency, t.tokens, t.confidence].join(",")).join("\n");      
-            const encodedUri = encodeURI(csvContent);
-            const link = document.createElement("a");
-            link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `QA_Execution_Report_${currentFramework}_${currentSheetName.replace(/\s+/g, '_')}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            logConsole(`Exported execution telemetry report to CSV.`);
+            logConsole("Exporting evaluated test execution report as Excel...");
+            const ws = XLSX.utils.json_to_sheet(testCasesData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Test Results");
+            XLSX.writeFile(wb, "Frameworks-Result_Export.xlsx");
+            logConsole("Report exported successfully.");
         }
     </script>
 </body>
