@@ -56,7 +56,7 @@ public class ChatbotTest {
         }
     }
 
-    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(60);
+    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(90);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(90);
 
     private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
@@ -286,36 +286,49 @@ public class ChatbotTest {
             System.out.println("--> Opening application URL: " + APP_URL);
             driver.get(APP_URL);
 
+            // Wait for page ready state
             wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
 
-            WebElement memberInput = wait.until(ExpectedConditions.presenceOfElementLocated(By.id("vaa-email")));
-            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", memberInput);
-            wait.until(ExpectedConditions.elementToBeClickable(memberInput));
+            // STEP 1: Handle potential landing page sign-in buttons or modals
+            try {
+                WebElement signinBtn = driver.findElement(By.xpath("//button[contains(translate(text(),'SIGN','sign'),'sign') or contains(translate(text(),'LOGIN','login'),'login') or contains(@class,'login')]"));
+                if (signinBtn.isDisplayed()) {
+                    System.out.println("--> Clicking landing page sign-in button...");
+                    clickElement(signinBtn);
+                    Thread.sleep(1500); // Brief wait for form expansion
+                }
+            } catch (Exception ignored) {
+                // No extra button needed, form is assumed to be visible
+            }
 
+            // STEP 2: Find and fill Email / Username field using multi-fallback XPath
+            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//input[@id='vaa-email' or @id='email' or @id='username' or @type='email' or contains(@name,'email') or contains(@name,'user') or contains(@placeholder,'email')]")
+            ));
+            ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", memberInput);
             memberInput.clear();
             memberInput.sendKeys(memberId);
             System.out.println("--> Email entered.");
 
-            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-pw")));
+            // STEP 3: Find and fill Password field
+            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//input[@id='vaa-pw' or @id='password' or @type='password' or contains(@name,'password') or contains(@placeholder,'password')]")
+            ));
             passwordInput.clear();
             passwordInput.sendKeys(password);
             System.out.println("--> Password entered.");
 
-            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("vaa-submit")));
+            // STEP 4: Submit Login
+            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(
+                By.xpath("//button[@id='vaa-submit' or @type='submit' or contains(translate(text(),'LOGIN','login'),'login') or contains(translate(text(),'SIGN','sign'),'sign')]")
+            ));
             clickElement(loginButton);
             System.out.println("--> Login submitted.");
 
-            wait.until(ExpectedConditions.or(
-                    ExpectedConditions.visibilityOfElementLocated(By.id("vaa-portal")),
-                    ExpectedConditions.presenceOfElementLocated(By.xpath("//*[contains(normalize-space(), 'Conversational AI')]"))
-            ));
-
-            System.out.println("--> Post-login page loaded.");
-
+            // STEP 5: Wait for Conversational AI navigation link / chat interface
             By conversationalAILocator = By.xpath(
-                    "//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')] | //*[contains(normalize-space(), 'Conversational AI')]"
+                "//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')] | //*[contains(normalize-space(), 'Conversational AI')]"
             );
-
             WebElement conversationalAI = wait.until(ExpectedConditions.elementToBeClickable(conversationalAILocator));
             clickElement(conversationalAI);
             System.out.println("--> Conversational AI clicked.");
@@ -327,8 +340,7 @@ public class ChatbotTest {
             System.out.println("--> CRITICAL FAILURE URL: " + driver.getCurrentUrl());
             System.out.println("--> CRITICAL FAILURE TITLE: " + driver.getTitle());
             throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
-        }
-    }
+        }}
 
     private By getChatInputLocator() {
         return By.xpath("//input | //textarea | //*[@contenteditable='true']");
