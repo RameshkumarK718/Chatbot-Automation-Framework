@@ -85,6 +85,38 @@ jobs:
             --input Frameworks_Output.xlsx \
             --output Frameworks-Result.xlsx
 
+      - name: Generate JSON Summary for Dashboard
+        if: always()
+        run: |
+          python -c "
+          import pandas as pd
+          import json
+          from datetime import datetime
+
+          try:
+              df = pd.read_excel('Frameworks-Result.xlsx')
+              total = len(df)
+              status_col = 'Status' if 'Status' in df.columns else (df.columns[-1] if len(df.columns) > 0 else 'Status')
+              passed = int(df[df[status_col].astype(str).str.upper() == 'PASS'].shape[0])
+              failed = total - passed
+              pass_rate = round((passed / total) * 100, 2) if total > 0 else 0
+          except Exception as e:
+              print(f'Error reading Excel: {e}')
+              total, passed, failed, pass_rate = 0, 0, 0, 0
+
+          data = {
+              'totalTests': total,
+              'passedTests': passed,
+              'failedTests': failed,
+              'passRate': pass_rate,
+              'lastUpdated': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+          }
+
+          with open('results.json', 'w') as f:
+              json.dump(data, f, indent=4)
+          print('Successfully generated results.json')
+          "
+
       - name: Upload Test Reports & Results
         if: always()
         uses: actions/upload-artifact@v6
@@ -94,4 +126,5 @@ jobs:
             target/surefire-reports/
             Frameworks_Output.xlsx
             Frameworks-Result.xlsx
+            results.json
           if-no-files-found: warn
