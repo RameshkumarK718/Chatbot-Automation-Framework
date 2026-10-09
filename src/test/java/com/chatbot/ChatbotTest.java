@@ -61,11 +61,11 @@ public class ChatbotTest {
 
     private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url",
-            "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/credentials(2).xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
     private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url",
-            "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks(EFI).xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
     private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
-            "https://raw.githubusercontent.com/A-NXT/testing-automation-framework/main/Frameworks-Result(EFI).xlsx");
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx");
     private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI)_Output.xlsx";
     private static final String OUTPUT_JSON_FILE = "target/test_results.json";
     
@@ -90,31 +90,44 @@ public class ChatbotTest {
         return connection.getInputStream();
     }
 
-   private String[] getCredentialsFromExcel() {
+    private String[] getCredentialsFromExcel() {
         String username = "";
         String password = "";
-        try (InputStream is = openUrlStream(CREDENTIALS_EXCEL_URL);
-             Workbook workbook = new XSSFWorkbook(is)) {
-            if (workbook.getNumberOfSheets() == 0) {
-                throw new RuntimeException("Credentials Excel contains no sheets.");
+        
+        File localFile = new File("credentials(2).xlsx");
+        InputStream is = null;
+        try {
+            if (localFile.exists()) {
+                is = new java.io.FileInputStream(localFile);
+                System.out.println("--> Loading credentials from local file.");
+            } else {
+                is = openUrlStream(CREDENTIALS_EXCEL_URL);
+                System.out.println("--> Loading credentials from URL.");
             }
-            Sheet sheet = workbook.getSheetAt(0);
-            Row row = sheet.getRow(1); // Row 1 or 0 depending on your header
-            if (row == null) {
-                row = sheet.getRow(0);
+
+            try (Workbook workbook = new XSSFWorkbook(is)) {
+                if (workbook.getNumberOfSheets() == 0) {
+                    throw new RuntimeException("Credentials Excel contains no sheets.");
+                }
+                Sheet sheet = workbook.getSheetAt(0);
+                Row row = sheet.getRow(1);
+                if (row == null) row = sheet.getRow(0);
+                if (row == null) {
+                    throw new RuntimeException("Credentials row was not found in Excel.");
+                }
+                username = getCellStringValue(row.getCell(1));
+                if (username.isBlank()) {
+                    username = getCellStringValue(row.getCell(0));
+                }
+                password = username;
+                System.out.println("--> Credentials loaded successfully: " + username);
             }
-            if (row == null) {
-                throw new RuntimeException("Credentials row was not found in Excel.");
-            }
-            // Column 1 contains the login string (e.g., "ramesh")
-            username = getCellStringValue(row.getCell(1));
-            password = username; 
-            System.out.println("--> Credentials loaded successfully: " + username);
         } catch (Exception e) {
             throw new RuntimeException("Error reading credentials Excel: " + e.getMessage(), e);
         }
         return new String[]{username, password};
     }
+
     private String getCellStringValue(Cell cell) {
         if (cell == null) {
             return "";
@@ -129,14 +142,17 @@ public class ChatbotTest {
 
     private List<TestRowData> fetchExcelDataFromGitHub(String fileUrl) {
         List<TestRowData> dataList = new ArrayList<>();
-
-        try (InputStream is = openUrlStream(fileUrl);
+        File localFile = new File("Frameworks(EFI).xlsx");
+        
+        try (InputStream is = localFile.exists() 
+                ? new java.io.FileInputStream(localFile) 
+                : openUrlStream(fileUrl);
              Workbook workbook = new XSSFWorkbook(is)) {
+
             if (workbook.getNumberOfSheets() == 0) {
                 throw new RuntimeException("Framework Excel contains no sheets.");
             }
 
-            // Iterate through every sheet in the workbook (e.g., all 5 sheets in Frameworks(EFI).xlsx)
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
@@ -147,42 +163,47 @@ public class ChatbotTest {
 
                 Map<String, Integer> colMap = new HashMap<>();
                 for (Cell cell : headerRow) {
-                    colMap.put(getCellStringValue(cell).toLowerCase(), cell.getColumnIndex());
+                    String headerVal = getCellStringValue(cell).toLowerCase();
+                    if (!headerVal.isBlank()) {
+                        colMap.put(headerVal, cell.getColumnIndex());
+                    }
                 }
 
-                // Process every single row without skipping based on runnable status
                 for (int r = 1; r <= sheet.getLastRowNum(); r++) {
                     Row row = sheet.getRow(r);
                     if (row == null) continue;
 
-                    String role = getCellByAnyHeader(row, colMap, "role", "set #");
-                    String question = getCellByAnyHeader(row, colMap, "question / input to enter", "question");
-                    String expectedResult = getCellByAnyHeader(row, colMap, "expected result", "what it tests / expected answer");
+                    String role = getCellByExactOrPartialHeader(row, colMap, "role", "set #", "#");
+                    String question = getCellByExactOrPartialHeader(row, colMap, "question / input to enter", "question");
+                    String expectedResult = getCellByExactOrPartialHeader(row, colMap, "expected result", "what it tests / expected answer");
 
                     if (question.isBlank()) {
                         continue;
                     }
 
                     String testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
-
                     dataList.add(new TestRowData(
                             sheetName, r, testCaseId, role, question, expectedResult,
                             "", "", "", ""
                     ));
                 }
             }
-            System.out.println("--> Successfully parsed " + dataList.size() + " test cases dynamically across all sheets.");
+            System.out.println("--> Successfully parsed " + dataList.size() + " test cases across all sheets.");
         } catch (Exception e) {
             throw new RuntimeException("Error fetching Frameworks Excel: " + e.getMessage(), e);
         }
         return dataList;
     }
 
-    private String getCellByAnyHeader(Row row, Map<String, Integer> colMap, String... possibleHeaders) {
+    private String getCellByExactOrPartialHeader(Row row, Map<String, Integer> colMap, String... possibleHeaders) {
         for (String header : possibleHeaders) {
             for (Map.Entry<String, Integer> entry : colMap.entrySet()) {
-                if (entry.getKey().contains(header)) {
-                    return getCellStringValue(row.getCell(entry.getValue()));
+                if (entry.getKey().equals(header) || entry.getKey().contains(header)) {
+                    Cell cell = row.getCell(entry.getValue());
+                    String val = getCellStringValue(cell);
+                    if (!val.isBlank()) {
+                        return val;
+                    }
                 }
             }
         }
@@ -385,17 +406,17 @@ public class ChatbotTest {
     }
 
     @DataProvider(name = "excelTestData")
-public Object[][] provideExcelData() {
-    List<TestRowData> dataList = fetchExcelDataFromGitHub(FRAMEWORK_EXCEL_URL);
-    // Make sure there is NO subList or limit here!
-    Object[][] data = new Object[dataList.size()][1];
-    for (int i = 0; i < dataList.size(); i++) {
-        data[i][0] = dataList.get(i);
+    public Object[][] provideExcelData() {
+        List<TestRowData> dataList = fetchExcelDataFromGitHub(FRAMEWORK_EXCEL_URL);
+        // Make sure there is NO subList or limit here!
+        Object[][] data = new Object[dataList.size()][1];
+        for (int i = 0; i < dataList.size(); i++) {
+            data[i][0] = dataList.get(i);
+        }
+        return data;
     }
-    return data;
-}
 
-  @Test(dataProvider = "excelTestData")
+    @Test(dataProvider = "excelTestData")
     public void runSingleQuestionTest(TestRowData rowData) {
         try {
             if (driver == null) {
@@ -404,7 +425,6 @@ public Object[][] provideExcelData() {
             } else {
                 waitForChatInput();
             }
-
             selectRole(rowData.role);
 
             String chatbotResponse = sendQuestion(rowData.question);
