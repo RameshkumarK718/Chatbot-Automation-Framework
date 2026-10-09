@@ -395,7 +395,7 @@ public Object[][] provideExcelData() {
     return data;
 }
 
-    @Test(dataProvider = "excelQuestions")
+  @Test(dataProvider = "excelTestData")
     public void runSingleQuestionTest(TestRowData rowData) {
         try {
             if (driver == null) {
