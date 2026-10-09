@@ -55,7 +55,7 @@ public class ChatbotTest {
             this.status = status;
         }
     }
-3
+
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(30);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
 
