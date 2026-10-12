@@ -26,39 +26,23 @@ on:
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx"
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: chatbot-automation-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
   run-tests:
-    name: Run Automation, AI Evaluation and Dashboard
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 90
-
-    env:
-      APP_URL: ${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}
-      FRAMEWORK_EXCEL_URL: ${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx' }}
-      CREDENTIALS_EXCEL_URL: ${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx' }}
-      RESULT_EXCEL_URL: ${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx' }}
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
           java-version: "21"
           distribution: "temurin"
           cache: "maven"
 
-      - name: Set up Python 3.11
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -78,172 +62,34 @@ jobs:
           google-chrome --version
 
       - name: Install Python Dependencies
-        shell: bash
         run: |
-          set -euo pipefail
           python -m pip install --upgrade pip
-          python -m pip install pandas openpyxl openai
-          if [ -f requirements.txt ]; then
-            python -m pip install -r requirements.txt
-          fi
-
-      - name: Display Configuration
-        run: |
-          echo "Application URL: $APP_URL"
-          echo "Framework Excel URL: $FRAMEWORK_EXCEL_URL"
-          echo "Credentials Excel URL: configured"
-          echo "Result Excel URL: $RESULT_EXCEL_URL"
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run Maven Tests
-        id: java_tests
-        continue-on-error: true
-        shell: bash
         run: |
-          set -euo pipefail
           mvn clean test -e -Dsurefire.useFile=false \
-            "-Dapp.url=$APP_URL" \
-            "-Dframework.excel.url=$FRAMEWORK_EXCEL_URL" \
-            "-Dcredentials.excel.url=$CREDENTIALS_EXCEL_URL" \
-            "-Dresult.excel.url=$RESULT_EXCEL_URL"
+            -Dapp.url="${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}" \
+            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx' }}" \
+            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx' }}" \
+            -Dresult.excel.url="${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx' }}"
 
       - name: Run Python AI Evaluator
-        id: ai_evaluator
         if: always()
-        continue-on-error: true
-        shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          set -euo pipefail
-          
-          INPUT_FILE=""
-          for f in Frameworks-Result*.xlsx; do
-            if [ -f "$f" ] && [ "$f" != "Frameworks-Result.xlsx" ]; then
-              INPUT_FILE="$f"
-              break
-            fi
-          done
+          python engine_ai_evaluator.py \
+            --input Frameworks_Output.xlsx \
+            --output Frameworks-Result.xlsx
 
-          if [ -z "$INPUT_FILE" ] && [ -f "Frameworks(EFI).xlsx" ]; then
-            INPUT_FILE="Frameworks(EFI).xlsx"
-          fi
-
-          if [ -n "$INPUT_FILE" ] && [ -f "$INPUT_FILE" ]; then
-            echo "Found input workbook: $INPUT_FILE"
-            python engine_ai_evaluator.py \
-              --input "$INPUT_FILE" \
-              --output "Frameworks-Result.xlsx"
-          else
-            echo "::warning::Result workbook not found, running with default fallback."
-            python engine_ai_evaluator.py \
-              --input "Frameworks-Result(EFI).xlsx" \
-              --output "Frameworks-Result.xlsx" || true
-          fi
-
-      - name: Generate Dynamic Dashboard JSON
-        if: always()
-        shell: bash
-        run: |
-          python - <<'PY'
-          import json
-          from datetime import datetime, timezone
-          from pathlib import Path
-          import pandas as pd
-
-          result_file = Path("Frameworks-Result.xlsx")
-
-          summary = {
-              "project": "Universal Chatbot Automation Framework",
-              "environment": "EFI",
-              "totalTests": 0,
-              "passedTests": 0,
-              "failedTests": 0,
-              "skippedTests": 0,
-              "passRate": 0.0,
-              "lastUpdated": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
-              "modules": {},
-              "message": ""
-          }
-
-          if result_file.exists():
-              try:
-                  workbook = pd.read_excel(result_file, sheet_name=None, dtype=str)
-                  for sheet_name, df in workbook.items():
-                      status_col = next((col for col in df.columns if str(col).strip().lower() in ["status", "pass / fail"]), None)
-                      if status_col is None:
-                          continue
-
-                      statuses = df[status_col].fillna("").astype(str).str.strip().str.upper()
-                      passed = int((statuses.str.contains("PASS")).sum())
-                      failed = int((statuses.str.contains("FAIL")).sum())
-                      skipped = int(statuses.str.startswith("SKIPPED").sum())
-
-                      summary["modules"][sheet_name] = {
-                          "total": len(df),
-                          "passed": passed,
-                          "failed": failed,
-                          "skipped": skipped
-                      }
-
-                      summary["totalTests"] += len(df)
-                      summary["passedTests"] += passed
-                      summary["failedTests"] += failed
-                      summary["skippedTests"] += skipped
-
-                  counted = summary["passedTests"] + summary["failedTests"]
-                  summary["passRate"] = round(summary["passedTests"] / counted * 100, 2) if counted else 0.0
-                  summary["message"] = "Summary generated from the evaluated workbook."
-              except Exception as exc:
-                  summary["message"] = f"Unable to read evaluation workbook: {exc}"
-          else:
-              summary["message"] = "Evaluation workbook not found."
-
-          Path("results.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
-          PY
-
-      - name: Prepare Dashboard
-        if: always()
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p dashboard-site
-          if [ -f "index.html" ]; then
-            cp index.html dashboard-site/index.html
-          fi
-          if [ -f "results.json" ]; then
-            cp results.json dashboard-site/results.json
-          fi
-          touch dashboard-site/.nojekyll
-
-      - name: Upload Test Reports and Results
+      - name: Upload Test Reports & Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: chatbot-test-reports
-          if-no-files-found: warn
           path: |
             target/surefire-reports/
-            target/allure-results/
-            Frameworks*.xlsx
-            results.json
-            index.html
-            dashboard-site/
-
-      - name: Upload Dashboard Artifact
-        if: always() && !cancelled()
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dashboard-site
-
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: run-tests
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+            Frameworks_Output.xlsx
+            Frameworks-Result.xlsx
+          if-no-files-found: warn
