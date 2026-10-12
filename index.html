@@ -74,7 +74,7 @@
                 <button onclick="switchFramework('Vedas')" id="btnVedas" class="px-3 py-1 text-xs font-medium rounded transition-all text-slate-400 hover:text-white">Vedas Core</button>
             </div>
 
-            <button onclick="fetchLiveGitHubReports()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg shadow-sm flex items-center space-x-2 transition-all" title="Fetch live execution JSON from GitHub repository">
+            <button onclick="fetchLiveExcelReports()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg shadow-sm flex items-center space-x-2 transition-all" title="Fetch live execution Excel from GitHub repository">
                 <i class="fa-solid fa-cloud-arrow-down text-[11px]"></i>
                 <span>Sync GitHub Repo</span>
             </button>
@@ -479,42 +479,6 @@
                 logConsole("Notice: Could not load Excel files from root. Please ensure they are pushed to repository root.");
                 document.getElementById('githubSyncStatus').innerText = "Load Failed";
                 document.getElementById('githubSyncStatus').className = "text-rose-400";
-                
-                enterpriseDatasets = {
-                    "EFI": { sheets: {} },
-                    "Vedas": { sheets: {} }
-                };
-                initDashboard();
-            }
-        }
-
-                const fileData = await response.json();
-                const decodedJsonString = decodeURIComponent(escape(atob(fileData.content)));
-                const githubReport = JSON.parse(decodedJsonString);
-
-                if (githubReport && githubReport.sheets) {
-                    enterpriseDatasets = githubReport;
-                    logConsole("Successfully loaded live dynamic report data from GitHub repository.");
-                } else if (githubReport && githubReport.testCases) {
-                    enterpriseDatasets = {
-                        "EFI": {
-                            "sheets": {
-                                "GitHub Live Run": githubReport.testCases
-                            }
-                        }
-                    };
-                    logConsole("Successfully integrated GitHub test cases dataset.");
-                }
-
-                document.getElementById('githubSyncStatus').innerText = "GitHub Live Synced";
-                document.getElementById('githubSyncStatus').className = "text-emerald-400";
-                initDashboard();
-
-            } catch (error) {
-                console.warn("Live GitHub report sync error:", error);
-                logConsole("Notice: Live report JSON not found in repo root target/. Please sync repository or upload an Excel dataset.");
-                document.getElementById('githubSyncStatus').innerText = "Awaiting Live Data";
-                document.getElementById('githubSyncStatus').className = "text-amber-400";
                 
                 enterpriseDatasets = {
                     "EFI": { sheets: {} },
