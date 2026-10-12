@@ -1,11 +1,9 @@
 name: Universal Chatbot Automation Framework
-
 on:
   push:
     branches:
       - main
       - master
-
   workflow_dispatch:
     inputs:
       app_url:
@@ -28,24 +26,27 @@ on:
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx"
 
+permissions:
+  contents: read
+
 jobs:
   run-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 90
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           java-version: "21"
           distribution: "temurin"
           cache: "maven"
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: "pip"
@@ -66,7 +67,9 @@ jobs:
       - name: Install Python Dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          fi
 
       - name: Run Maven Tests
         run: |
@@ -80,18 +83,25 @@ jobs:
         if: always()
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          python engine_ai_evaluator.py \
-            --input "Frameworks-Result(EFI).xlsx" \
-            --output Frameworks-Result.xlsx
+          if [ -f "Frameworks-Result(EFI).xlsx" ]; then
+            python engine_ai_evaluator.py \
+              --input "Frameworks-Result(EFI).xlsx" \
+              --output "Frameworks-Result.xlsx"
+          else
+            echo "::error::Frameworks-Result(EFI).xlsx was not found."
+            exit 1
+          fi
 
       - name: Upload Test Reports & Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: chatbot-test-reports
           path: |
             target/surefire-reports/
             Frameworks-Result(EFI).xlsx
             Frameworks-Result.xlsx
+            index.html
           if-no-files-found: warn
