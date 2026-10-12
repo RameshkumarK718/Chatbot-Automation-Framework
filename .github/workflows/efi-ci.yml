@@ -4,7 +4,6 @@ on:
     branches:
       - main
       - master
-
   workflow_dispatch:
     inputs:
       app_url:
@@ -27,34 +26,42 @@ on:
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx"
 
+permissions:
+  contents: read
+
 jobs:
   run-tests:
     runs-on: ubuntu-24.04
     timeout-minutes: 90
 
     steps:
+      # 1. Checkout repository
       - name: Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
+      # 2. Configure Java
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v6
         with:
           java-version: "21"
-          distribution: "temurin"
-          cache: "maven"
+          distribution: temurin
+          cache: maven
 
+      # 3. Configure Python
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
-          cache: "pip"
+          cache: pip
 
+      # 4. Install Chrome
       - name: Install Chrome
         uses: browser-actions/setup-chrome@v2
         with:
           chrome-version: stable
           install-dependencies: true
 
+      # 5. Verify environment
       - name: Verify Environment
         run: |
           java -version
@@ -62,67 +69,134 @@ jobs:
           python --version
           google-chrome --version
 
+      # 6. Install Python dependencies
       - name: Install Python Dependencies
+        shell: bash
         run: |
+          set -euo pipefail
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+          if [ -f requirements.txt ]; then
+            python -m pip install -r requirements.txt
+          else
+            echo "::warning::requirements.txt was not found."
+          fi
+
+      # 7. Execute Selenium/TestNG automation
       - name: Run Maven Tests
         run: |
           mvn clean test -e -Dsurefire.useFile=false \
-            -Dapp.url="${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}" \
-            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx' }}" \
-            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx' }}" \
-            -Dresult.excel.url="${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx' }}"
+            "-Dapp.url=${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}" \
+            "-Dframework.excel.url=${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx' }}" \
+            "-Dcredentials.excel.url=${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx' }}" \
+            "-Dresult.excel.url=${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx' }}"
 
+      # 8. Evaluate chatbot responses with AI
       - name: Run Python AI Evaluator
         if: always()
+        shell: bash
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
-          python engine_ai_evaluator.py \
-            --input Frameworks_Output.xlsx \
-            --output Frameworks-Result.xlsx
+          set -euo pipefail
 
+          if [ -f "Frameworks_Output.xlsx" ]; then
+            python engine_ai_evaluator.py \
+              --input Frameworks_Output.xlsx \
+              --output Frameworks-Result.xlsx
+          else
+            echo "::warning::Frameworks_Output.xlsx not found. AI evaluation skipped."
+          fi
+
+      # 9. Generate dynamic dashboard JSON
       - name: Generate JSON Summary for Dashboard
         if: always()
+        shell: bash
         run: |
-          python -c "
-          import pandas as pd
+          python - <<'PY'
           import json
-          from datetime import datetime
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          import pandas as pd
+
+          result_file = Path("Frameworks-Result.xlsx")
+
+          total = 0
+          passed = 0
+          failed = 0
+          pass_rate = 0.0
 
           try:
-              df = pd.read_excel('Frameworks-Result.xlsx')
-              total = len(df)
-              status_col = 'Status' if 'Status' in df.columns else (df.columns[-1] if len(df.columns) > 0 else 'Status')
-              passed = int(df[df[status_col].astype(str).str.upper() == 'PASS'].shape[0])
+              if result_file.exists():
+                  df = pd.read_excel(result_file)
+                  total = len(df)
+
+                  status_col = next(
+                      (
+                          col for col in df.columns
+                          if str(col).strip().lower() == "status"
+                      ),
+                      None
+                  )
+
+                  if status_col is not None:
+                      statuses = (
+                          df[status_col]
+                          .fillna("")
+                          .astype(str)
+                          .str.strip()
+                          .str.upper()
+                      )
+
+                      passed = int((statuses == "PASS").sum())
+                      failed = total - passed
+
+                      pass_rate = round(
+                          passed / total * 100, 2
+                      ) if total else 0.0
+                  else:
+                      print(
+                          "::warning::Status column not found; "
+                          "check the result workbook column names."
+                      )
+                      failed = total
+              else:
+                  print(
+                      "::warning::Frameworks-Result.xlsx not found; "
+                      "dashboard counts will be zero."
+                  )
+
+          except Exception as exc:
+              print(f"::warning::Unable to read result workbook: {exc}")
               failed = total - passed
-              pass_rate = round((passed / total) * 100, 2) if total > 0 else 0
-          except Exception as e:
-              print(f'Error reading Excel: {e}')
-              total, passed, failed, pass_rate = 0, 0, 0, 0
 
           data = {
-              'totalTests': total,
-              'passedTests': passed,
-              'failedTests': failed,
-              'passRate': pass_rate,
-              'lastUpdated': datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+              "totalTests": total,
+              "passedTests": passed,
+              "failedTests": failed,
+              "passRate": pass_rate,
+              "lastUpdated": datetime.now(timezone.utc).strftime(
+                  "%Y-%m-%d %H:%M:%S UTC"
+              )
           }
 
-          with open('results.json', 'w') as f:
-              json.dump(data, f, indent=4)
-          print('Successfully generated results.json')
-          "
+          with open("results.json", "w", encoding="utf-8") as file:
+              json.dump(data, file, indent=4)
 
-      - name: Upload Test Reports & Results
+          print(json.dumps(data, indent=4))
+          print("Successfully generated results.json")
+          PY
+
+      # 10. Upload reports, Excel files, and dashboard JSON
+      - name: Upload Test Reports and Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: chatbot-test-reports
           path: |
             target/surefire-reports/
+            target/test_results.json
             Frameworks_Output.xlsx
             Frameworks-Result.xlsx
             results.json
