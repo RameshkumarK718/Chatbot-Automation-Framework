@@ -55,14 +55,14 @@ jobs:
         uses: actions/setup-java@v5
         with:
           java-version: "21"
-          distribution: temurin
-          cache: maven
+          distribution: "temurin"
+          cache: "maven"
 
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: pip
+          cache: "pip"
 
       - name: Install Chrome
         uses: browser-actions/setup-chrome@v2
