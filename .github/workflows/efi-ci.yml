@@ -117,7 +117,6 @@ jobs:
         run: |
           set -euo pipefail
           
-          # Automatically detect generated framework result workbook (e.g., Frameworks-Result(EFI).xlsx)
           INPUT_FILE=""
           for f in Frameworks-Result*.xlsx; do
             if [ -f "$f" ] && [ "$f" != "Frameworks-Result.xlsx" ]; then
@@ -136,7 +135,7 @@ jobs:
               --input "$INPUT_FILE" \
               --output "Frameworks-Result.xlsx"
           else
-            echo "::warning::No test output workbook detected. Running evaluator with default fallback."
+            echo "::warning::Result workbook not found, running with default fallback."
             python engine_ai_evaluator.py \
               --input "Frameworks-Result(EFI).xlsx" \
               --output "Frameworks-Result.xlsx" || true
@@ -171,13 +170,13 @@ jobs:
               try:
                   workbook = pd.read_excel(result_file, sheet_name=None, dtype=str)
                   for sheet_name, df in workbook.items():
-                      status_col = next((col for col in df.columns if str(col).strip().lower() == "status"), None)
+                      status_col = next((col for col in df.columns if str(col).strip().lower() in ["status", "pass / fail"]), None)
                       if status_col is None:
                           continue
 
                       statuses = df[status_col].fillna("").astype(str).str.strip().str.upper()
-                      passed = int((statuses == "PASS").sum())
-                      failed = int((statuses == "FAIL").sum())
+                      passed = int((statuses.str.contains("PASS")).sum())
+                      failed = int((statuses.str.contains("FAIL")).sum())
                       skipped = int(statuses.str.startswith("SKIPPED").sum())
 
                       summary["modules"][sheet_name] = {
