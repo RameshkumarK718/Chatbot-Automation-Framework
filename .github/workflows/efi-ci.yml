@@ -1,9 +1,11 @@
 name: Universal Chatbot Automation Framework
+
 on:
   push:
     branches:
       - main
       - master
+
   workflow_dispatch:
     inputs:
       app_url:
@@ -36,7 +38,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "21"
           distribution: "temurin"
@@ -80,7 +82,7 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: |
           python engine_ai_evaluator.py \
-            --input Frameworks_Output.xlsx \
+            --input "Frameworks-Result(EFI).xlsx" \
             --output Frameworks-Result.xlsx
 
       - name: Upload Test Reports & Results
@@ -90,6 +92,6 @@ jobs:
           name: chatbot-test-reports
           path: |
             target/surefire-reports/
-            Frameworks_Output.xlsx
+            Frameworks-Result(EFI).xlsx
             Frameworks-Result.xlsx
           if-no-files-found: warn
