@@ -4,7 +4,6 @@ on:
     branches:
       - main
       - master
-
   workflow_dispatch:
     inputs:
       app_url:
@@ -53,7 +52,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: "21"
           distribution: temurin
@@ -117,14 +116,29 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
           set -euo pipefail
-          if [ -f "Frameworks_Output.xlsx" ]; then
+          
+          # Automatically detect generated framework result workbook (e.g., Frameworks-Result(EFI).xlsx)
+          INPUT_FILE=""
+          for f in Frameworks-Result*.xlsx; do
+            if [ -f "$f" ] && [ "$f" != "Frameworks-Result.xlsx" ]; then
+              INPUT_FILE="$f"
+              break
+            fi
+          done
+
+          if [ -z "$INPUT_FILE" ] && [ -f "Frameworks(EFI).xlsx" ]; then
+            INPUT_FILE="Frameworks(EFI).xlsx"
+          fi
+
+          if [ -n "$INPUT_FILE" ] && [ -f "$INPUT_FILE" ]; then
+            echo "Found input workbook: $INPUT_FILE"
             python engine_ai_evaluator.py \
-              --input "Frameworks_Output.xlsx" \
+              --input "$INPUT_FILE" \
               --output "Frameworks-Result.xlsx"
           else
-            echo "::warning::Frameworks_Output.xlsx was not found."
+            echo "::warning::No test output workbook detected. Running evaluator with default fallback."
             python engine_ai_evaluator.py \
-              --input "Frameworks_Output.xlsx" \
+              --input "Frameworks-Result(EFI).xlsx" \
               --output "Frameworks-Result.xlsx" || true
           fi
 
@@ -212,8 +226,7 @@ jobs:
           path: |
             target/surefire-reports/
             target/allure-results/
-            Frameworks_Output.xlsx
-            Frameworks-Result.xlsx
+            Frameworks*.xlsx
             results.json
             index.html
             dashboard-site/
