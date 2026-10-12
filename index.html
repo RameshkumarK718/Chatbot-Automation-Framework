@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Chatbot Automation Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: #f8f9fa;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #dee2e6;
+            padding-bottom: 10px;
+        }
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .card h3 {
+            margin: 0 0 10px 0;
+            color: #6c757d;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .card p {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .pass {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .fail {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 30px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #343a40;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f1f3f5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Chatbot Automation Dashboard</h1>
+        <div class="card-grid">
+            <div class="card">
+                <h3>Total Test Cases</h3>
+                <p>1</p>
+            </div>
+            <div class="card">
+                <h3>Passed</h3>
+                <p class="pass">0</p>
+            </div>
+            <div class="card">
+                <h3>Failed</h3>
+                <p class="fail">0</p>
+            </div>
+            <div class="card">
+                <h3>Pass Rate</h3>
+                <p>0.0%</p>
+            </div>
+        </div>
+        <h2>Module Breakdown</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Module / Sheet Name</th>
+                    <th>Total Tests</th>
+                    <th>Passed</th>
+                    <th>Failed</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+                <tr>
+                    <td>Sheet1</td>
+                    <td>1</td>
+                    <td class="pass">0</td>
+                    <td class="fail">0</td>
+                </tr>
+            
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
