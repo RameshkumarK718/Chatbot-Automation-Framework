@@ -1,5 +1,5 @@
 # Maven / Java build output
-target/
+# target/
 bin/
 *.class
 
@@ -30,5 +30,5 @@ config.properties
 *.log
 
 # Generated test results (if you want to keep them local)
-Frameworks-Result*.xlsx
+# Frameworks-Result*.xlsx
 results.json
