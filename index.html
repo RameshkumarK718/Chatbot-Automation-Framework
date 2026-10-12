@@ -403,34 +403,90 @@
         let activeSelectedTestCaseId = null;
         let accuracyChartInstance = null;
 
-        // GitHub Repository Configuration for Live Fetching
-        const GH_OWNER = "RameshkumarK718";
-        const GH_REPO = "Chatbot-Automation-Framework";
-        const GH_REPORT_PATH = "target/execution-report.json";
-
-        // Enterprise Datasets (Strictly Dynamic - Populated via GitHub or File Upload)
+        // Enterprise Datasets (Loaded directly from root Excel files via SheetJS)
         let enterpriseDatasets = {};
 
         window.onload = function() {
             initChart();
-            fetchLiveGitHubReports();
+            fetchLiveExcelReports();
         };
 
-        // Live GitHub API Synchronization Function
-        async function fetchLiveGitHubReports() {
-            logConsole(`Syncing live reports from GitHub repository (${GH_OWNER}/${GH_REPO})...`);
-            document.getElementById('githubSyncStatus').innerText = "Connecting to GitHub...";
+        // Fetch and parse Excel spreadsheets directly from repository root
+        async function fetchLiveExcelReports() {
+            logConsole("Loading evaluation spreadsheets from repository root...");
+            document.getElementById('githubSyncStatus').innerText = "Loading Excel Sheets...";
             document.getElementById('githubSyncStatus').className = "text-yellow-400";
 
             try {
-                const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_REPORT_PATH}`;
-                const response = await fetch(apiUrl, {
-                    headers: { "Accept": "application/vnd.github.v3+json" }
+                // Fetch EFI Result Spreadsheet
+                const efiRes = await fetch("Frameworks-Result(EFI).xlsx");
+                if (!efiRes.ok) throw new Error("Failed to load Frameworks-Result(EFI).xlsx");
+                const efiBuffer = await efiRes.arrayBuffer();
+                const efiWorkbook = XLSX.read(new Uint8Array(efiBuffer), { type: 'array' });
+
+                let efiSheetsData = {};
+                efiWorkbook.SheetNames.forEach(sheetName => {
+                    const ws = efiWorkbook.Sheets[sheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(ws);
+                    efiSheetsData[sheetName] = jsonRows.map((row, idx) => ({
+                        id: row["Test Case ID"] || row["Q #"] || row["#"] || `EFI-${idx + 1}`,
+                        intent: row["Category"] || row["Role"] || sheetName,
+                        prompt: row["User Question"] || row["Question"] || row["Question / Input to enter"] || "",
+                        expected: row["Expected Answer"] || row["Expected result"] || row["What it tests / expected answer"] || "",
+                        actual: row["Chatbot Answer"] || row["Actual result"] || row["Actual output"] || "Pending",
+                        status: (row["Status"] || row["Pass / Fail"] || "").toUpperCase().includes("PASS") ? "PASSED" : "FAILED",
+                        latency: 350,
+                        tokens: 42,
+                        confidence: 90
+                    }));
                 });
 
-                if (!response.ok) {
-                    throw new Error(`Report not found in repository (Status: ${response.status})`);
+                // Fetch Vedas Result Spreadsheet
+                const vedasRes = await fetch("Frameworks-Result(Vedas).xlsx");
+                let vedasSheetsData = {};
+                if (vedasRes.ok) {
+                    const vedasBuffer = await vedasRes.arrayBuffer();
+                    const vedasWorkbook = XLSX.read(new Uint8Array(vedasBuffer), { type: 'array' });
+                    vedasWorkbook.SheetNames.forEach(sheetName => {
+                        const ws = vedasWorkbook.Sheets[sheetName];
+                        const jsonRows = XLSX.utils.sheet_to_json(ws);
+                        vedasSheetsData[sheetName] = jsonRows.map((row, idx) => ({
+                            id: row["Test Case ID"] || `VEDAS-${idx + 1}`,
+                            intent: row["Category"] || sheetName,
+                            prompt: row["User Question"] || row["Question"] || "",
+                            expected: row["Expected Answer"] || "",
+                            actual: row["Chatbot Answer"] || "Pending",
+                            status: (row["Status"] || "").toUpperCase().includes("PASS") ? "PASSED" : "FAILED",
+                            latency: 320,
+                            tokens: 38,
+                            confidence: 92
+                        }));
+                    });
                 }
+
+                enterpriseDatasets = {
+                    "EFI": { sheets: efiSheetsData },
+                    "Vedas": { sheets: vedasSheetsData }
+                };
+
+                document.getElementById('githubSyncStatus').innerText = "Live Excel Synced";
+                document.getElementById('githubSyncStatus').className = "text-emerald-400";
+                logConsole("Successfully loaded and parsed all Excel sheets from repository root.");
+                initDashboard();
+
+            } catch (error) {
+                console.warn("Excel loading error:", error);
+                logConsole("Notice: Could not load Excel files from root. Please ensure they are pushed to repository root.");
+                document.getElementById('githubSyncStatus').innerText = "Load Failed";
+                document.getElementById('githubSyncStatus').className = "text-rose-400";
+                
+                enterpriseDatasets = {
+                    "EFI": { sheets: {} },
+                    "Vedas": { sheets: {} }
+                };
+                initDashboard();
+            }
+        }
 
                 const fileData = await response.json();
                 const decodedJsonString = decodeURIComponent(escape(atob(fileData.content)));
