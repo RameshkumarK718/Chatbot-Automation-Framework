@@ -581,7 +581,7 @@ def process_qa_framework_excel(
                 or not chatbot_answer.strip()
                 or chatbot_answer.lower() == "nan"
             )
-            
+
             is_error_response = (
                 chatbot_answer.lower().startswith("error")
                 or chatbot_answer.lower().startswith("exception")
