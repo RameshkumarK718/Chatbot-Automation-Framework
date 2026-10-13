@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Chatbot QA Automation Dashboard </title>
+    <title>Universal Chatbot QA Automation Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -71,10 +71,10 @@
         <div class="flex items-center space-x-3">
             <div class="bg-darkBg p-1 rounded-lg border border-darkBorder flex items-center">
                 <button onclick="switchFramework('EFI')" id="btnEFI" class="px-3 py-1 text-xs font-medium rounded transition-all bg-blue-600 text-white shadow-sm">EFI Core</button>
-                <button disabled  onclick="switchFramework('Vedas')" id="btnVedas" class="px-3 py-1 text-xs font-medium rounded transition-all text-slate-400 hover:text-white">Vedas Core</button>
+                <button onclick="switchFramework('Vedas')" id="btnVedas" class="px-3 py-1 text-xs font-medium rounded transition-all text-slate-400 hover:text-white">Vedas Core</button>
             </div>
 
-            <button onclick="fetchLiveExcelReports()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg shadow-sm flex items-center space-x-2 transition-all" title="Fetch live execution Excel from GitHub repository">
+            <button onclick="fetchLiveExcelReports()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg shadow-sm flex items-center space-x-2 transition-all" title="Fetch live execution Excel from repository root">
                 <i class="fa-solid fa-cloud-arrow-down text-[11px]"></i>
                 <span>Sync GitHub Repo</span>
             </button>
@@ -411,7 +411,7 @@
             fetchLiveExcelReports();
         };
 
-      // Fetch and parse Excel spreadsheets directly from repository root dynamically
+        // Fetch and parse Excel spreadsheets directly from repository root dynamically
         async function fetchLiveExcelReports() {
             logConsole("Loading evaluation spreadsheets from repository root...");
             document.getElementById('githubSyncStatus').innerText = "Loading Excel Sheets...";
@@ -430,7 +430,7 @@
                     const jsonRows = XLSX.utils.sheet_to_json(ws);
                     efiSheetsData[sheetName] = jsonRows.map((row, idx) => ({
                         id: row["Test Case ID"] || row["Q #"] || row["#"] || `EFI-${idx + 1}`,
-                        intent: row["Category"] || row["Role"] || sheetName,
+                        intent: row["Category"] || row["Subcategory"] || sheetName,
                         prompt: row["User Question"] || row["Question"] || row["Question / Input to enter"] || "",
                         expected: row["Expected Answer"] || row["Expected result"] || row["What it tests / expected answer"] || "",
                         actual: row["Chatbot Answer"] || row["Actual result"] || row["Actual output"] || "Pending",
@@ -469,24 +469,6 @@
                     "Vedas": { sheets: vedasSheetsData }
                 };
 
-                document.getElementById('githubSyncStatus').innerText = "Live Excel Synced";
-                document.getElementById('githubSyncStatus').className = "text-emerald-400";
-                logConsole("Successfully loaded and parsed live Excel metrics from repository root.");
-                initDashboard();
-
-            } catch (error) {
-                console.warn("Excel loading error:", error);
-                logConsole("Notice: Could not load Excel files from root. Please ensure they are pushed to repository root.");
-                document.getElementById('githubSyncStatus').innerText = "Load Failed";
-                document.getElementById('githubSyncStatus').className = "text-rose-400";
-                
-                enterpriseDatasets = {
-                    "EFI": { sheets: {} },
-                    "Vedas": { sheets: {} }
-                };
-                initDashboard();
-            }
-        }
                 document.getElementById('githubSyncStatus').innerText = "Live Excel Synced";
                 document.getElementById('githubSyncStatus').className = "text-emerald-400";
                 logConsole("Successfully loaded and parsed all Excel sheets from repository root.");
@@ -625,12 +607,10 @@
             let countWithMetrics = 0;
 
             testCasesData.forEach(t => {
-                if (t.latency) {
-                    totalLatency += t.latency;
-                    totalTokens += (t.tokens || 35);
-                    totalConfidence += (t.confidence || 95);
-                    countWithMetrics++;
-                }
+                totalLatency += (t.latency || 0);
+                totalTokens += (t.tokens || 0);
+                totalConfidence += (t.confidence || 0);
+                countWithMetrics++;
             });
 
             const avgLatency = countWithMetrics > 0 ? Math.round(totalLatency / countWithMetrics) : 0;
@@ -865,9 +845,9 @@
                             expected: row.Expected || row.expected || 'Expected response',
                             actual: row.Actual || row.actual || 'Pending',
                             status: row.Status || row.status || 'PENDING',
-                            latency: row.Latency || row.latency || 300,
-                            tokens: row.Tokens || row.tokens || 35,
-                            confidence: row.Confidence || row.confidence || 95
+                            latency: Number(row.Latency || row.latency) || 300,
+                            tokens: Number(row.Tokens || row.tokens) || 35,
+                            confidence: Number(row.Confidence || row.confidence) || 95
                         }));
 
                         if (!enterpriseDatasets[currentFramework]) {
