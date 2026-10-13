@@ -452,12 +452,12 @@ def process_qa_framework_excel(
                 ]
             )
 
-           chatbot_answer = get_first_text(
+            chatbot_answer = get_first_text(
                 row,
                 [
                     "Chatbot Answer",
                     "Actual Result",
-                    "Response",       # Add your actual column name here
+                    "Response",
                     "Actual Output"
                 ]
             )
@@ -642,6 +642,7 @@ def process_qa_framework_excel(
         output_file=output_file,
         html_file="index.html"
     )
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Run AI Evaluator on Chatbot Results"
