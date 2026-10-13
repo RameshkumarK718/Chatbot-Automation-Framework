@@ -452,11 +452,13 @@ def process_qa_framework_excel(
                 ]
             )
 
-            chatbot_answer = get_first_text(
+           chatbot_answer = get_first_text(
                 row,
                 [
                     "Chatbot Answer",
-                    "Actual Result"
+                    "Actual Result",
+                    "Response",       # Add your actual column name here
+                    "Actual Output"
                 ]
             )
 
