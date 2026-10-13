@@ -2,7 +2,6 @@ import os
 import json
 import difflib
 import argparse
-import time
 import pandas as pd
 from openai import OpenAI
 
@@ -40,13 +39,95 @@ class AIEvaluator:
                 "Neither OPENAI_API_KEY nor OPENROUTER_API_KEY is set."
             )
 
-    def evaluate_advanced(
+   def evaluate_advanced(
         self,
         question,
         expected,
         actual,
         context=""
     ):
+        prompt = f"""...""" # (Keep your existing prompt text here)
+
+        models_to_try = [
+            {
+                "model": "gpt-4o-mini",
+                "client": self.openai_client,
+                "strict_json": True,
+                "desc": "Primary Engine (OpenAI gpt-4o-mini)"
+            },
+            {
+                "model": "openrouter/free",
+                "client": self.openrouter_client,
+                "strict_json": False,
+                "desc": "Fallback Engine (OpenRouter Free Router)"
+            }
+        ]
+
+        last_exception = None
+        import time
+
+        for attempt in models_to_try:
+            try:
+                if attempt["client"] is None:
+                    raise ValueError(f"API key not configured for {attempt['desc']}")
+
+                kwargs = {
+                    "model": attempt["model"],
+                    "messages": [
+                        {"role": "system", "content": "You are a QA evaluator. Return valid JSON only."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    "temperature": 0.0
+                }
+
+                if attempt["strict_json"]:
+                    kwargs["response_format"] = {"type": "json_object"}
+
+                start_time = time.time()
+                response = attempt["client"].chat.completions.create(**kwargs)
+                latency_ms = int((time.time() - start_time) * 1000)
+
+                # Extract token usage
+                usage = getattr(response, "usage", None)
+                prompt_tokens = usage.prompt_tokens if usage else 0
+                completion_tokens = usage.completion_tokens if usage else 0
+                total_tokens = usage.total_tokens if usage else (prompt_tokens + completion_tokens)
+
+                content = response.choices[0].message.content
+                if not content:
+                    raise ValueError("AI returned an empty response.")
+
+                content = content.strip()
+                if "```json" in content:
+                    content = content.split("```json", 1)[1].split("```", 1)[0].strip()
+                elif "```" in content:
+                    content = content.split("```", 1)[1].split("```", 1)[0].strip()
+
+                result = json.loads(content)
+
+                # Inject metrics into the result dictionary
+                result["prompt_tokens"] = prompt_tokens
+                result["completion_tokens"] = completion_tokens
+                result["total_tokens"] = total_tokens
+                result["latency_ms"] = latency_ms
+
+                # Basic validation checks...
+                return result
+
+            except Exception as e:
+                last_exception = e
+                print(f"Warning: {attempt['desc']} failed: {str(e)}")
+
+        return {
+            "relevance": "Irrelevant",
+            "hallucination": True,
+            "score": 0.0,
+            "reason": f"All AI evaluation models failed. Last error: {str(last_exception)}",
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "latency_ms": 0
+        }
         prompt = f"""
 You are an expert QA engineer and AI response auditor.
 
@@ -143,17 +224,9 @@ Required JSON format:
                         "type": "json_object"
                     }
 
-                start_time = time.time()
                 response = attempt["client"].chat.completions.create(
                     **kwargs
                 )
-                latency_ms = int((time.time() - start_time) * 1000)
-
-                # Extract token usage metadata safely
-                usage = getattr(response, "usage", None)
-                prompt_tokens = usage.prompt_tokens if usage else 0
-                completion_tokens = usage.completion_tokens if usage else 0
-                total_tokens = usage.total_tokens if usage else (prompt_tokens + completion_tokens)
 
                 content = response.choices[0].message.content
 
@@ -198,12 +271,6 @@ Required JSON format:
                         "AI response does not contain 'score'."
                     )
 
-                # Inject telemetry metrics into result
-                result["prompt_tokens"] = prompt_tokens
-                result["completion_tokens"] = completion_tokens
-                result["total_tokens"] = total_tokens
-                result["latency_ms"] = latency_ms
-
                 print(
                     f"AI evaluation successful using "
                     f"{attempt['desc']}"
@@ -226,11 +293,7 @@ Required JSON format:
             "reason": (
                 "All AI evaluation models failed. "
                 f"Last error: {str(last_exception)}"
-            ),
-            "prompt_tokens": 0,
-            "completion_tokens": 0,
-            "total_tokens": 0,
-            "latency_ms": 0
+            )
         }
 
 
@@ -293,7 +356,8 @@ def update_html_dashboard(
     html_file="index.html"
 ):
     """
-    Dynamically read evaluated Excel results, generate results.json, and update the HTML dashboard.
+    Dynamically read evaluated Excel results and
+    generate/update the HTML dashboard.
     """
     try:
         if not os.path.exists(output_file):
@@ -308,7 +372,6 @@ def update_html_dashboard(
         total_tests = 0
         total_passed = 0
         total_failed = 0
-        all_dfs = []
 
         summary_rows_html = ""
 
@@ -318,7 +381,6 @@ def update_html_dashboard(
                 sheet_name=sheet_name,
                 dtype=str
             )
-            all_dfs.append(df)
 
             if "Status" not in df.columns:
                 continue
@@ -361,24 +423,6 @@ def update_html_dashboard(
             if total_tests > 0
             else 0.0
         )
-
-        combined_df = pd.concat(all_dfs, ignore_index=True) if all_dfs else pd.DataFrame()
-        
-        # Calculate mean metrics for dashboard
-        mean_tokens = int(combined_df['Total Tokens'].astype(float).mean()) if 'Total Tokens' in combined_df.columns and len(combined_df) > 0 else 0
-        mean_latency = int(combined_df['Latency MS'].astype(float).mean()) if 'Latency MS' in combined_df.columns and len(combined_df) > 0 else 0
-
-        # Export results.json for dynamic frontend loading
-        dashboard_metrics = {
-            "totalTestCases": total_tests,
-            "passRate": round(pass_percentage, 1),
-            "totalPassed": total_passed,
-            "totalFailed": total_failed,
-            "meanLatency": mean_latency,
-            "meanTokens": mean_tokens
-        }
-        with open("results.json", "w", encoding="utf-8") as jf:
-            json.dump(dashboard_metrics, jf, indent=4)
 
         html_content = f"""<!DOCTYPE html>
 <html lang="en">
@@ -634,10 +678,6 @@ def process_qa_framework_excel(
                 row_dict["Pass and Failure Reason"] = (
                     "Chatbot response was blank, threw an exception, or returned an error."
                 )
-                row_dict["Prompt Tokens"] = 0
-                row_dict["Completion Tokens"] = 0
-                row_dict["Total Tokens"] = 0
-                row_dict["Latency MS"] = 0
                 updated_rows.append(row_dict)
                 print(f"Row {index + 1}: FAIL | Match: {match_pct_str} | Blank or Error response")
                 continue
@@ -716,10 +756,6 @@ def process_qa_framework_excel(
             row_dict["Hallucination"] = "Yes" if hallucinated else "No"
             row_dict["Status"] = status
             row_dict["Pass and Failure Reason"] = reason
-            row_dict["Prompt Tokens"] = result.get("prompt_tokens", 0)
-            row_dict["Completion Tokens"] = result.get("completion_tokens", 0)
-            row_dict["Total Tokens"] = result.get("total_tokens", 0)
-            row_dict["Latency MS"] = result.get("latency_ms", 0)
 
             updated_rows.append(row_dict)
 
@@ -743,11 +779,7 @@ def process_qa_framework_excel(
             "Relevance",
             "Hallucination",
             "Status",
-            "Pass and Failure Reason",
-            "Prompt Tokens",
-            "Completion Tokens",
-            "Total Tokens",
-            "Latency MS"
+            "Pass and Failure Reason"
         ]
 
         result_df = pd.DataFrame(updated_rows)
