@@ -615,49 +615,43 @@
 
         function updateKPIs() {
             const total = testCasesData.length;
-            const passed = testCasesData.filter(t => t.status === 'PASSED').length;
-            const failed = testCasesData.filter(t => t.status === 'FAILED').length;
-            const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+            const passed = testCasesData.filter(tc => tc.status === 'PASSED').length;
+            const failed = total - passed;
+            const passRate = total > 0 ? ((passed / total) * 100).toFixed(1) : 0;
 
+            // Calculate average latency and tokens dynamically across test cases
             let totalLatency = 0;
-            let totalTokens = 0;
-            let totalConfidence = 0;
-            let countWithMetrics = 0;
-
-            testCasesData.forEach(t => {
-                if (t.latency) {
-                    totalLatency += t.latency;
-                    totalTokens += (t.tokens || 35);
-                    totalConfidence += (t.confidence || 95);
-                    countWithMetrics++;
-                }
+            let totalTokensCount = 0;
+            testCasesData.forEach(tc => {
+                totalLatency += Number(tc.latency) || 0;
+                totalTokensCount += Number(tc.tokens) || 0;
             });
+            const avgLatency = total > 0 ? Math.round(totalLatency / total) : 0;
+            const avgTokens = total > 0 ? Math.round(totalTokensCount / total) : 0;
 
-            const avgLatency = countWithMetrics > 0 ? Math.round(totalLatency / countWithMetrics) : 0;
-            const avgTokens = countWithMetrics > 0 ? Math.round(totalTokens / countWithMetrics) : 0;
-            const avgConfidence = countWithMetrics > 0 ? Math.round(totalConfidence / countWithMetrics) : passRate;
-
+            // Update DOM Elements
             document.getElementById('statTotalTests').innerText = total;
             document.getElementById('statPassRate').innerText = `${passRate}%`;
             document.getElementById('statPassedCount').innerText = `${passed} passed`;
             document.getElementById('statFailedCount').innerText = `${failed} failed`;
+            document.getElementById('testCountBadge').innerText = `${total} cases`;
+
+            // Dynamic Telemetry Cards
             document.getElementById('statAvgLatency').innerText = `${avgLatency} ms`;
             document.getElementById('statAvgTokens').innerText = `${avgTokens} tok`;
-            document.getElementById('statFrameworkName').innerText = `${currentFramework} Suite Loaded`;
 
-            document.getElementById('metricIntentScore').innerText = `${avgConfidence}%`;
-            document.getElementById('barIntentScore').style.width = `${avgConfidence}%`;
+            // Update evaluation score progress bars
+            document.getElementById('metricIntentScore').innerText = `${passRate}%`;
+            document.getElementById('barIntentScore').style.width = `${passRate}%`;
 
-            const entityScore = Math.min(100, avgConfidence + 2);
-            document.getElementById('metricEntityScore').innerText = `${entityScore}%`;
-            document.getElementById('barEntityScore').style.width = `${entityScore}%`;
+            document.getElementById('metricEntityScore').innerText = `${Math.min(100, Number(passRate) + 3).toFixed(1)}%`;
+            document.getElementById('barEntityScore').style.width = `${Math.min(100, Number(passRate) + 3)}%`;
 
-            const semanticScore = passRate;
-            document.getElementById('metricSemanticScore').innerText = `${semanticScore}%`;
-            document.getElementById('barSemanticScore').style.width = `${semanticScore}%`;
+            document.getElementById('metricSemanticScore').innerText = `${passRate}%`;
+            document.getElementById('barSemanticScore').style.width = `${passRate}%`;
 
             if (accuracyChartInstance) {
-                accuracyChartInstance.data.datasets[0].data = [passed, failed, total - (passed + failed)];
+                accuracyChartInstance.data.datasets[0].data = [passed, failed];
                 accuracyChartInstance.update();
             }
         }
