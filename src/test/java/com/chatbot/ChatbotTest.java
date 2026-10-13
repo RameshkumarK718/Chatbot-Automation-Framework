@@ -302,9 +302,17 @@ public class ChatbotTest {
             }
 
             // STEP 2: Find and fill Email / Username field using multi-fallback XPath
-            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//input[@id='vaa-email' or @id='email' or @id='username' or @type='email' or contains(@name,'email') or contains(@name,'user') or contains(@placeholder,'email')]")
-            ));
+            WebElement memberInput = wait.until(
+            ExpectedConditions.elementToBeClickable(
+            By.xpath("//input[@id='vaa-email' or " +
+                 "@id='email' or " +
+                 "@id='username' or " +
+                 "translate(@type,'EMAIL','email')='email' or " +
+                 "contains(translate(@name,'EMAILUSER','emailuser'),'email') or " +
+                 "contains(translate(@name,'EMAILUSER','emailuser'),'user') or " +
+                 "contains(translate(@placeholder,'EMAIL','email'),'email')]")
+    )
+);
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", memberInput);
             memberInput.clear();
             memberInput.sendKeys(memberId);
