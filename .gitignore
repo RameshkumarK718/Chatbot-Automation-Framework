@@ -30,6 +30,6 @@ config.properties
 *.log
 
 # Generated test results (if you want to keep them local)
-# Frameworks-Result(EFI).xlsx
+# Frameworks(EFI).xlsx
 # Frameworks-Result(Vedas).xlsx
 results.json
