@@ -412,19 +412,15 @@
         };
 
         // Fetch and parse Excel spreadsheets directly from repository root dynamically
-      async function fetchLiveExcelReports() {
-            logConsole("Fetching live evaluation spreadsheets dynamically from GitHub repository...");
-            document.getElementById('githubSyncStatus').innerText = "Syncing with GitHub...";
+        async function fetchLiveExcelReports() {
+            logConsole("Loading evaluation spreadsheets from repository root...");
+            document.getElementById('githubSyncStatus').innerText = "Loading Excel Sheets...";
             document.getElementById('githubSyncStatus').className = "text-yellow-400";
 
-            const timestamp = new Date().getTime();
-            const efiUrl = `https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx?t=${timestamp}`;
-            const vedasUrl = `https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(Vedas).xlsx?t=${timestamp}`;
-
             try {
-                // Fetch EFI Result Spreadsheet dynamically
-                const efiRes = await fetch(efiUrl);
-                if (!efiRes.ok) throw new Error("Failed to fetch Frameworks-Result(EFI).xlsx from GitHub");
+                // Fetch EFI Result Spreadsheet
+                const efiRes = await fetch("Frameworks-Result(EFI).xlsx");
+                if (!efiRes.ok) throw new Error("Failed to load Frameworks-Result(EFI).xlsx");
                 const efiBuffer = await efiRes.arrayBuffer();
                 const efiWorkbook = XLSX.read(new Uint8Array(efiBuffer), { type: 'array' });
 
@@ -445,31 +441,27 @@
                     }));
                 });
 
-                // Fetch Vedas Result Spreadsheet dynamically
+                // Fetch Vedas Result Spreadsheet
+                const vedasRes = await fetch("Frameworks-Result(Vedas).xlsx");
                 let vedasSheetsData = {};
-                try {
-                    const vedasRes = await fetch(vedasUrl);
-                    if (vedasRes.ok) {
-                        const vedasBuffer = await vedasRes.arrayBuffer();
-                        const vedasWorkbook = XLSX.read(new Uint8Array(vedasBuffer), { type: 'array' });
-                        vedasWorkbook.SheetNames.forEach(sheetName => {
-                            const ws = vedasWorkbook.Sheets[sheetName];
-                            const jsonRows = XLSX.utils.sheet_to_json(ws);
-                            vedasSheetsData[sheetName] = jsonRows.map((row, idx) => ({
-                                id: row["Test Case ID"] || `VEDAS-${idx + 1}`,
-                                intent: row["Category"] || sheetName,
-                                prompt: row["User Question"] || row["Question"] || "",
-                                expected: row["Expected Answer"] || "",
-                                actual: row["Chatbot Answer"] || "Pending",
-                                status: (row["Status"] || "").toUpperCase().includes("PASS") ? "PASSED" : "FAILED",
-                                latency: Number(row["Latency MS"] || row["Latency"] || row["Duration"] || 320),
-                                tokens: Number(row["Total Tokens"] || row["Tokens"] || row["Prompt & Completion Tokens"] || 58),
-                                confidence: Math.round((Number(row["Semantic Score"]) || 0) * 100)
-                            }));
-                        });
-                    }
-                } catch (e) {
-                    console.warn("Vedas optional file not found, skipping.");
+                if (vedasRes.ok) {
+                    const vedasBuffer = await vedasRes.arrayBuffer();
+                    const vedasWorkbook = XLSX.read(new Uint8Array(vedasBuffer), { type: 'array' });
+                    vedasWorkbook.SheetNames.forEach(sheetName => {
+                        const ws = vedasWorkbook.Sheets[sheetName];
+                        const jsonRows = XLSX.utils.sheet_to_json(ws);
+                        vedasSheetsData[sheetName] = jsonRows.map((row, idx) => ({
+                            id: row["Test Case ID"] || `VEDAS-${idx + 1}`,
+                            intent: row["Category"] || sheetName,
+                            prompt: row["User Question"] || row["Question"] || "",
+                            expected: row["Expected Answer"] || "",
+                            actual: row["Chatbot Answer"] || "Pending",
+                            status: (row["Status"] || "").toUpperCase().includes("PASS") ? "PASSED" : "FAILED",
+                          latency: Number(row["Latency MS"] || row["Latency"] || row["Duration"] || 320),
+                          tokens: Number(row["Total Tokens"] || row["Tokens"] || row["Prompt & Completion Tokens"] || 58),
+                            confidence: Math.round((Number(row["Semantic Score"]) || 0) * 100)
+                        }));
+                    });
                 }
 
                 enterpriseDatasets = {
@@ -479,16 +471,14 @@
 
                 document.getElementById('githubSyncStatus').innerText = "Live Excel Synced";
                 document.getElementById('githubSyncStatus').className = "text-emerald-400";
-                logConsole("Successfully synchronized and parsed live Excel metrics directly from GitHub.");
+                logConsole("Successfully loaded and parsed all Excel sheets from repository root.");
                 initDashboard();
 
             } catch (error) {
-                console.error("GitHub sync error:", error);
-                logConsole(`Sync Failed: ${error.message}`);
-                document.getElementById('githubSyncStatus').innerText = "Sync Failed";
+                console.warn("Excel loading error:", error);
+                logConsole("Notice: Could not load Excel files from root. Please ensure they are pushed to repository root.");
+                document.getElementById('githubSyncStatus').innerText = "Load Failed";
                 document.getElementById('githubSyncStatus').className = "text-rose-400";
-            }
-        }
                 
                 enterpriseDatasets = {
                     "EFI": { sheets: {} },
