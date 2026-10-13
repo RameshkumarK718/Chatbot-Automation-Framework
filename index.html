@@ -412,7 +412,7 @@
         };
 
         // Fetch and parse Excel spreadsheets directly from repository root
-        async function fetchLiveExcelReports() {
+      async function fetchLiveExcelReports() {
             logConsole("Loading evaluation spreadsheets from repository root...");
             document.getElementById('githubSyncStatus').innerText = "Loading Excel Sheets...";
             document.getElementById('githubSyncStatus').className = "text-yellow-400";
@@ -435,9 +435,9 @@
                         expected: row["Expected Answer"] || row["Expected result"] || row["What it tests / expected answer"] || "",
                         actual: row["Chatbot Answer"] || row["Actual result"] || row["Actual output"] || "Pending",
                         status: (row["Status"] || row["Pass / Fail"] || "").toUpperCase().includes("PASS") ? "PASSED" : "FAILED",
-                        latency: 350,
-                        tokens: 62,
-                        confidence: 90
+                        latency: Number(row["Latency MS"]) || 0,
+                        tokens: Number(row["Total Tokens"]) || 0,
+                        confidence: Math.round((Number(row["Semantic Score"]) || 0) * 100)
                     }));
                 });
 
@@ -457,9 +457,9 @@
                             expected: row["Expected Answer"] || "",
                             actual: row["Chatbot Answer"] || "Pending",
                             status: (row["Status"] || "").toUpperCase().includes("PASS") ? "PASSED" : "FAILED",
-                            latency: 320,
-                            tokens: 66,
-                            confidence: 92
+                            latency: Number(row["Latency MS"]) || 0,
+                            tokens: Number(row["Total Tokens"]) || 0,
+                            confidence: Math.round((Number(row["Semantic Score"]) || 0) * 100)
                         }));
                     });
                 }
@@ -469,6 +469,24 @@
                     "Vedas": { sheets: vedasSheetsData }
                 };
 
+                document.getElementById('githubSyncStatus').innerText = "Live Excel Synced";
+                document.getElementById('githubSyncStatus').className = "text-emerald-400";
+                logConsole("Successfully loaded and parsed all Excel sheets from repository root.");
+                initDashboard();
+
+            } catch (error) {
+                console.warn("Excel loading error:", error);
+                logConsole("Notice: Could not load Excel files from root. Please ensure they are pushed to repository root.");
+                document.getElementById('githubSyncStatus').innerText = "Load Failed";
+                document.getElementById('githubSyncStatus').className = "text-rose-400";
+                
+                enterpriseDatasets = {
+                    "EFI": { sheets: {} },
+                    "Vedas": { sheets: {} }
+                };
+                initDashboard();
+            }
+        }
                 document.getElementById('githubSyncStatus').innerText = "Live Excel Synced";
                 document.getElementById('githubSyncStatus').className = "text-emerald-400";
                 logConsole("Successfully loaded and parsed all Excel sheets from repository root.");
