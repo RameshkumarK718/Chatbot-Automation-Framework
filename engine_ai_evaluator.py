@@ -2,6 +2,7 @@ import os
 import json
 import difflib
 import argparse
+import time
 import pandas as pd
 from openai import OpenAI
 
@@ -142,9 +143,17 @@ Required JSON format:
                         "type": "json_object"
                     }
 
+                start_time = time.time()
                 response = attempt["client"].chat.completions.create(
                     **kwargs
                 )
+                latency_ms = int((time.time() - start_time) * 1000)
+
+                # Extract token usage metadata safely
+                usage = getattr(response, "usage", None)
+                prompt_tokens = usage.prompt_tokens if usage else 0
+                completion_tokens = usage.completion_tokens if usage else 0
+                total_tokens = usage.total_tokens if usage else (prompt_tokens + completion_tokens)
 
                 content = response.choices[0].message.content
 
@@ -189,6 +198,12 @@ Required JSON format:
                         "AI response does not contain 'score'."
                     )
 
+                # Inject telemetry metrics into result
+                result["prompt_tokens"] = prompt_tokens
+                result["completion_tokens"] = completion_tokens
+                result["total_tokens"] = total_tokens
+                result["latency_ms"] = latency_ms
+
                 print(
                     f"AI evaluation successful using "
                     f"{attempt['desc']}"
@@ -211,7 +226,11 @@ Required JSON format:
             "reason": (
                 "All AI evaluation models failed. "
                 f"Last error: {str(last_exception)}"
-            )
+            ),
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "latency_ms": 0
         }
 
 
@@ -342,129 +361,10 @@ def update_html_dashboard(
             else 0.0
         )
 
-        html_content = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Chatbot Automation Dashboard</title>
-    <style>
-        body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 40px;
-            background: #f8f9fa;
-            color: #333;
-        }}
-        .container {{
-            max-width: 1000px;
-            margin: auto;
-        }}
-        h1 {{
-            color: #2c3e50;
-            border-bottom: 2px solid #dee2e6;
-            padding-bottom: 10px;
-        }}
-        .card-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }}
-        .card {{
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            text-align: center;
-        }}
-        .card h3 {{
-            margin: 0 0 10px 0;
-            color: #6c757d;
-            font-size: 14px;
-            text-transform: uppercase;
-        }}
-        .card p {{
-            margin: 0;
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-        }}
-        .pass {{
-            color: #28a745;
-            font-weight: bold;
-        }}
-        .fail {{
-            color: #dc3545;
-            font-weight: bold;
-        }}
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            margin-top: 30px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }}
-        th, td {{
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        th {{
-            background-color: #343a40;
-            color: white;
-        }}
-        tr:hover {{
-            background-color: #f1f3f5;
-        }}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Chatbot Automation Dashboard</h1>
-        <div class="card-grid">
-            <div class="card">
-                <h3>Total Test Cases</h3>
-                <p>{total_tests}</p>
-            </div>
-            <div class="card">
-                <h3>Passed</h3>
-                <p class="pass">{total_passed}</p>
-            </div>
-            <div class="card">
-                <h3>Failed</h3>
-                <p class="fail">{total_failed}</p>
-            </div>
-            <div class="card">
-                <h3>Pass Rate</h3>
-                <p>{pass_percentage:.1f}%</p>
-            </div>
-        </div>
-        <h2>Module Breakdown</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Module / Sheet Name</th>
-                    <th>Total Tests</th>
-                    <th>Passed</th>
-                    <th>Failed</th>
-                </tr>
-            </thead>
-            <tbody>
-                {summary_rows_html}
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
-"""
+        with open(html_file, "r", encoding="utf-8", errors="ignore") as f:
+            html_content = f.read()
 
-        with open(html_file, "w", encoding="utf-8") as file:
-            file.write(html_content)
-
-        print(f"Dashboard successfully updated: {html_file}")
+        print(f"Dashboard status updated: {html_file}")
 
     except Exception as e:
         print(f"Failed to update HTML dashboard: {str(e)}")
@@ -479,8 +379,8 @@ def create_skipped_report(output_file, status):
 
 
 def process_qa_framework_excel(
-    input_file="Frameworks_Output.xlsx",
-    output_file="Frameworks-Result.xlsx"
+    input_file="Frameworks(EFI).xlsx",
+    output_file="Frameworks-Result(EFI).xlsx"
 ):
     """
     Process Java-generated chatbot results,
@@ -568,20 +468,18 @@ def process_qa_framework_excel(
                 ]
             )
 
-            # 1. Keep difflib strictly as a diagnostic metric
             match_pct = calculate_match_percentage(
                 expected,
                 chatbot_answer
             )
             match_pct_str = f"{match_pct:.2f}%"
 
-            # 2. Check if the answer is blank or an explicit runtime exception/error
             is_blank = (
                 not chatbot_answer
                 or not chatbot_answer.strip()
                 or chatbot_answer.lower() == "nan"
             )
-
+            
             is_error_response = (
                 chatbot_answer.lower().startswith("error")
                 or chatbot_answer.lower().startswith("exception")
@@ -596,11 +494,14 @@ def process_qa_framework_excel(
                 row_dict["Pass and Failure Reason"] = (
                     "Chatbot response was blank, threw an exception, or returned an error."
                 )
+                row_dict["Prompt Tokens"] = 0
+                row_dict["Completion Tokens"] = 0
+                row_dict["Total Tokens"] = 0
+                row_dict["Latency MS"] = 0
                 updated_rows.append(row_dict)
                 print(f"Row {index + 1}: FAIL | Match: {match_pct_str} | Blank or Error response")
                 continue
 
-            # 3. Perform AI Evaluation via LLM
             result = evaluator.evaluate_advanced(
                 question=question,
                 expected=expected,
@@ -640,7 +541,6 @@ def process_qa_framework_excel(
                 )
             )
 
-            # 4. Apply Manager's Rule for PASS / FAIL
             SEMANTIC_THRESHOLD = 0.75
 
             is_relevant = (relevance.lower() == "relevant")
@@ -674,6 +574,10 @@ def process_qa_framework_excel(
             row_dict["Hallucination"] = "Yes" if hallucinated else "No"
             row_dict["Status"] = status
             row_dict["Pass and Failure Reason"] = reason
+            row_dict["Prompt Tokens"] = result.get("prompt_tokens", 0)
+            row_dict["Completion Tokens"] = result.get("completion_tokens", 0)
+            row_dict["Total Tokens"] = result.get("total_tokens", 0)
+            row_dict["Latency MS"] = result.get("latency_ms", 0)
 
             updated_rows.append(row_dict)
 
@@ -697,7 +601,11 @@ def process_qa_framework_excel(
             "Relevance",
             "Hallucination",
             "Status",
-            "Pass and Failure Reason"
+            "Pass and Failure Reason",
+            "Prompt Tokens",
+            "Completion Tokens",
+            "Total Tokens",
+            "Latency MS"
         ]
 
         result_df = pd.DataFrame(updated_rows)
@@ -732,8 +640,6 @@ def process_qa_framework_excel(
         output_file=output_file,
         html_file="index.html"
     )
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Run AI Evaluator on Chatbot Results"
@@ -741,7 +647,7 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--input",
-        default="Frameworks(EFI).xlsx.xlsx",
+        default="Frameworks(EFI).xlsx",
         help="Input Excel path generated by Java runner"
     )
 
