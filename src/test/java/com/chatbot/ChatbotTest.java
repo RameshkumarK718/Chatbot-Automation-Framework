@@ -322,12 +322,13 @@ public class ChatbotTest {
             clickElement(loginButton);
             System.out.println("--> Login submitted.");
 
+           // STEP 5: Click the actual chat navigation element
             By conversationalAILocator = By.xpath(
-                "//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')] | //*[contains(normalize-space(), 'Conversational AI')]"
+                "//a[contains(text(),'Chat')] | //button[contains(text(),'Chat')] | //span[contains(text(),'AI Assistant')]"
             );
             WebElement conversationalAI = wait.until(ExpectedConditions.elementToBeClickable(conversationalAILocator));
             clickElement(conversationalAI);
-            System.out.println("--> Conversational AI clicked.");
+            System.out.println("--> Chat navigation clicked.");
 
             waitForChatInput();
             System.out.println("--> Chatbot input is ready.");
