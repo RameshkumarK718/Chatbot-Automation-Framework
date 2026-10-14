@@ -85,28 +85,25 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          INPUT_FILE=""
           if [ -f "Frameworks-Result(EFI).xlsx" ]; then
-            INPUT_FILE="Frameworks-Result(EFI).xlsx"
-          elif [ -f "Frameworks(EFI).xlsx" ]; then
-            INPUT_FILE="Frameworks(EFI).xlsx"
+            python engine_ai_evaluator.py \
+              --input "Frameworks-Result(EFI).xlsx" \
+              --output "Frameworks-Result.xlsx"
           else
-            echo "::error::Neither Frameworks-Result(EFI).xlsx nor Frameworks(EFI).xlsx was found."
+            echo "::error::Frameworks-Result(EFI).xlsx was not found."
             exit 1
           fi
-
-          echo "Running AI Evaluator on input: $INPUT_FILE"
           python engine_ai_evaluator.py \
-            --input "$INPUT_FILE" \
-            --output "Frameworks-Result(EFI).xlsx"
-
+            --input "Frameworks-Result(EFI)_Output.xlsx" \
+            --output "Frameworks-Result.xlsx" 
       - name: Upload Test Reports & Results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: chatbot-test-reports
           path: |
             target/surefire-reports/
             Frameworks-Result(EFI).xlsx
+            Frameworks-Result.xlsx
             index.html
           if-no-files-found: warn
