@@ -66,7 +66,9 @@ public class ChatbotTest {
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
     private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx");
-    private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI)_Output.xlsx";
+    
+    // FIXED: Direct write to main result excel file so Python AI Evaluator can read it
+    private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI).xlsx";
     private static final String OUTPUT_JSON_FILE = "target/test_results.json";
     
     private WebDriver driver;
@@ -286,39 +288,27 @@ public class ChatbotTest {
             System.out.println("--> Opening application URL: " + APP_URL);
             driver.get(APP_URL);
 
-            // Wait for page ready state
             wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
 
-            // STEP 1: Handle potential landing page sign-in buttons or modals
             try {
                 WebElement signinBtn = driver.findElement(By.xpath("//button[contains(translate(text(),'SIGN','sign'),'sign') or contains(translate(text(),'LOGIN','login'),'login') or contains(@class,'login')]"));
                 if (signinBtn.isDisplayed()) {
                     System.out.println("--> Clicking landing page sign-in button...");
                     clickElement(signinBtn);
-                    Thread.sleep(1500); // Brief wait for form expansion
+                    Thread.sleep(1500);
                 }
-            } catch (Exception ignored) {
-                // No extra button needed, form is assumed to be visible
-            }
+            } catch (Exception ignored) {}
 
-            // STEP 2: Find and fill Email / Username field using multi-fallback XPath
             WebElement memberInput = wait.until(
-            ExpectedConditions.elementToBeClickable(
-            By.xpath("//input[@id='vaa-email' or " +
-                 "@id='email' or " +
-                 "@id='username' or " +
-                 "translate(@type,'EMAIL','email')='email' or " +
-                 "contains(translate(@name,'EMAILUSER','emailuser'),'email') or " +
-                 "contains(translate(@name,'EMAILUSER','emailuser'),'user') or " +
-                 "contains(translate(@placeholder,'EMAIL','email'),'email')]")
-    )
-);
+                ExpectedConditions.elementToBeClickable(
+                    By.xpath("//input[@id='vaa-email' or @id='email' or @id='username' or translate(@type,'EMAIL','email')='email' or contains(translate(@name,'EMAILUSER','emailuser'),'email') or contains(translate(@name,'EMAILUSER','emailuser'),'user') or contains(translate(@placeholder,'EMAIL','email'),'email')]")
+                )
+            );
             ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", memberInput);
             memberInput.clear();
             memberInput.sendKeys(memberId);
             System.out.println("--> Email entered.");
 
-            // STEP 3: Find and fill Password field
             WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//input[@id='vaa-pw' or @id='password' or @type='password' or contains(@name,'password') or contains(@placeholder,'password')]")
             ));
@@ -326,14 +316,12 @@ public class ChatbotTest {
             passwordInput.sendKeys(password);
             System.out.println("--> Password entered.");
 
-            // STEP 4: Submit Login
             WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(
                 By.xpath("//button[@id='vaa-submit' or @type='submit' or contains(translate(text(),'LOGIN','login'),'login') or contains(translate(text(),'SIGN','sign'),'sign')]")
             ));
             clickElement(loginButton);
             System.out.println("--> Login submitted.");
 
-            // STEP 5: Wait for Conversational AI navigation link / chat interface
             By conversationalAILocator = By.xpath(
                 "//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')] | //*[contains(normalize-space(), 'Conversational AI')]"
             );
@@ -348,7 +336,8 @@ public class ChatbotTest {
             System.out.println("--> CRITICAL FAILURE URL: " + driver.getCurrentUrl());
             System.out.println("--> CRITICAL FAILURE TITLE: " + driver.getTitle());
             throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
-        }}
+        }
+    }
 
     private By getChatInputLocator() {
         return By.xpath("//input | //textarea | //*[@contenteditable='true']");
@@ -428,7 +417,6 @@ public class ChatbotTest {
     @DataProvider(name = "excelTestData")
     public Object[][] provideExcelData() {
         List<TestRowData> dataList = fetchExcelDataFromGitHub(FRAMEWORK_EXCEL_URL);
-        // Make sure there is NO subList or limit here!
         Object[][] data = new Object[dataList.size()][1];
         for (int i = 0; i < dataList.size(); i++) {
             data[i][0] = dataList.get(i);
@@ -490,7 +478,7 @@ public class ChatbotTest {
                 for (Cell cell : headerRow) {
                     String header = getCellStringValue(cell).toLowerCase();
                     int colIdx = cell.getColumnIndex();
-                    if (header.contains("actual result")) {
+                    if (header.contains("actual result") || header.contains("chatbot answer")) {
                         Cell c = row.getCell(colIdx);
                         if (c == null) c = row.createCell(colIdx);
                         c.setCellValue(result.actualResult);
@@ -502,7 +490,7 @@ public class ChatbotTest {
                 }
             }
             workbook.write(outputStream);
-            System.out.println("--> Execution results written to " + OUTPUT_EXCEL_FILE);
+            System.out.println("--> Execution results successfully written to " + OUTPUT_EXCEL_FILE);
         } catch (Exception e) {
             System.err.println("Failed to update Excel: " + e.getMessage());
         }
