@@ -34,22 +34,27 @@ public class ChatbotTest {
         public int rowIndex;
         public String testCaseId;
         public String role;
+        public String questionType;
         public String question;
         public String expectedResult;
+        public String context;
         public String runnable;
         public String actualResult;
         public String reason;
         public String status;
 
         public TestRowData(String sheetName, int rowIndex, String testCaseId, String role,
-                            String question, String expectedResult, String runnable,
-                            String actualResult, String reason, String status) {
+                            String questionType, String question, String expectedResult, 
+                            String context, String runnable, String actualResult, 
+                            String reason, String status) {
             this.sheetName = sheetName;
             this.rowIndex = rowIndex;
             this.testCaseId = testCaseId;
             this.role = role;
+            this.questionType = questionType;
             this.question = question;
             this.expectedResult = expectedResult;
+            this.context = context;
             this.runnable = runnable;
             this.actualResult = actualResult;
             this.reason = reason;
@@ -59,22 +64,22 @@ public class ChatbotTest {
 
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(60);
+
+    // Dynamic framework property support (defaults to EFI, easily switchable via -Dframework=Vedas)
+    private static final String ACTIVE_FRAMEWORK = System.getProperty("active.framework", "EFI");
     
     private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url",
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
-    private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url",
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
-    private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
-            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx");
     
-    private static final String FRAMEWORK_EXCEL_FILE = "Frameworks(EFI).xlsx";
-    private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI).xlsx";
-    private static final String OUTPUT_JSON_FILE = "target/test_results.json";
+    private static final String FRAMEWORK_EXCEL_FILE = "Frameworks(" + ACTIVE_FRAMEWORK + ").xlsx";
+    private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(" + ACTIVE_FRAMEWORK + ").xlsx";
+    private static final String OUTPUT_JSON_FILE = "target/test_results_" + ACTIVE_FRAMEWORK.toLowerCase() + ".json";
     
     private WebDriver driver;
     private WebDriverWait wait;
     private final List<TestRowData> executedResults = new ArrayList<>();
+    private String lastConversationContext = "";
 
     private InputStream openUrlStream(String fileUrl) throws Exception {
         @SuppressWarnings("deprecation")
@@ -97,12 +102,13 @@ public class ChatbotTest {
         String username = "";
         String password = "";
         
-        File localFile = new File("credentials(2).xlsx");
+        String credFilename = ACTIVE_FRAMEWORK.equalsIgnoreCase("Vedas") ? "credentials(1).xlsx" : "credentials(2).xlsx";
+        File localFile = new File(credFilename);
         InputStream is = null;
         try {
             if (localFile.exists()) {
                 is = new java.io.FileInputStream(localFile);
-                System.out.println("--> Loading credentials from local file.");
+                System.out.println("--> Loading credentials from local file: " + credFilename);
             } else {
                 is = openUrlStream(CREDENTIALS_EXCEL_URL);
                 System.out.println("--> Loading credentials from URL.");
@@ -123,7 +129,7 @@ public class ChatbotTest {
                     username = getCellStringValue(row.getCell(0));
                 }
                 password = username;
-                System.out.println("--> Credentials loaded successfully: " + username);
+                System.out.println("--> Credentials loaded successfully for user: " + username);
             }
         } catch (Exception e) {
             throw new RuntimeException("Error reading credentials Excel: " + e.getMessage(), e);
@@ -149,7 +155,7 @@ public class ChatbotTest {
         
         try (InputStream is = localFile.exists() 
                 ? new java.io.FileInputStream(localFile) 
-                : openUrlStream(FRAMEWORK_EXCEL_URL);
+                : openUrlStream("https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/" + FRAMEWORK_EXCEL_FILE);
              Workbook workbook = new XSSFWorkbook(is)) {
 
             if (workbook.getNumberOfSheets() == 0) {
@@ -159,7 +165,7 @@ public class ChatbotTest {
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
-                System.out.println("--> Reading sheet: " + sheetName);
+                System.out.println("--> Reading sheet [" + ACTIVE_FRAMEWORK + "]: " + sheetName);
 
                 Row headerRow = sheet.getRow(0);
                 if (headerRow == null) continue;
@@ -177,21 +183,29 @@ public class ChatbotTest {
                     if (row == null) continue;
 
                     String role = getCellByExactOrPartialHeader(row, colMap, "role", "set #", "#");
+                    String questionType = getCellByExactOrPartialHeader(row, colMap, "question type", "type", "category");
                     String question = getCellByExactOrPartialHeader(row, colMap, "question / input to enter", "question");
                     String expectedResult = getCellByExactOrPartialHeader(row, colMap, "expected result", "what it tests / expected answer");
+                    String context = getCellByExactOrPartialHeader(row, colMap, "context", "conversation context");
+                    String runnable = getCellByExactOrPartialHeader(row, colMap, "runnable for this role today?", "runnable", "run");
 
                     if (question.isBlank()) {
                         continue;
                     }
 
-                    String testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
+                    // Filter out non-runnable tests if specified in Excel
+                    if (!runnable.isBlank() && (runnable.equalsIgnoreCase("no") || runnable.equalsIgnoreCase("n"))) {
+                        continue;
+                    }
+
+                    String testCaseId = String.format("%s-%s-TC%03d", ACTIVE_FRAMEWORK, sheetName.replaceAll("\\s+", ""), r);
                     dataList.add(new TestRowData(
-                            sheetName, r, testCaseId, role, question, expectedResult,
-                            "", "", "", ""
+                            sheetName, r, testCaseId, role, questionType, question, 
+                            expectedResult, context, runnable, "", "", ""
                     ));
                 }
             }
-            System.out.println("--> Successfully parsed " + dataList.size() + " test cases across all sheets.");
+            System.out.println("--> Successfully parsed " + dataList.size() + " runnable test cases for: " + ACTIVE_FRAMEWORK);
         } catch (Exception e) {
             throw new RuntimeException("Error fetching Framework Excel: " + e.getMessage(), e);
         }
@@ -303,7 +317,6 @@ public class ChatbotTest {
             clickElement(loginButton);
             System.out.println("--> Login submitted successfully.");
 
-            // Proceed directly to chat input post-login
             waitForChatInput();
             System.out.println("--> Chatbot input is ready.");
 
@@ -361,16 +374,41 @@ public class ChatbotTest {
         });
     }
 
-    private String sendQuestion(String question) {
+    private String sendQuestionToChatbot(String question, String questionType, String context) {
+        // Handle conversational context / question type transitions if applicable
+        if (questionType != null && (questionType.equalsIgnoreCase("Initial") || questionType.equalsIgnoreCase("Direct"))) {
+            lastConversationContext = ""; // Reset context for initial/direct queries
+        }
+
         String previousResponse = getLastChatMessageText();
         WebElement chatInput = waitForChatInput();
         try {
             chatInput.click();
             chatInput.clear();
         } catch (Exception ignored) {}
+
         chatInput.sendKeys(question);
         chatInput.sendKeys(Keys.ENTER);
-        return waitForChatbotResponse(previousResponse);
+        
+        String response = waitForChatbotResponse(previousResponse);
+        if (response != null && !response.isBlank()) {
+            lastConversationContext = response; // Store for follow-ups
+        }
+        return response;
+    }
+
+    private void selectRole(String targetRole) {
+        if (targetRole == null || targetRole.isBlank()) return;
+        try {
+            By roleDropdownLocator = By.xpath("//select[contains(@id,'role') or contains(@name,'role')] | //div[contains(@class,'role-select')]");
+            List<WebElement> dropdowns = driver.findElements(roleDropdownLocator);
+            if (!dropdowns.isEmpty()) {
+                WebElement dropdown = dropdowns.get(0);
+                dropdown.click();
+                WebElement option = driver.findElement(By.xpath("//option[text()='" + targetRole + "'] | //li[contains(text(),'" + targetRole + "')]"));
+                option.click();
+            }
+        } catch (Exception ignored) {}
     }
 
     @DataProvider(name = "excelTestData")
@@ -391,8 +429,10 @@ public class ChatbotTest {
             } else {
                 waitForChatInput();
             }
+            selectRole(rowData.role);
 
-            String chatbotResponse = sendQuestion(rowData.question);
+            // Step: Send Question + Answer + Context to Chatbot using Selenium + Java
+            String chatbotResponse = sendQuestionToChatbot(rowData.question, rowData.questionType, rowData.context);
             rowData.actualResult = chatbotResponse;
 
             if (chatbotResponse == null || chatbotResponse.isBlank()) {
@@ -400,7 +440,7 @@ public class ChatbotTest {
                 rowData.reason = "Chatbot returned an empty response.";
             } else {
                 rowData.status = "PASS";
-                rowData.reason = "Success. Response received.";
+                rowData.reason = "Success. Response received and captured.";
             }
         } catch (Exception e) {
             rowData.actualResult = "EXCEPTION: " + e.getMessage();
@@ -422,7 +462,7 @@ public class ChatbotTest {
         File localFile = new File(FRAMEWORK_EXCEL_FILE);
         try (InputStream is = localFile.exists() 
                 ? new java.io.FileInputStream(localFile) 
-                : openUrlStream(FRAMEWORK_EXCEL_URL);
+                : openUrlStream("https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/" + FRAMEWORK_EXCEL_FILE);
              Workbook workbook = new XSSFWorkbook(is);
              FileOutputStream outputStream = new FileOutputStream(OUTPUT_EXCEL_FILE)) {
             
@@ -468,6 +508,7 @@ public class ChatbotTest {
                             "  {\n" +
                             "    \"testCaseId\": \"%s\",\n" +
                             "    \"role\": \"%s\",\n" +
+                            "    \"questionType\": \"%s\",\n" +
                             "    \"question\": \"%s\",\n" +
                             "    \"expectedResult\": \"%s\",\n" +
                             "    \"actualResult\": \"%s\",\n" +
@@ -475,6 +516,7 @@ public class ChatbotTest {
                             "  }%s\n",
                             escapeJson(r.testCaseId),
                             escapeJson(r.role),
+                            escapeJson(r.questionType),
                             escapeJson(r.question),
                             escapeJson(r.expectedResult),
                             escapeJson(r.actualResult),
