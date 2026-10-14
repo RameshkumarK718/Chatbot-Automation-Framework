@@ -58,17 +58,18 @@ public class ChatbotTest {
 
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(60);
-
-    private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
-    private static final String ACTIVE_FRAMEWORK = System.getProperty("framework", "EFI"); // Supports EFI or Vedas
     
+    private static final String APP_URL = System.getProperty("app.url", "https://dtqponlzcij0l.cloudfront.net/");
     private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url",
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx");
+    private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url",
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx");
+    private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx");
     
-    // Dynamic file paths based on active framework
-    private static final String FRAMEWORK_EXCEL_FILE = "Frameworks(" + ACTIVE_FRAMEWORK + ").xlsx";
-    private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(" + ACTIVE_FRAMEWORK + ").xlsx";
-    private static final String OUTPUT_JSON_FILE = "target/test_results_" + ACTIVE_FRAMEWORK.toLowerCase() + ".json";
+    private static final String FRAMEWORK_EXCEL_FILE = "Frameworks(EFI).xlsx";
+    private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI).xlsx";
+    private static final String OUTPUT_JSON_FILE = "target/test_results.json";
     
     private WebDriver driver;
     private WebDriverWait wait;
@@ -147,7 +148,7 @@ public class ChatbotTest {
         
         try (InputStream is = localFile.exists() 
                 ? new java.io.FileInputStream(localFile) 
-                : openUrlStream("https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/" + FRAMEWORK_EXCEL_FILE);
+                : openUrlStream(FRAMEWORK_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is)) {
 
             if (workbook.getNumberOfSheets() == 0) {
@@ -157,7 +158,7 @@ public class ChatbotTest {
             for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
                 Sheet sheet = workbook.getSheetAt(i);
                 String sheetName = sheet.getSheetName();
-                System.out.println("--> Reading sheet [" + ACTIVE_FRAMEWORK + "]: " + sheetName);
+                System.out.println("--> Reading sheet: " + sheetName);
 
                 Row headerRow = sheet.getRow(0);
                 if (headerRow == null) continue;
@@ -182,16 +183,16 @@ public class ChatbotTest {
                         continue;
                     }
 
-                    String testCaseId = String.format("%s-%s-TC%03d", ACTIVE_FRAMEWORK, sheetName.replaceAll("\\s+", ""), r);
+                    String testCaseId = String.format("%s-TC%03d", sheetName.replaceAll("\\s+", ""), r);
                     dataList.add(new TestRowData(
                             sheetName, r, testCaseId, role, question, expectedResult,
                             "", "", "", ""
                     ));
                 }
             }
-            System.out.println("--> Successfully parsed " + dataList.size() + " test cases for framework: " + ACTIVE_FRAMEWORK);
+            System.out.println("--> Successfully parsed " + dataList.size() + " test cases across all sheets.");
         } catch (Exception e) {
-            throw new RuntimeException("Error fetching Framework Excel for " + ACTIVE_FRAMEWORK + ": " + e.getMessage(), e);
+            throw new RuntimeException("Error fetching Framework Excel: " + e.getMessage(), e);
         }
         return dataList;
     }
@@ -299,12 +300,11 @@ public class ChatbotTest {
                 By.xpath("//button[@id='vaa-submit' or @type='submit' or contains(translate(text(),'LOGIN','login'),'login')]")
             ));
             clickElement(loginButton);
+            System.out.println("--> Login submitted successfully.");
 
-            WebElement conversationalAI = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//span[contains(normalize-space(),'Conversational AI')]/ancestor::a[1] | //a[contains(normalize-space(),'Conversational AI')] | //a[contains(text(),'Chat')]")
-            ));
-            clickElement(conversationalAI);
-            System.out.println("--> Logged in and navigated to Chat successfully.");
+            // Proceed directly to chat input post-login
+            waitForChatInput();
+            System.out.println("--> Chatbot input is ready.");
 
         } catch (Exception e) {
             throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
@@ -421,7 +421,7 @@ public class ChatbotTest {
         File localFile = new File(FRAMEWORK_EXCEL_FILE);
         try (InputStream is = localFile.exists() 
                 ? new java.io.FileInputStream(localFile) 
-                : openUrlStream("https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/" + FRAMEWORK_EXCEL_FILE);
+                : openUrlStream(FRAMEWORK_EXCEL_URL);
              Workbook workbook = new XSSFWorkbook(is);
              FileOutputStream outputStream = new FileOutputStream(OUTPUT_EXCEL_FILE)) {
             
