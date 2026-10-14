@@ -332,7 +332,6 @@ public class ChatbotTest {
 
             waitForChatInput();
             System.out.println("--> Chatbot input is ready.");
-
         } catch (Exception e) {
             System.out.println("--> CRITICAL FAILURE URL: " + driver.getCurrentUrl());
             System.out.println("--> CRITICAL FAILURE TITLE: " + driver.getTitle());
