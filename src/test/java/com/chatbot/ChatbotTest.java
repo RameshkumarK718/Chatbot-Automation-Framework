@@ -67,7 +67,6 @@ public class ChatbotTest {
     private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
             "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx");
     
-    // FIXED: Direct write to main result excel file so Python AI Evaluator can read it
     private static final String OUTPUT_EXCEL_FILE = "Frameworks-Result(EFI).xlsx";
     private static final String OUTPUT_JSON_FILE = "target/test_results.json";
     
@@ -322,20 +321,14 @@ public class ChatbotTest {
             clickElement(loginButton);
             System.out.println("--> Login submitted.");
 
-           // STEP 5: Click the actual chat navigation element
-            By conversationalAILocator = By.xpath(
-                "//a[contains(text(),'Chat')] | //button[contains(text(),'Chat')] | //span[contains(text(),'AI Assistant')]"
-            );
-            WebElement conversationalAI = wait.until(ExpectedConditions.elementToBeClickable(conversationalAILocator));
-            clickElement(conversationalAI);
-            System.out.println("--> Chat navigation clicked.");
-
+            // STEP 5: Proceed directly to chat input post-login without hanging
             waitForChatInput();
             System.out.println("--> Chatbot input is ready.");
+
         } catch (Exception e) {
             System.out.println("--> CRITICAL FAILURE URL: " + driver.getCurrentUrl());
             System.out.println("--> CRITICAL FAILURE TITLE: " + driver.getTitle());
-            throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
+            throw new AssertionError("Failed to login and initialize chatbot test setup: " + e.getMessage(), e);
         }
     }
 
