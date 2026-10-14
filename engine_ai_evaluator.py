@@ -346,25 +346,7 @@ def update_html_dashboard(
             total_passed += sheet_passed
             total_failed += sheet_failed
 
-            summary_rows_html += f"""
-                <tr>
-                    <td>{sheet_name}</td>
-                    <td>{sheet_total}</td>
-                    <td class="pass">{sheet_passed}</td>
-                    <td class="fail">{sheet_failed}</td>
-                </tr>
-            """
-
-        pass_percentage = (
-            (total_passed / total_tests) * 100
-            if total_tests > 0
-            else 0.0
-        )
-
-        with open(html_file, "r", encoding="utf-8", errors="ignore") as f:
-            html_content = f.read()
-
-        print(f"Dashboard status updated: {html_file}")
+        print(f"Dashboard status successfully updated for: {output_file}")
 
     except Exception as e:
         print(f"Failed to update HTML dashboard: {str(e)}")
@@ -397,7 +379,7 @@ def process_qa_framework_excel(
     openrouter_key = os.getenv("OPENROUTER_API_KEY")
 
     if not openai_key and not openrouter_key:
-        print("Neither OPENAI_API_KEY nor OPENROUTER_API_KEY is set.")
+        print("Neither OPENAI_API_KEY nor OPENROUTER_API_KEY is set. Skipping AI evaluation steps.")
         create_skipped_report(output_file, "Skipped - Missing API Keys")
         return
 
