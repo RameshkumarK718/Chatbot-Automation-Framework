@@ -103,7 +103,7 @@ jobs:
             exit 1
           fi
 
-           python engine_ai_evaluator.py \
+          python engine_ai_evaluator.py \
             --input "Frameworks-Result(EFI)_Output.xlsx" \
             --output "Frameworks-Result.xlsx"
 
@@ -116,7 +116,7 @@ jobs:
             target/surefire-reports/
             target/diagnostics/
             target/test_results.json
-            Frameworks(EFI).xlsx
             Frameworks-Result(EFI)_Output.xlsx
+            Frameworks-Result.xlsx
             index.html
           if-no-files-found: warn
