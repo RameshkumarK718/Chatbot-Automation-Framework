@@ -4,25 +4,28 @@ on:
     branches:
       - main
       - master
+  pull_request:
+    branches:
+      - main
+      - master
+  schedule:
+    - cron: "0 0 * * *"
   workflow_dispatch:
     inputs:
       app_url:
-        description: "Target EFI Chatbot App URL"
+        description: "Target EFI chatbot app URL"
         required: true
         default: "https://dtqponlzcij0l.cloudfront.net/"
-
       framework_excel_url:
-        description: "EFI Question Bank Excel URL (GitHub Raw)"
+        description: "EFI question bank Excel URL"
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx"
-
       credentials_excel_url:
-        description: "EFI Credentials Excel URL (GitHub Raw)"
+        description: "Credentials Excel URL"
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx"
-
       result_excel_url:
-        description: "EFI Result Excel URL (GitHub Raw)"
+        description: "Result template Excel URL"
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx"
 
@@ -72,27 +75,37 @@ jobs:
           fi
 
       - name: Run Maven Tests
+        env:
+          APP_URL: ${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}
+          FRAMEWORK_EXCEL_URL: ${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx' }}
+          CREDENTIALS_EXCEL_URL: ${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx' }}
+          RESULT_EXCEL_URL: ${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx' }}
         run: |
           mvn clean test -e -Dsurefire.useFile=false \
-            -Dapp.url="${{ inputs.app_url || 'https://dtqponlzcij0l.cloudfront.net/' }}" \
-            -Dframework.excel.url="${{ inputs.framework_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(EFI).xlsx' }}" \
-            -Dcredentials.excel.url="${{ inputs.credentials_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(2).xlsx' }}" \
-            -Dresult.excel.url="${{ inputs.result_excel_url || 'https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(EFI).xlsx' }}"
+            "-Dapp.url=${APP_URL}" \
+            "-Dframework.excel.url=${FRAMEWORK_EXCEL_URL}" \
+            "-Dcredentials.excel.url=${CREDENTIALS_EXCEL_URL}" \
+            "-Dresult.excel.url=${RESULT_EXCEL_URL}"
 
       - name: Run Python AI Evaluator
-        if: always()
+        if: success() && github.event_name != 'pull_request'
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          if [ -f "Frameworks-Result(EFI).xlsx" ]; then
-            python engine_ai_evaluator.py \
-              --input "Frameworks-Result(EFI).xlsx" \
-              --output "Frameworks-Result.xlsx"
-          else
-            echo "::error::Frameworks-Result(EFI).xlsx was not found."
+          if [ -z "${OPENAI_API_KEY}" ] && [ -z "${OPENROUTER_API_KEY}" ]; then
+            echo "::error::Configure OPENAI_API_KEY or OPENROUTER_API_KEY in repository secrets."
             exit 1
           fi
+
+          if [ ! -f "Frameworks-Result(EFI)_Output.xlsx" ]; then
+            echo "::error::Java-generated Frameworks-Result(EFI)_Output.xlsx was not found."
+            exit 1
+          fi
+
+           python engine_ai_evaluator.py \
+            --input "Frameworks-Result(EFI)_Output.xlsx" \
+            --output "Frameworks-Result.xlsx"
 
       - name: Upload Test Reports & Results
         if: always()
@@ -101,7 +114,9 @@ jobs:
           name: chatbot-test-reports
           path: |
             target/surefire-reports/
-            Frameworks-Result(EFI).xlsx
-            Frameworks-Result.xlsx
+            target/diagnostics/
+            target/test_results.json
+            Frameworks(EFI).xlsx
+            Frameworks-Result(EFI)_Output.xlsx
             index.html
           if-no-files-found: warn
