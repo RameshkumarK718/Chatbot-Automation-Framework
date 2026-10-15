@@ -32,7 +32,7 @@ class AIEvaluator:
         if self.openrouter_key:
             self.openrouter_client = OpenAI(
                 api_key=self.openrouter_key,
-                base_url="[https://openrouter.ai/api/v1](https://openrouter.ai/api/v1)"
+                base_url="https://openrouter.ai/api/v1"
             )
 
         if not self.openai_client and not self.openrouter_client:
