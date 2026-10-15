@@ -62,8 +62,8 @@ public class ChatbotTest {
         }
     }
 
-    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
-    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(60);
+    private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(30);
 
     // Dynamic framework property support (defaults to EFI, easily switchable via -Dframework=Vedas)
     private static final String ACTIVE_FRAMEWORK = System.getProperty("active.framework", "EFI");
@@ -285,7 +285,7 @@ private void initializeDriverAndLogin() {
 
     driver = new ChromeDriver(options);
     driver.manage().timeouts().implicitlyWait(Duration.ZERO);
-    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(45));
+    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(30));
 
     wait = new WebDriverWait(driver, WAIT_TIMEOUT);
 
