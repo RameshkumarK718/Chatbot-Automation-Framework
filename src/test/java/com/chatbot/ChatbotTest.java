@@ -265,65 +265,150 @@ public class ChatbotTest {
         }
     }
 
-    private void initializeDriverAndLogin() {
-        String[] credentials = getCredentialsFromExcel();
-        String memberId = credentials[0];
-        String password = credentials[1];
 
-        Assert.assertFalse(memberId.isBlank(), "Member ID is missing.");
-        Assert.assertFalse(password.isBlank(), "Password is missing.");
+private void initializeDriverAndLogin() {
+    String[] credentials = getCredentialsFromExcel();
+    String memberId = credentials[0];
+    String password = credentials[1];
 
-        ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
+    Assert.assertFalse(memberId == null || memberId.isBlank(),
+            "Member ID is missing.");
+    Assert.assertFalse(password == null || password.isBlank(),
+            "Password is missing.");
 
-        driver = new ChromeDriver(options);
-        driver.manage().timeouts().implicitlyWait(Duration.ZERO);
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(45));
-        wait = new WebDriverWait(driver, WAIT_TIMEOUT);
+    ChromeOptions options = new ChromeOptions();
+    options.addArguments("--headless=new");
+    options.addArguments("--no-sandbox");
+    options.addArguments("--disable-dev-shm-usage");
+    options.addArguments("--disable-gpu");
+    options.addArguments("--window-size=1920,1080");
+
+    driver = new ChromeDriver(options);
+    driver.manage().timeouts().implicitlyWait(Duration.ZERO);
+    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(45));
+
+    wait = new WebDriverWait(driver, WAIT_TIMEOUT);
+
+    try {
+        System.out.println("--> Opening application URL: " + APP_URL);
+        driver.get(APP_URL);
+
+        wait.until(webDriver ->
+                ((JavascriptExecutor) webDriver)
+                        .executeScript("return document.readyState")
+                        .equals("complete"));
+
+        // Allow the SPA to render, without a fixed sleep.
+        By emailLocator = By.xpath(
+                "//input[" +
+                "@id='vaa-email' or " +
+                "@id='email' or " +
+                "@id='username' or " +
+                "@type='email' or " +
+                "contains(@name,'email') or " +
+                "contains(@name,'user') or " +
+                "contains(@placeholder,'email') or " +
+                "contains(@autocomplete,'username')" +
+                "]"
+        );
+
+        // Log the actual page state before waiting for the field.
+        System.out.println("--> Current URL: " + driver.getCurrentUrl());
+        System.out.println("--> Page title: " + driver.getTitle());
+
+        // If the page requires opening a sign-in form, try that first.
+        By signInLocator = By.xpath(
+                "//button[contains(translate(normalize-space(.)," +
+                "'SIGNINLOG','signinlog'),'sign in') or " +
+                "contains(translate(normalize-space(.)," +
+                "'LOGIN','login'),'login')]"
+        );
 
         try {
-            System.out.println("--> Opening application URL: " + APP_URL);
-            driver.get(APP_URL);
+            List<WebElement> signInButtons =
+                    driver.findElements(signInLocator);
 
-            wait.until(webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
-
-            try {
-                WebElement signinBtn = driver.findElement(By.xpath("//button[contains(translate(text(),'SIGN','sign'),'sign') or contains(translate(text(),'LOGIN','login'),'login')]"));
-                if (signinBtn.isDisplayed()) {
-                    clickElement(signinBtn);
-                    Thread.sleep(1500);
+            for (WebElement button : signInButtons) {
+                if (button.isDisplayed() && button.isEnabled()
+                        && driver.findElements(emailLocator).isEmpty()) {
+                    clickElement(button);
+                    break;
                 }
-            } catch (Exception ignored) {}
-
-            WebElement memberInput = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//input[@id='vaa-email' or @id='email' or @id='username' or contains(@name,'email') or contains(@placeholder,'email')]")
-            ));
-            memberInput.clear();
-            memberInput.sendKeys(memberId);
-
-            WebElement passwordInput = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//input[@id='vaa-pw' or @id='password' or @type='password' or contains(@name,'password')]")
-            ));
-            passwordInput.clear();
-            passwordInput.sendKeys(password);
-
-            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(
-                By.xpath("//button[@id='vaa-submit' or @type='submit' or contains(translate(text(),'LOGIN','login'),'login')]")
-            ));
-            clickElement(loginButton);
-            System.out.println("--> Login submitted successfully.");
-
-            waitForChatInput();
-            System.out.println("--> Chatbot input is ready.");
-
-        } catch (Exception e) {
-            throw new AssertionError("Failed to initialize chatbot test setup: " + e.getMessage(), e);
+            }
+        } catch (Exception ex) {
+            System.out.println(
+                    "--> Sign-in button was not clicked: "
+                    + ex.getMessage());
         }
+
+        System.out.println("--> Matching email fields: "
+                + driver.findElements(emailLocator).size());
+
+        WebElement memberInput = wait.until(
+                ExpectedConditions.elementToBeClickable(emailLocator));
+
+        memberInput.clear();
+        memberInput.sendKeys(memberId);
+
+        By passwordLocator = By.xpath(
+                "//input[@id='vaa-pw' or " +
+                "@id='password' or " +
+                "@type='password' or " +
+                "contains(@name,'password') or " +
+                "contains(@autocomplete,'current-password')]"
+        );
+
+        WebElement passwordInput = wait.until(
+                ExpectedConditions.elementToBeClickable(passwordLocator));
+
+        passwordInput.clear();
+        passwordInput.sendKeys(password);
+
+        By loginButtonLocator = By.xpath(
+                "//button[@id='vaa-submit' or " +
+                "@type='submit' or " +
+                "contains(translate(normalize-space(.)," +
+                "'LOGIN','login'),'login') or " +
+                "contains(translate(normalize-space(.)," +
+                "'SIGN','sign'),'sign in')]"
+        );
+
+        WebElement loginButton = wait.until(
+                ExpectedConditions.elementToBeClickable(
+                        loginButtonLocator));
+
+        clickElement(loginButton);
+        System.out.println("--> Login button clicked.");
+
+        waitForChatInput();
+        System.out.println("--> Chatbot input is ready.");
+
+    } catch (Exception e) {
+        try {
+            File debugFile = new File("target/login_debug.html");
+            File parent = debugFile.getParentFile();
+
+            if (parent != null) {
+                parent.mkdirs();
+            }
+
+            try (FileWriter writer = new FileWriter(debugFile)) {
+                writer.write(driver.getPageSource());
+            }
+
+            System.err.println(
+                    "--> Saved failed page source to target/login_debug.html");
+        } catch (Exception debugException) {
+            System.err.println(
+                    "--> Could not save page source: "
+                    + debugException.getMessage());
+        }
+
+        throw new AssertionError(
+                "Failed to initialize chatbot test setup: "
+                + e.getMessage(), e);
     }
+}
 
     private By getChatInputLocator() {
         return By.xpath("//input | //textarea | //*[@contenteditable='true']");
