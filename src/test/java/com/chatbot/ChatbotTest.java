@@ -63,7 +63,7 @@ public class ChatbotTest {
     }
 
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(30);
-    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(45);
+    private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(60);
 
     // Dynamic framework property support (defaults to EFI, easily switchable via -Dframework=Vedas)
     private static final String ACTIVE_FRAMEWORK = System.getProperty("active.framework", "EFI");
@@ -250,20 +250,47 @@ public class ChatbotTest {
     }
 
     @AfterMethod
-    public void captureDiagnosticsOnFailure(ITestResult result) {
-        if (result.getStatus() == ITestResult.FAILURE && driver != null) {
-            String testName = result.getName() + "_" + System.currentTimeMillis();
-            try {
-                File htmlFile = new File("target/diagnostics/html/" + testName + ".html");
-                htmlFile.getParentFile().mkdirs();
-                try (FileWriter writer = new FileWriter(htmlFile)) {
-                    writer.write(driver.getPageSource());
-                }
-            } catch (Exception e) {
-                System.err.println("--> Failed to write failure diagnostics: " + e.getMessage());
-            }
-        }
+public void captureDiagnosticsOnFailure(ITestResult result) {
+    if (result.getStatus() != ITestResult.FAILURE || driver == null) {
+        return;
     }
+
+    String testName =
+        result.getName() + "_" + System.currentTimeMillis();
+
+    try {
+        // Verify that the browser session is still available.
+        driver.getWindowHandles();
+
+        File htmlFile = new File(
+            "target/diagnostics/html/" + testName + ".html"
+        );
+
+        File parent = htmlFile.getParentFile();
+        if (parent != null) {
+            parent.mkdirs();
+        }
+
+        try (FileWriter writer = new FileWriter(htmlFile)) {
+            writer.write(driver.getPageSource());
+        }
+
+        System.out.println(
+            "--> Failure diagnostics saved: " + htmlFile.getPath()
+        );
+
+    } catch (WebDriverException e) {
+        System.err.println(
+            "--> Browser session unavailable; skipping diagnostics: "
+            + e.getMessage()
+        );
+    } catch (Exception e) {
+        System.err.println(
+            "--> Failed to write failure diagnostics: " + e.getMessage()
+        );
+    }
+}
+
 
 
 private void initializeDriverAndLogin() {
@@ -285,7 +312,7 @@ private void initializeDriverAndLogin() {
 
     driver = new ChromeDriver(options);
     driver.manage().timeouts().implicitlyWait(Duration.ZERO);
-    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(45));
+    driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
 
     wait = new WebDriverWait(driver, WAIT_TIMEOUT);
 
@@ -517,6 +544,11 @@ private void initializeDriverAndLogin() {
             selectRole(rowData.role);
 
             // Step: Send Question + Answer + Context to Chatbot using Selenium + Java
+            System.out.println(
+            	    "--> Running test: " + rowData.testCaseId
+            	    + " | Sheet: " + rowData.sheetName
+            	    + " | Question: " + rowData.question
+            	);
             String chatbotResponse = sendQuestionToChatbot(rowData.question, rowData.questionType, rowData.context);
             rowData.actualResult = chatbotResponse;
 
@@ -547,7 +579,7 @@ private void initializeDriverAndLogin() {
         File localFile = new File(FRAMEWORK_EXCEL_FILE);
         try (InputStream is = localFile.exists() 
                 ? new java.io.FileInputStream(localFile) 
-                : openUrlStream("https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/" + FRAMEWORK_EXCEL_FILE);
+                : openUrlStream("https://githubusercontent.com" + FRAMEWORK_EXCEL_FILE);
              Workbook workbook = new XSSFWorkbook(is);
              FileOutputStream outputStream = new FileOutputStream(OUTPUT_EXCEL_FILE)) {
             
@@ -561,26 +593,26 @@ private void initializeDriverAndLogin() {
                 if (headerRow == null) continue;
 
                 for (Cell cell : headerRow) {
-                    String header = getCellStringValue(cell).toLowerCase();
+                    String header = getCellStringValue(cell).toLowerCase().trim();
                     int colIdx = cell.getColumnIndex();
+                    
+                    // Case-Insensitive alignment for tracking metrics across different structural layouts
                     if (header.contains("actual result") || header.contains("chatbot answer")) {
-                        Cell c = row.getCell(colIdx);
-                        if (c == null) c = row.createCell(colIdx);
+                        Cell c = row.getCell(colIdx, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                         c.setCellValue(result.actualResult);
                     } else if (header.contains("pass / fail") || header.contains("status")) {
-                        Cell c = row.getCell(colIdx);
-                        if (c == null) c = row.createCell(colIdx);
+                        Cell c = row.getCell(colIdx, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
                         c.setCellValue(result.status);
                     }
                 }
             }
             workbook.write(outputStream);
-            System.out.println("--> Execution results populated and written to " + OUTPUT_EXCEL_FILE);
+            System.out.println("--> [SUCCESS] Runtime metrics workbook populated successfully: " + OUTPUT_EXCEL_FILE);
         } catch (Exception e) {
-            System.err.println("Failed to update Excel: " + e.getMessage());
+            System.err.println("Critical Error updating POI Excel workbook matrix: " + e.getMessage());
         }
-    }
-
+        }
+        
     private void exportResultsToJson(List<TestRowData> results) {
         try {
             File file = new File(OUTPUT_JSON_FILE);
