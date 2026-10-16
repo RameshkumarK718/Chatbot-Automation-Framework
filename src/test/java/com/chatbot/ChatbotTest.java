@@ -462,7 +462,12 @@ private void initializeDriverAndLogin() {
                 "//div[contains(@class,'bot-response')] | " +
                 "//div[contains(@class,'chat-bubble')] | " +
                 "//div[contains(@class,'chat-response')] | " +
-                "//div[contains(@class,'bot-text')]"
+                "//div[contains(@class,'bot-text')] | " +
+                "//div[contains(@class,'chat-message')] | " +
+                "//div[contains(@class,'markdown')] | " +
+                "//div[contains(@class,'response')] | " +
+                "//div[contains(@class,'message-content')] | " +
+                "//div[@role='article']"
             ));
         } catch (Exception e) {
             return new ArrayList<>();
