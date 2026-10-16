@@ -457,7 +457,13 @@ private void initializeDriverAndLogin() {
 
     private List<WebElement> getChatMessages() {
         try {
-            return driver.findElements(By.xpath("//div[contains(@class,'message')] | //div[contains(@class,'bot-response')] | //div[contains(@class,'chat-bubble')]"));
+            return driver.findElements(By.xpath(
+                "//div[contains(@class,'message')] | " +
+                "//div[contains(@class,'bot-response')] | " +
+                "//div[contains(@class,'chat-bubble')] | " +
+                "//div[contains(@class,'chat-response')] | " +
+                "//div[contains(@class,'bot-text')]"
+            ));
         } catch (Exception e) {
             return new ArrayList<>();
         }
@@ -502,13 +508,23 @@ private void initializeDriverAndLogin() {
         chatInput.sendKeys(question);
         chatInput.sendKeys(Keys.ENTER);
         
+        // Fallback: Click the Send button if ENTER didn't submit
+        try {
+            WebElement sendButton = driver.findElement(By.xpath("//button[@type='submit' or contains(@class,'send') or contains(@aria-label,'Send') or contains(@class,'submit')]"));
+            if (sendButton.isDisplayed() && sendButton.isEnabled()) {
+                sendButton.click();
+            }
+        } catch (Exception ignored) {
+            // Ignored intentionally
+        }
+        
         String response = waitForChatbotResponse(previousResponse);
         if (response != null && !response.isBlank()) {
             lastConversationContext = response; // Store for follow-ups
         }
         return response;
     }
-
+    
     private void selectRole(String targetRole) {
         if (targetRole == null || targetRole.isBlank()) return;
         try {
