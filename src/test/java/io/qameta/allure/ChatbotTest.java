@@ -23,7 +23,7 @@ public class ChatbotTest {
     private static final String APP_URL = "https://devdedham.aptussoft.com/MemberAPI";
     
     // Local Vedas Framework path
-    private static final String FRAMEWORK_PATH = "C:\\Users\\rames\\OneDrive\\Documents\\My Data Sources\\Frameworks(Vedas).xlsx";
+    private static final String FRAMEWORK_PATH = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx";
 
     @BeforeClass
     public static void setUpClass() {
