@@ -19,14 +19,6 @@ public final class ExcelUtils {
     private ExcelUtils() {
         // Private constructor for utility class
     }
-
-    /**
-     * Reads test data from an Excel sheet for TestNG DataProvider.
-     *
-     * @param filePath  Path to the .xlsx file
-     * @param sheetName Name of the worksheet
-     * @return 2D Object array containing [TestCaseId, Question, ExpectedAnswer]
-     */
     public static Object[][] getDataFromExcel(String filePath, String sheetName) {
         if (filePath == null || filePath.trim().isEmpty()) {
             throw new IllegalArgumentException("Excel file path cannot be null or empty.");
