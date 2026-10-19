@@ -9,8 +9,12 @@ import java.util.List;
 
 public class ExcelUtils {
 
+    /**
+     * Reads test data from the specified Excel file and sheet.
+     */
     public static Object[][] getDataFromExcel(String filePath, String sheetName) {
         List<Object[]> dataList = new ArrayList<>();
+        
         try (FileInputStream fis = new FileInputStream(new File(filePath));
              Workbook workbook = new XSSFWorkbook(fis)) {
             
@@ -25,25 +29,32 @@ public class ExcelUtils {
                 if (row == null) continue;
 
                 String testCaseId = getCellString(row.getCell(0));
-                String question = getCellString(row.getCell(3)); // Adjust column index if needed
-                String expected = getCellString(row.getCell(4)); // Adjust column index if needed
+                String question = getCellString(row.getCell(3)); 
+                String expected = getCellString(row.getCell(4)); 
 
                 dataList.add(new Object[]{testCaseId, question, expected});
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
         return dataList.toArray(new Object[0][0]);
     }
 
+    /**
+     * Safely retrieves string values from an Excel cell.
+     */
     @SuppressWarnings("deprecation")
-	private static String getCellString(Cell cell) {
+    private static String getCellString(Cell cell) {
         if (cell == null) return "";
         cell.setCellType(CellType.STRING);
         return cell.getStringCellValue().trim();
     }
 
-	public static void writeResult(String sheetName, int rowIndex, String actualAnswer, String status) {
-		
-	}
+    /**
+     * Placeholder method for writing test results back to Excel if needed.
+     */
+    public static void writeResult(String sheetName, int rowIndex, String actualAnswer, String status) {
+        // Implementation for writing results back if required
+    }
 }
