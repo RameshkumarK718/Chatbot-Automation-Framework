@@ -1,60 +1,204 @@
 package io.qameta.allure.utils;
-import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-public class ExcelUtils {
+public final class ExcelUtils {
+
+    private ExcelUtils() {
+        // Utility class; prevent object creation.
+    }
 
     /**
-     * Reads test data from the specified Excel file and sheet.
+     * Reads test case ID, user question, and expected answer
+     * from an Excel sheet.
+     *
+     * Expected headers:
+     * Test Case ID, User Question, Expected Answer
+     *
+     * Returns Object[][] suitable for TestNG DataProvider.
      */
-    public static Object[][] getDataFromExcel(String filePath, String sheetName) {
-        List<Object[]> dataList = new ArrayList<>();
-        
-        try (FileInputStream fis = new FileInputStream(new File(filePath));
-             Workbook workbook = new XSSFWorkbook(fis)) {
-            
-            Sheet sheet = workbook.getSheet(sheetName);
-            if (sheet == null) {
-                sheet = workbook.getSheetAt(0); // Fallback to first sheet
-            }
+    public static Object[][] getDataFromExcel(
+            String filePath, String sheetName) {
 
-            int rowCount = sheet.getPhysicalNumberOfRows();
-            for (int i = 1; i < rowCount; i++) {
-                Row row = sheet.getRow(i);
-                if (row == null) continue;
-
-                String testCaseId = getCellString(row.getCell(0));
-                String question = getCellString(row.getCell(3)); 
-                String expected = getCellString(row.getCell(4)); 
-
-                dataList.add(new Object[]{testCaseId, question, expected});
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (filePath == null || filePath.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Excel file path cannot be empty.");
         }
-        
-        return dataList.toArray(new Object[0][0]);
+
+        if (sheetName == null || sheetName.trim().isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Excel sheet name cannot be empty.");
+        }
+
+        File excelFile = new File(filePath);
+
+        if (!excelFile.isFile()) {
+            throw new IllegalArgumentException(
+                    "Excel file not found: "
+                            + excelFile.getAbsolutePath());
+        }
+
+        List<Object[]> dataList = new ArrayList<>();
+        DataFormatter formatter = new DataFormatter(Locale.US);
+
+        try (FileInputStream inputStream =
+                     new FileInputStream(excelFile);
+             Workbook workbook = new XSSFWorkbook(inputStream)) {
+
+            Sheet sheet = workbook.getSheet(sheetName);
+
+            if (sheet == null) {
+                throw new IllegalArgumentException(
+                        "Sheet '" + sheetName
+                                + "' was not found in "
+                                + excelFile.getName());
+            }
+
+            Row headerRow = sheet.getRow(0);
+
+            if (headerRow == null) {
+                throw new IllegalArgumentException(
+                        "The Excel sheet has no header row: "
+                                + sheetName);
+            }
+
+            Map<String, Integer> columns =
+                    getHeaderColumns(headerRow, formatter);
+
+            int testCaseIdColumn =
+                    findColumn(columns, "Test Case ID");
+
+            int questionColumn =
+                    findColumn(columns, "User Question");
+
+            int expectedAnswerColumn =
+                    findColumn(columns, "Expected Answer");
+
+            if (testCaseIdColumn < 0
+                    || questionColumn < 0
+                    || expectedAnswerColumn < 0) {
+
+                throw new IllegalArgumentException(
+                        "Required headers are missing in sheet '"
+                                + sheetName
+                                + "'. Required: Test Case ID, "
+                                + "User Question, Expected Answer. "
+                                + "Found: " + columns.keySet());
+            }
+
+            // Start at row 1 because row 0 contains the headers.
+            for (int rowIndex = 1;
+                 rowIndex <= sheet.getLastRowNum();
+                 rowIndex++) {
+
+                Row row = sheet.getRow(rowIndex);
+
+                if (row == null) {
+                    continue;
+                }
+
+                String testCaseId = getCellString(
+                        row.getCell(testCaseIdColumn), formatter);
+
+                String question = getCellString(
+                        row.getCell(questionColumn), formatter);
+
+                String expectedAnswer = getCellString(
+                        row.getCell(expectedAnswerColumn), formatter);
+
+                // Skip completely empty test rows.
+                if (testCaseId.isEmpty()
+                        && question.isEmpty()
+                        && expectedAnswer.isEmpty()) {
+                    continue;
+                }
+
+                // A question is required to execute a test.
+                if (question.isEmpty()) {
+                    System.err.println(
+                            "Skipping Excel row " + (rowIndex + 1)
+                                    + ": User Question is empty.");
+                    continue;
+                }
+
+                dataList.add(new Object[]{
+                        testCaseId,
+                        question,
+                        expectedAnswer
+                });
+            }
+
+        } catch (IOException e) {
+            throw new IllegalStateException(
+                    "Unable to read Excel file: "
+                            + excelFile.getAbsolutePath(),
+                    e);
+        }
+
+        if (dataList.isEmpty()) {
+            System.err.println(
+                    "Warning: No runnable test cases found in sheet '"
+                            + sheetName + "'.");
+        }
+
+        return dataList.toArray(new Object[0][]);
     }
 
     /**
-     * Safely retrieves string values from an Excel cell.
+     * Creates a map of normalized header names to column indexes.
      */
-    @SuppressWarnings("deprecation")
-    private static String getCellString(Cell cell) {
-        if (cell == null) return "";
-        cell.setCellType(CellType.STRING);
-        return cell.getStringCellValue().trim();
+    private static Map<String, Integer> getHeaderColumns(
+            Row headerRow, DataFormatter formatter) {
+
+        Map<String, Integer> columns = new HashMap<>();
+
+        for (Cell cell : headerRow) {
+            String header = getCellString(cell, formatter)
+                    .trim()
+                    .toLowerCase(Locale.ROOT);
+
+            if (!header.isEmpty()) {
+                columns.put(header, cell.getColumnIndex());
+            }
+        }
+
+        return columns;
     }
 
     /**
-     * Placeholder method for writing test results back to Excel if needed.
+     * Finds a column using a case-insensitive header name.
      */
-    public static void writeResult(String sheetName, int rowIndex, String actualAnswer, String status) {
-        // Implementation for writing results back if required
+    private static int findColumn(
+            Map<String, Integer> columns, String headerName) {
+
+        Integer columnIndex = columns.get(
+                headerName.toLowerCase(Locale.ROOT));
+
+        return columnIndex == null ? -1 : columnIndex;
+    }
+
+    /**
+     * Safely reads string, numeric, date, and formula cell values.
+     */
+    private static String getCellString(
+            Cell cell, DataFormatter formatter) {
+
+        if (cell == null) {
+            return "";
+        }
+
+        return formatter.formatCellValue(cell).trim();
     }
 }
