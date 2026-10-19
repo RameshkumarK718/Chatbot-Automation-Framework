@@ -20,7 +20,7 @@ venv/
 test-output/
 
 # Local credentials and sensitive configs (prevents leaking them)
-credentials(2).xlsx
+credentials(1).xlsx
 config.properties
 
 # Temporary, backup, and log files
