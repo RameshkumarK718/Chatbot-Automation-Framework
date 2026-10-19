@@ -36,9 +36,14 @@ public class ExcelUtils {
         return dataList.toArray(new Object[0][0]);
     }
 
-    private static String getCellString(Cell cell) {
+    @SuppressWarnings("deprecation")
+	private static String getCellString(Cell cell) {
         if (cell == null) return "";
         cell.setCellType(CellType.STRING);
         return cell.getStringCellValue().trim();
     }
+
+	public static void writeResult(String sheetName, int rowIndex, String actualAnswer, String status) {
+		
+	}
 }
