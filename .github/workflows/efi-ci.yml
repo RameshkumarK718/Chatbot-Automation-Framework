@@ -3,26 +3,35 @@ on:
   push:
     branches:
       - main
-     - master
+      - master
   workflow_dispatch:
     inputs:
+      framework:
+        description: "Select QA Framework"
+        required: true
+        default: "Vedas"
+        type: choice
+        options:
+          - Vedas
+          - EFI
+
       app_url:
-        description: "Target Vedas Chatbot App URL"
+        description: "Target Chatbot App URL"
         required: true
         default: "https://devdedham.aptussoft.com/MemberAPI"
 
       framework_excel_url:
-        description: "Vedas Question Bank Excel URL (GitHub Raw)"
+        description: "Question Bank Excel URL (GitHub Raw)"
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx"
 
       credentials_excel_url:
-        description: "Vedas Credentials Excel URL (GitHub Raw)"
+        description: "Credentials Excel URL (GitHub Raw)"
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx"
 
       result_excel_url:
-        description: "Vedas Result Excel URL (GitHub Raw)"
+        description: "Result Excel URL (GitHub Raw)"
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(Vedas).xlsx"
 
@@ -69,6 +78,8 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then
             python -m pip install -r requirements.txt
+          else
+            python -m pip install pandas openpyxl openai
           fi
 
       - name: Run Maven Tests
@@ -85,23 +96,19 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
         run: |
-          if [ -f "Frameworks-Result(EFI).xlsx" ]; then
-            python engine_ai_evaluator.py \
-              --input "Frameworks-Result(EFI).xlsx" \
-              --output "Frameworks-Result.xlsx"
-          else
-            echo "::error::Frameworks-Result(EFI).xlsx was not found."
-            exit 1
-          fi
+          TARGET_FW="${{ inputs.framework || 'Vedas' }}"
+          echo "Running AI Evaluator for framework: $TARGET_FW"
+          
+          python engine_ai_evaluator.py --framework "$TARGET_FW"
 
       - name: Upload Test Reports & Results
         if: always()
         uses: actions/upload-artifact@v7.0.2
         with:
-          name: chatbot-test-reports
+          name: chatbot-test-reports-${{ inputs.framework || 'Vedas' }}
           path: |
             target/surefire-reports/
+            Frameworks-Result(Vedas).xlsx
             Frameworks-Result(EFI).xlsx
-            Frameworks-Result.xlsx
             index.html
           if-no-files-found: warn
