@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ExcelUtils {
-
     public static Object[][] getDataFromExcel(String filePath, String sheetName) {
         List<Object[]> dataList = new ArrayList<>();
         try (FileInputStream fis = new FileInputStream(new File(filePath));
