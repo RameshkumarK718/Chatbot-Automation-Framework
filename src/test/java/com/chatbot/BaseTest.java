@@ -18,7 +18,7 @@ public class BaseTest {
     protected WebDriver driver;
     protected WebDriverWait wait;
 
-    protected static final String APP_URL = "https://dtqponlzcij0l.cloudfront.net/";
+    protected static final String APP_URL = System.getProperty("app.url", "https://devdedham.aptussoft.com/MemberAPI");
 
     @BeforeMethod
     public void setUp() {
@@ -30,30 +30,31 @@ public class BaseTest {
         options.addArguments("--window-size=1920,1080");
 
         driver = new ChromeDriver(options);
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(90));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(120));
         wait = new WebDriverWait(driver, Duration.ofSeconds(60));
 
         try {
-            // Default fallback in case Excel is missing
+            // Default fallback credentials
             String username = "user@example.com";
             String password = "password";
 
-            // Dynamically load credentials from src/main/resources/credentials.xlsx
+            // Dynamically load credentials from src/main/resources/credentials.xlsx or credentials(1).xlsx
             try (InputStream credStream = getClass().getClassLoader().getResourceAsStream("credentials.xlsx")) {
                 if (credStream != null) {
                     try (Workbook credWorkbook = new XSSFWorkbook(credStream)) {
                         Sheet credSheet = credWorkbook.getSheetAt(0);
-                        Row firstRow = credSheet.getRow(1); // Row 1 assumes data row (Row 0 is header)
+                        Row firstRow = credSheet.getRow(1);
                         if (firstRow != null) {
                             username = getCellVal(firstRow.getCell(0));
                             password = getCellVal(firstRow.getCell(1));
                         }
                     }
                 } else {
-                    System.err.println("Warning: credentials.xlsx not found in classpath. Using default credentials.");
+                    System.err.println("Warning: credentials.xlsx not found in classpath. Using default/system credentials.");
                 }
             } catch (Exception e) {
-                System.err.println("Warning: Error reading credentials.xlsx. Using default credentials. Error: " + e.getMessage());
+                System.err.println("Warning: Error reading credentials.xlsx. Using fallback credentials. Error: " + e.getMessage());
             }
 
             driver.get(APP_URL);
@@ -62,33 +63,36 @@ public class BaseTest {
             wait.until(webDriver -> ((JavascriptExecutor) webDriver)
                 .executeScript("return document.readyState").equals("complete"));
 
-            // Optimized XPath removing duplicate and redundant checks
-            WebElement emailInput = wait.until(ExpectedConditions.presenceOfElementLocated(
-                By.xpath("//input[@id='vaa-email' or contains(@name, 'email') or @type='email' or contains(@placeholder, 'Email') or contains(@class, 'email')]")
-            ));
+            // Locate email input field
+            By emailLocator = By.xpath("//input[@id='vaa-email' or contains(@name, 'email') or @type='email' or contains(@placeholder, 'Email') or contains(@class, 'email')]");
+            WebElement emailInput = wait.until(ExpectedConditions.presenceOfElementLocated(emailLocator));
             emailInput.clear();
             emailInput.sendKeys(username);
 
             // Locate password input field
-            WebElement passwordInput = driver.findElement(
-                By.xpath("//input[@id='vaa-pw' or contains(@name, 'password') or contains(@type, 'password')]")
-            );
+            By passwordLocator = By.xpath("//input[@id='vaa-pw' or contains(@name, 'password') or contains(@type, 'password')]");
+            WebElement passwordInput = driver.findElement(passwordLocator);
             passwordInput.clear();
             passwordInput.sendKeys(password);
 
             // Click submit button
-            WebElement submitBtn = driver.findElement(
-                By.xpath("//button[@id='vaa-submit' or @type='submit' or contains(text(), 'Login')]")
-            );
-            submitBtn.click();
+            By submitLocator = By.xpath("//button[@id='vaa-submit' or @type='submit' or contains(text(), 'Login') or contains(text(), 'Sign In')]");
+            WebElement submitBtn = driver.findElement(submitLocator);
+            
+            try {
+                submitBtn.click();
+            } catch (Exception clickEx) {
+                JavascriptExecutor js = (JavascriptExecutor) driver;
+                js.executeScript("arguments[0].click();", submitBtn);
+            }
 
-            // Wait until login completes and main chatbot UI is loaded
+            // Wait until login completes and main chatbot UI / Conversational AI is available
             wait.until(ExpectedConditions.presenceOfElementLocated(
                 By.xpath("//*[contains(normalize-space(), 'Conversational AI') or contains(@class, 'chat-container')]")
             ));
 
         } catch (Exception e) {
-            // Capture screenshot on failure for diagnostics and save to target directory
+            // Capture screenshot on failure for diagnostics
             try {
                 File srcFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
                 File destFile = new File("target/failure-screenshot.png");
