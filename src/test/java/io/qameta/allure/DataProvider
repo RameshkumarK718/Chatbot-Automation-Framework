@@ -1,6 +1,6 @@
 package io.qameta.allure.tests;
 import io.qameta.allure.pages.ChatbotPage;
-import io.qameta.allure.utils.ExcelUtils; // Assuming you have an Excel utility
+import io.qameta.allure.utils.ExcelUtils;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.Assert;
@@ -8,6 +8,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
+import java.time.Duration;
 
 public class ChatbotTest {
     private WebDriver driver;
@@ -15,22 +16,26 @@ public class ChatbotTest {
 
     @BeforeMethod
     public void setUp() {
-        // Initialize WebDriver (or fetch from a BaseTest/DriverFactory class)
+        // Initialize WebDriver
         driver = new ChromeDriver();
         driver.manage().window().maximize();
-        driver.หนด = driver; // Navigate to your chatbot URL
-        driver.get("https://your-chatbot-application-url.com");
+        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(60));
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(10));
+        
+        // Navigate to Vedas Chatbot URL
+        driver.get("https://devdedham.aptussoft.com/MemberAPI");
         
         chatbotPage = new ChatbotPage(driver);
     }
+
     @DataProvider(name = "chatbotTestData")
     public Object[][] provideChatbotData() {
-        // Read test data row by row using your utility
-        return ExcelUtils.getDataFromExcel("Frameworks_Output.xlsx", "Sheet1");
+        // Read test data directly from your local Vedas question bank
+        return ExcelUtils.getDataFromExcel("C:\\Users\\rames\\OneDrive\\Documents\\My Data Sources\\Frameworks(Vedas).xlsx", "Frameworks");
     }
 
     @Test(dataProvider = "chatbotTestData")
-    public void testChatbotQuestion(String testCaseId, String question, String expectedAnswer) {
+    public void testChatbotQuestion(String sheetName, int rowIndex, String testCaseId, String question, String expectedAnswer) {
         System.out.println("Executing Test ID: " + testCaseId + " | Question: " + question);
 
         // 1. Send question via Page Object
@@ -41,11 +46,13 @@ public class ChatbotTest {
 
         System.out.println("Chatbot Answer Captured: " + actualAnswer);
 
-        // 3. Basic TestNG validation
+        // 3. Write actual answer and status back to Excel for AI evaluation
+        String status = (actualAnswer != null && !actualAnswer.trim().isEmpty()) ? "PASS" : "FAIL";
+        ExcelUtils.writeResult(sheetName, rowIndex, actualAnswer, status);
+
+        // 4. Basic TestNG validation
         Assert.assertNotNull(actualAnswer, "Chatbot response should not be null");
-        Assert.assertFalse(actualAnswer.isEmpty(), "Chatbot response should not be empty");
-        
-        // (Optional: Write actualAnswer back to your Excel sheet so your Python script can pick it up)
+        Assert.assertFalse(actualAnswer.trim().isEmpty(), "Chatbot response should not be empty");
     }
 
     @AfterMethod
