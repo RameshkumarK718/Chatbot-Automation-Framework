@@ -18,6 +18,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,9 +66,19 @@ public class ChatbotTest {
     private static final Duration WAIT_TIMEOUT = Duration.ofSeconds(45);
     private static final Duration RESPONSE_TIMEOUT = Duration.ofSeconds(120);
 
+    // Framework & GitHub Repository Configurations
     private static final String ACTIVE_FRAMEWORK = System.getProperty("active.framework", "Vedas");
     private static final String APP_URL = System.getProperty("app.url", "https://devdedham.aptussoft.com/MemberAPI");
     
+    private static final String CREDENTIALS_EXCEL_URL = System.getProperty("credentials.excel.url",
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx");
+    
+    private static final String FRAMEWORK_EXCEL_URL = System.getProperty("framework.excel.url",
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(" + ACTIVE_FRAMEWORK + ").xlsx");
+    
+    private static final String RESULT_EXCEL_URL = System.getProperty("result.excel.url",
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks-Result(" + ACTIVE_FRAMEWORK + ").xlsx");
+
     private static final String CREDENTIALS_FILE_PATH = System.getProperty("credentials.excel.path",
             "C:\\Users\\rames\\OneDrive\\Documents\\My Data Sources\\credentials(1).xlsx");
     
@@ -82,11 +95,27 @@ public class ChatbotTest {
     private final List<TestRowData> executedResults = new ArrayList<>();
     private String lastConversationContext = "";
 
+    private File getOrDownloadFile(String localPath, String remoteUrl) {
+        File file = new File(localPath);
+        if (!file.exists() && remoteUrl != null && !remoteUrl.isBlank()) {
+            try {
+                file.getParentFile().mkdirs();
+                try (InputStream in = new URL(remoteUrl).openStream()) {
+                    Files.copy(in, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                }
+                System.out.println("--> Downloaded resource from GitHub to: " + localPath);
+            } catch (Exception e) {
+                System.err.println("--> Warning: Could not download remote file from " + remoteUrl + ": " + e.getMessage());
+            }
+        }
+        return file;
+    }
+
     private String[] getCredentialsFromExcel() {
         String username = "";
         String password = "";
         
-        File localFile = new File(CREDENTIALS_FILE_PATH);
+        File localFile = getOrDownloadFile(CREDENTIALS_FILE_PATH, CREDENTIALS_EXCEL_URL);
         try (InputStream is = new FileInputStream(localFile);
              Workbook workbook = new XSSFWorkbook(is)) {
             
@@ -129,7 +158,7 @@ public class ChatbotTest {
 
     private List<TestRowData> fetchExcelData() {
         List<TestRowData> dataList = new ArrayList<>();
-        File localFile = new File(FRAMEWORK_EXCEL_FILE);
+        File localFile = getOrDownloadFile(FRAMEWORK_EXCEL_FILE, FRAMEWORK_EXCEL_URL);
         
         try (InputStream is = new FileInputStream(localFile);
              Workbook workbook = new XSSFWorkbook(is)) {
@@ -260,12 +289,10 @@ public class ChatbotTest {
 
         driver = new ChromeDriver(options);
 
-        // Configure timeouts safely
         driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(0));
         driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(120));
         driver.manage().timeouts().scriptTimeout(Duration.ofSeconds(30));
 
-        // Explicit wait instance for UI elements and response polling
         wait = new WebDriverWait(driver, Duration.ofSeconds(45));
 
         try {
@@ -295,7 +322,6 @@ public class ChatbotTest {
                 System.out.println("--> Login credentials submitted successfully.");
             }
 
-            // Navigate into the Conversational AI Chat Drawer
             navigateToConversationalAI();
 
             waitForChatInput();
@@ -357,40 +383,6 @@ public class ChatbotTest {
         }
     }
 
-    private String sendQuestionToChatbot1(String question, String questionType, String context) {
-        if (questionType != null && (questionType.equalsIgnoreCase("Initial") || questionType.equalsIgnoreCase("Direct"))) {
-            lastConversationContext = ""; 
-        }
-
-        String previousResponse = getLastChatMessageText();
-        WebElement chatInput = waitForChatInput();
-        
-        try {
-            chatInput.click();
-            chatInput.clear();
-        } catch (Exception ignored) {}
-
-        // Type question and send via Enter key directly to prevent button click hanging
-        chatInput.sendKeys(question);
-        chatInput.sendKeys(Keys.ENTER);
-
-        // Optional click on send button if Enter key doesn't trigger send
-        try {
-            By sendBtnLocator = By.xpath("//button[contains(normalize-space(.), 'Send') or contains(@class,'send')]");
-            List<WebElement> sendButtons = driver.findElements(sendBtnLocator);
-            if (!sendButtons.isEmpty() && sendButtons.get(0).isDisplayed()) {
-                JavascriptExecutor js = (JavascriptExecutor) driver;
-                js.executeScript("arguments[0].click();", sendButtons.get(0));
-            }
-        } catch (Exception ignored) {}
-
-        String response = waitForChatbotResponse(previousResponse);
-        if (response != null && !response.isBlank()) {
-            lastConversationContext = response;
-        }
-        return response;
-    }
-
     private String getLastChatMessageText() {
         try {
             By messageLocator = By.xpath(
@@ -401,7 +393,6 @@ public class ChatbotTest {
 
             List<WebElement> messages = driver.findElements(messageLocator);
             if (!messages.isEmpty()) {
-                // Correctly fetch the last message from the list
                 WebElement lastMessage = messages.get(messages.size() - 1);
                 String text = lastMessage.getText();
                 return text != null ? text.trim() : "";
@@ -417,17 +408,10 @@ public class ChatbotTest {
         return responseWait.until(d -> {
             String currentResponse = getLastChatMessageText();
             
-            // 1. Safeguard against null return values from getLastChatMessageText()
-            if (currentResponse == null) {
+            if (currentResponse == null || currentResponse.isBlank()) {
                 return null;
             }
             
-            // 2. Safe check if blank
-            if (currentResponse.isBlank()) {
-                return null;
-            }
-            
-            // 3. Check if response updated from previous response
             if (!currentResponse.equals(previousResponse)) {
                 return currentResponse;
             }
@@ -449,19 +433,17 @@ public class ChatbotTest {
         } catch (Exception ignored) {}
 
         chatInput.sendKeys(question);
-        
+        chatInput.sendKeys(Keys.ENTER);
+
         try {
-            By sendButtonLocator = By.xpath("//button[contains(normalize-space(.), 'Send') or contains(@class,'send')]");
-            WebElement sendButton = driver.findElement(sendButtonLocator);
-            if (sendButton.isDisplayed() && sendButton.isEnabled()) {
-                clickElement(sendButton);
-            } else {
-                chatInput.sendKeys(Keys.ENTER);
+            By sendBtnLocator = By.xpath("//button[contains(normalize-space(.), 'Send') or contains(@class,'send')]");
+            List<WebElement> sendButtons = driver.findElements(sendBtnLocator);
+            if (!sendButtons.isEmpty() && sendButtons.get(0).isDisplayed()) {
+                JavascriptExecutor js = (JavascriptExecutor) driver;
+                js.executeScript("arguments[0].click();", sendButtons.get(0));
             }
-        } catch (Exception e) {
-            chatInput.sendKeys(Keys.ENTER);
-        }
-        
+        } catch (Exception ignored) {}
+
         String response = waitForChatbotResponse(previousResponse);
         if (response != null && !response.isBlank()) {
             lastConversationContext = response;
@@ -507,7 +489,7 @@ public class ChatbotTest {
                     + " | Sheet: " + rowData.sheetName
                     + " | Question: " + rowData.question);
             
-            String chatbotResponse = sendQuestionToChatbot1(rowData.question, rowData.questionType, rowData.context);
+            String chatbotResponse = sendQuestionToChatbot(rowData.question, rowData.questionType, rowData.context);
             rowData.actualResult = (chatbotResponse != null) ? chatbotResponse : "";
 
             if (chatbotResponse == null || chatbotResponse.isBlank()) {
@@ -534,8 +516,8 @@ public class ChatbotTest {
     }
     
     private void updateFrameworkExcel(List<TestRowData> results) {
-        File localFile = new File(OUTPUT_EXCEL_FILE);
-        File templateFile = new File(FRAMEWORK_EXCEL_FILE);
+        File localFile = getOrDownloadFile(OUTPUT_EXCEL_FILE, RESULT_EXCEL_URL);
+        File templateFile = getOrDownloadFile(FRAMEWORK_EXCEL_FILE, FRAMEWORK_EXCEL_URL);
         
         File sourceFile = localFile.exists() ? localFile : templateFile;
 
