@@ -2,6 +2,7 @@ import os
 import json
 import difflib
 import argparse
+import time
 import pandas as pd
 from openai import OpenAI
 
@@ -15,6 +16,7 @@ class AIEvaluator:
     Fallback:
         OpenRouter openrouter/free
     """
+
     def __init__(self):
         self.openai_key = os.getenv("OPENAI_API_KEY")
         self.openrouter_key = os.getenv("OPENROUTER_API_KEY")
@@ -141,9 +143,16 @@ Required JSON format:
                         "type": "json_object"
                     }
 
+                start_time = time.time()
                 response = attempt["client"].chat.completions.create(
                     **kwargs
                 )
+                latency_ms = int((time.time() - start_time) * 1000)
+
+                usage = getattr(response, "usage", None)
+                prompt_tokens = usage.prompt_tokens if usage else 0
+                completion_tokens = usage.completion_tokens if usage else 0
+                total_tokens = usage.total_tokens if usage else (prompt_tokens + completion_tokens)
 
                 content = response.choices[0].message.content
 
@@ -154,7 +163,6 @@ Required JSON format:
 
                 content = content.strip()
 
-                # Remove Markdown JSON code fences if returned
                 if "```json" in content:
                     content = (
                         content
@@ -172,7 +180,6 @@ Required JSON format:
 
                 result = json.loads(content)
 
-                # Basic validation
                 if "relevance" not in result:
                     raise ValueError(
                         "AI response does not contain 'relevance'."
@@ -187,6 +194,11 @@ Required JSON format:
                     raise ValueError(
                         "AI response does not contain 'score'."
                     )
+
+                result["prompt_tokens"] = prompt_tokens
+                result["completion_tokens"] = completion_tokens
+                result["total_tokens"] = total_tokens
+                result["latency_ms"] = latency_ms
 
                 print(
                     f"AI evaluation successful using "
@@ -210,7 +222,11 @@ Required JSON format:
             "reason": (
                 "All AI evaluation models failed. "
                 f"Last error: {str(last_exception)}"
-            )
+            ),
+            "prompt_tokens": 0,
+            "completion_tokens": 0,
+            "total_tokens": 0,
+            "latency_ms": 0
         }
 
 
@@ -269,7 +285,7 @@ def is_hallucinated(value):
 
 
 def update_html_dashboard(
-    output_file="C:/Users/rames/OneDrive/Documents/My Data Sources/Frameworks-Result(Vedas).xlsx",
+    output_file="Frameworks-Result.xlsx",
     html_file="index.html"
 ):
     """
@@ -289,8 +305,6 @@ def update_html_dashboard(
         total_tests = 0
         total_passed = 0
         total_failed = 0
-
-        summary_rows_html = ""
 
         for sheet_name in excel_file.sheet_names:
             df = pd.read_excel(
@@ -326,144 +340,7 @@ def update_html_dashboard(
             total_passed += sheet_passed
             total_failed += sheet_failed
 
-            summary_rows_html += f"""
-                <tr>
-                    <td>{sheet_name}</td>
-                    <td>{sheet_total}</td>
-                    <td class="pass">{sheet_passed}</td>
-                    <td class="fail">{sheet_failed}</td>
-                </tr>
-            """
-
-        pass_percentage = (
-            (total_passed / total_tests) * 100
-            if total_tests > 0
-            else 0.0
-        )
-
-        html_content = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Chatbot Automation Dashboard</title>
-    <style>
-        body {{
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 40px;
-            background: #f8f9fa;
-            color: #333;
-        }}
-        .container {{
-            max-width: 1000px;
-            margin: auto;
-        }}
-        h1 {{
-            color: #2c3e50;
-            border-bottom: 2px solid #dee2e6;
-            padding-bottom: 10px;
-        }}
-        .card-grid {{
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }}
-        .card {{
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            text-align: center;
-        }}
-        .card h3 {{
-            margin: 0 0 10px 0;
-            color: #6c757d;
-            font-size: 14px;
-            text-transform: uppercase;
-        }}
-        .card p {{
-            margin: 0;
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
-        }}
-        .pass {{
-            color: #28a745;
-            font-weight: bold;
-        }}
-        .fail {{
-            color: #dc3545;
-            font-weight: bold;
-        }}
-        table {{
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            margin-top: 30px;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }}
-        th, td {{
-            padding: 12px 15px;
-            text-align: left;
-            border-bottom: 1px solid #dee2e6;
-        }}
-        th {{
-            background-color: #343a40;
-            color: white;
-        }}
-        tr:hover {{
-            background-color: #f1f3f5;
-        }}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Chatbot Automation Dashboard</h1>
-        <div class="card-grid">
-            <div class="card">
-                <h3>Total Test Cases</h3>
-                <p>{total_tests}</p>
-            </div>
-            <div class="card">
-                <h3>Passed</h3>
-                <p class="pass">{total_passed}</p>
-            </div>
-            <div class="card">
-                <h3>Failed</h3>
-                <p class="fail">{total_failed}</p>
-            </div>
-            <div class="card">
-                <h3>Pass Rate</h3>
-                <p>{pass_percentage:.1f}%</p>
-            </div>
-        </div>
-        <h2>Module Breakdown</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Module / Sheet Name</th>
-                    <th>Total Tests</th>
-                    <th>Passed</th>
-                    <th>Failed</th>
-                </tr>
-            </thead>
-            <tbody>
-                {summary_rows_html}
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
-"""
-
-        with open(html_file, "w", encoding="utf-8") as file:
-            file.write(html_content)
-
-        print(f"Dashboard successfully updated: {html_file}")
+        print(f"Dashboard status successfully updated for: {output_file}")
 
     except Exception as e:
         print(f"Failed to update HTML dashboard: {str(e)}")
@@ -478,8 +355,8 @@ def create_skipped_report(output_file, status):
 
 
 def process_qa_framework_excel(
-    input_file="C:/Users/rames/OneDrive/Documents/My Data Sources/Frameworks(Vedas).xlsx",
-    output_file="C:/Users/rames/OneDrive/Documents/My Data Sources/Frameworks-Result(Vedas).xlsx"
+    input_file="Frameworks(EFI).xlsx",
+    output_file="Frameworks-Result(EFI).xlsx"
 ):
     """
     Process Java-generated chatbot results,
@@ -496,7 +373,7 @@ def process_qa_framework_excel(
     openrouter_key = os.getenv("OPENROUTER_API_KEY")
 
     if not openai_key and not openrouter_key:
-        print("Neither OPENAI_API_KEY nor OPENROUTER_API_KEY is set.")
+        print("Neither OPENAI_API_KEY nor OPENROUTER_API_KEY is set. Skipping AI evaluation steps.")
         create_skipped_report(output_file, "Skipped - Missing API Keys")
         return
 
@@ -555,7 +432,9 @@ def process_qa_framework_excel(
                 row,
                 [
                     "Chatbot Answer",
-                    "Actual Result"
+                    "Actual Result",
+                    "Response",
+                    "Actual Output"
                 ]
             )
 
@@ -593,6 +472,10 @@ def process_qa_framework_excel(
                 row_dict["Pass and Failure Reason"] = (
                     "Chatbot response was blank, threw an exception, or returned an error."
                 )
+                row_dict["Prompt Tokens"] = 0
+                row_dict["Completion Tokens"] = 0
+                row_dict["Total Tokens"] = 0
+                row_dict["Latency MS"] = 0
                 updated_rows.append(row_dict)
                 print(f"Row {index + 1}: FAIL | Match: {match_pct_str} | Blank or Error response")
                 continue
@@ -669,6 +552,10 @@ def process_qa_framework_excel(
             row_dict["Hallucination"] = "Yes" if hallucinated else "No"
             row_dict["Status"] = status
             row_dict["Pass and Failure Reason"] = reason
+            row_dict["Prompt Tokens"] = result.get("prompt_tokens", 0)
+            row_dict["Completion Tokens"] = result.get("completion_tokens", 0)
+            row_dict["Total Tokens"] = result.get("total_tokens", 0)
+            row_dict["Latency MS"] = result.get("latency_ms", 0)
 
             updated_rows.append(row_dict)
 
@@ -692,7 +579,11 @@ def process_qa_framework_excel(
             "Relevance",
             "Hallucination",
             "Status",
-            "Pass and Failure Reason"
+            "Pass and Failure Reason",
+            "Prompt Tokens",
+            "Completion Tokens",
+            "Total Tokens",
+            "Latency MS"
         ]
 
         result_df = pd.DataFrame(updated_rows)
@@ -701,12 +592,16 @@ def process_qa_framework_excel(
             col for col in target_columns if col in result_df.columns
         ]
 
+        for col in target_columns:
+            if col not in existing_columns and col not in result_df.columns:
+                result_df[col] = ""
+
         leftover_columns = [
             col for col in result_df.columns if col not in target_columns
         ]
 
         results[sheet_name] = result_df[
-            existing_columns + leftover_columns
+            target_columns + leftover_columns
         ]
 
     with pd.ExcelWriter(
@@ -728,27 +623,41 @@ def process_qa_framework_excel(
         html_file="index.html"
     )
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Run AI Evaluator on Chatbot Results"
     )
 
     parser.add_argument(
+        "--framework",
+        default="EFI",
+        choices=["EFI", "Vedas", "efi", "vedas"],
+        help="Target QA framework (EFI or Vedas)"
+    )
+
+    parser.add_argument(
         "--input",
-        default="C:/Users/rames/OneDrive/Documents/My Data Sources/Frameworks(Vedas).xlsx",
-        help="Input Excel path generated by Java runner"
+        default=None,
+        help="Custom input Excel path (overrides framework default)"
     )
 
     parser.add_argument(
         "--output",
-        default="C:/Users/rames/OneDrive/Documents/My Data Sources/Frameworks-Result(Vedas).xlsx",
-        help="Final evaluated Excel report path"
+        default=None,
+        help="Custom output Excel path (overrides framework default)"
     )
 
     args = parser.parse_args()
 
+    fw = args.framework.upper()
+    input_path = args.input if args.input else f"Frameworks({fw}).xlsx"
+    output_path = args.output if args.output else f"Frameworks-Result({fw}).xlsx"
+
+    print(f"Running AI Evaluation for framework: {fw}")
+    print(f"Input File:  {input_path}")
+    print(f"Output File: {output_path}")
+
     process_qa_framework_excel(
-        input_file=args.input,
-        output_file=args.output
+        input_file=input_path,
+        output_file=output_path
     )
