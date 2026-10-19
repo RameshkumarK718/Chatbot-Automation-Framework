@@ -15,7 +15,6 @@ class AIEvaluator:
     Fallback:
         OpenRouter openrouter/free
     """
-
     def __init__(self):
         self.openai_key = os.getenv("OPENAI_API_KEY")
         self.openrouter_key = os.getenv("OPENROUTER_API_KEY")
