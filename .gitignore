@@ -2,33 +2,27 @@
 # target/
 bin/
 *.class
-
 # Eclipse IDE files
 .metadata/
 .classpath
 .project
 .settings/
-
 # Python cache and virtual environments
 __pycache__/
 *.pyc
 .pytest_cache/
 venv/
 .venv/
-
 # TestNG generated reports
 test-output/
-
 # Local credentials and sensitive configs (prevents leaking them)
 credentials(1).xlsx
 config.properties
-
 # Temporary, backup, and log files
 *.swp
 *.swo
 *.backup
 *.log
-
 # Generated test results (if you want to keep them local)
 # Frameworks-Result(EFI).xlsx
 # Frameworks-Result(Vedas).xlsx
