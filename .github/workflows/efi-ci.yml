@@ -18,17 +18,14 @@ on:
         description: "Target Chatbot App URL"
         required: true
         default: "https://devdedham.aptussoft.com/MemberAPI"
-
       framework_excel_url:
         description: "Question Bank Excel URL (GitHub Raw)"
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx"
-
       credentials_excel_url:
         description: "Credentials Excel URL (GitHub Raw)"
         required: true
         default: "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/credentials(1).xlsx"
-
       result_excel_url:
         description: "Result Excel URL (GitHub Raw)"
         required: true
