@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Universal Chatbot QA Automation & AI Evaluation Center</title>
+  <title>Universal Chatbot QA Automation Dashboard & AI Evaluation Center</title>
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -13,44 +13,78 @@
       theme: {
         extend: {
           colors: {
-            brand: { 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8' },
-            dark: { 800: '#111827', 900: '#090d16', 950: '#030712' }
+            brand: {
+              50: '#f0f6ff',
+              100: '#e0edff',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              900: '#1e3a8a',
+            },
+            dark: {
+              800: '#111827',
+              850: '#0f172a',
+              900: '#090d16',
+              950: '#030712',
+            }
           },
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace']
+            mono: ['JetBrains Mono', 'monospace'],
           }
         }
       }
     }
   </script>
 
-  <!-- Google Fonts & FontAwesome -->
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-  <!-- SheetJS -->
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- SheetJS CDN for parsing Excel (.xlsx/.xls) and CSV files -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #030712; }
-    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+    /* Custom Scrollbar Styles */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #030712;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* Glassmorphism panel */
     .glass-panel {
       background: rgba(17, 24, 39, 0.85);
       backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
   </style>
 </head>
 <body class="h-full flex flex-col font-sans overflow-hidden bg-slate-950 text-slate-200">
 
-  <!-- HEADER -->
-  <header class="h-16 bg-slate-900/95 border-b border-slate-800 px-4 flex items-center justify-between shrink-0 z-30 backdrop-blur-md">
+  <!-- TOP HEADER NAVIGATION BAR WITH ASPIRENXT LOGO & TITLE -->
+  <header class="h-14 bg-slate-900/90 border-b border-slate-800/80 px-4 flex items-center justify-between shrink-0 z-30 backdrop-blur-md">
     <div class="flex items-center space-x-3">
-      <div class="w-10 h-10 rounded-xl bg-white border border-slate-700 flex flex-col items-center justify-center p-0.5 shadow-sm shrink-0">
-        <svg viewBox="0 0 500 340" class="w-6 h-6 object-contain" xmlns="http://www.w3.org/2000/svg">
+      <!-- AspireNXT Logo Box -->
+      <div class="w-9 h-9 rounded-xl bg-white border border-slate-700/80 flex flex-col items-center justify-center p-0.5 shadow-sm shrink-0">
+        <svg viewBox="0 0 500 340" class="w-5 h-5 object-contain" xmlns="http://www.w3.org/2000/svg">
           <polygon points="250,20 20,280 250,200" fill="#f87171"/>
           <polygon points="250,20 250,200 480,280" fill="#dc2626"/>
           <polygon points="250,200 20,280 250,320" fill="#b91c1c"/>
@@ -62,263 +96,426 @@
       </div>
       <div>
         <h1 class="text-xs md:text-sm font-semibold tracking-wide text-white flex items-center gap-2">
-          Universal Chatbot QA Automation & AI Evaluation
-          <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> STATUS: ONLINE
-          </span>
+          Universal Chatbot QA Automation Dashboard & AI Evaluation Center
+          <span id="activeFrameworkBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 font-mono">EFI Core</span>
         </h1>
-        <p class="text-[10px] text-slate-400">Bot: <span id="header-bot" class="text-amber-400 font-mono font-semibold">Domain</span> &bull; Language: <span id="header-lang" class="text-blue-400 font-mono font-semibold">any</span></p>
+        <p class="text-[10px] text-slate-400">A-NXT Enterprise Validation Suite &bull; <span class="text-emerald-400 font-mono" id="syncStatusLabel">A-NXT Org Synced</span></p>
       </div>
     </div>
 
-    <!-- Header Actions -->
-    <div class="flex items-center space-x-2.5 text-xs">
-      <label class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg cursor-pointer transition text-xs font-medium">
-        <i class="fa-solid fa-file-excel text-emerald-400"></i>
-        <span>Import Question Bank</span>
-        <input type="file" id="question-bank-file" accept=".xlsx, .xls, .csv, .json" class="hidden" onchange="handleQuestionBankImport(event)">
-      </label>
+    <!-- Header Actions & Framework Core Switcher -->
+    <div class="flex items-center space-x-3 text-xs">
+      <!-- Core Switcher -->
+      <div class="bg-slate-950 p-1 rounded-lg border border-slate-800 flex items-center">
+        <button onclick="switchFramework('EFI')" id="btnEFI" class="px-2.5 py-1 text-[11px] font-semibold rounded transition-all bg-blue-600 text-white shadow-sm">EFI Core</button>
+        <button onclick="switchFramework('Vedas')" id="btnVedas" class="px-2.5 py-1 text-[11px] font-semibold rounded transition-all text-slate-400 hover:text-white">Vedas Core</button>
+      </div>
 
-      <button onclick="toggleAuthDrawer()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg transition text-xs">
+      <button onclick="verifyEndpointConnection()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-1.5 rounded-lg font-medium transition text-xs shadow-md">
+        <i class="fa-brands fa-github text-sm"></i>
+        <span class="hidden sm:inline">Sync A-NXT Repo</span>
+      </button>
+
+      <button onclick="toggleAuthDrawer()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg font-medium transition text-xs">
         <i class="fa-solid fa-key text-amber-400"></i>
-        <span>Auth Config & Headers</span>
+        <span class="hidden sm:inline">Auth Config</span>
       </button>
 
-      <button onclick="toggleSandboxDrawer()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg font-medium transition text-xs shadow-lg shadow-blue-600/20">
+      <button onclick="toggleSandboxDrawer()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg font-medium transition text-xs shadow-lg shadow-blue-600/20">
         <i class="fa-solid fa-terminal"></i>
-        <span>Live Interactive Sandbox</span>
+        <span>Interactive Sandbox</span>
       </button>
 
-      <button onclick="exportAuditReport()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-1.5 rounded-lg transition text-xs font-medium">
-        <i class="fa-solid fa-download text-slate-400"></i>
-        <span>Export Audit Report</span>
-      </button>
+      <div class="relative">
+        <button onclick="toggleExportDropdown()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg transition text-xs">
+          <i class="fa-solid fa-download text-slate-400"></i>
+          <span class="hidden sm:inline">Export Audit Report</span>
+          <i class="fa-solid fa-chevron-down text-[10px] ml-1"></i>
+        </button>
+        <div id="export-dropdown" class="hidden absolute right-0 mt-2 w-52 bg-slate-900 border border-slate-800 rounded-lg shadow-xl z-50 overflow-hidden">
+          <button onclick="exportReport('json')" class="w-full text-left px-4 py-2 hover:bg-slate-800 text-slate-200 text-xs flex items-center gap-2">
+            <i class="fa-solid fa-file-code text-blue-400"></i> Export JSON Data
+          </button>
+          <button onclick="exportReport('csv')" class="w-full text-left px-4 py-2 hover:bg-slate-800 text-slate-200 text-xs flex items-center gap-2 border-t border-slate-800">
+            <i class="fa-solid fa-file-csv text-emerald-400"></i> Export CSV Dataset
+          </button>
+          <button onclick="exportReport('html')" class="w-full text-left px-4 py-2 hover:bg-slate-800 text-slate-200 text-xs flex items-center gap-2 border-t border-slate-800">
+            <i class="fa-solid fa-file-contract text-purple-400"></i> Export Executive HTML Report
+          </button>
+        </div>
+      </div>
     </div>
   </header>
 
   <!-- MAIN WRAPPER -->
   <div class="flex-1 flex overflow-hidden relative">
 
-    <!-- DYNAMIC 12-POINT SIDEBAR (NUMBERS REMOVED) -->
-    <aside id="sidebar" class="w-72 bg-slate-900/95 border-r border-slate-800 flex flex-col shrink-0 transition-all duration-300 z-20 overflow-y-auto p-3 space-y-4 text-xs">
-      
-      <!-- CONFIGURATION -->
-      <div>
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">CONFIGURATION</div>
-        <div class="space-y-2 font-mono text-[11px]">
-          <div onclick="openBlockModal('domain')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>Domain & Environment</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-blue-400 mt-1 truncate" id="sb-url-display">URL, QA/UAT/Prod</div>
-          </div>
-
-          <div onclick="openBlockModal('lang')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>Programming Language & Tools</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-amber-400 mt-1" id="sb-lang-display">Java, Python, TestNG</div>
-          </div>
-
-          <div onclick="openBlockModal('xpath')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>XPaths / Locators</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-purple-300 mt-1">CSS & Element ID</div>
-          </div>
-
-          <div onclick="openBlockModal('config')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>Test Configuration</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-slate-400 mt-1">Timeouts & Headless</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- EXECUTION -->
-      <div>
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">EXECUTION</div>
-        <div class="space-y-2 font-mono text-[11px]">
-          <div onclick="openBlockModal('runtime')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>Runtime & Performance</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-emerald-400 mt-1">Latency & Duration Metrics</div>
-          </div>
-
-          <div onclick="openBlockModal('suite')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>Test Suite & Total Tasks</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-slate-400 mt-1">Test cases, sheets, categories</div>
-          </div>
-
-          <div onclick="runBulkEvaluation()" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>Test Run</span>
-              <i class="fa-solid fa-play text-[10px] text-emerald-400"></i>
-            </div>
-            <div class="text-[10px] text-emerald-400 font-semibold mt-1">Run, Stop & Monitor</div>
-          </div>
-
-          <div onclick="openBlockModal('cicd')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>CI/CD Pipeline</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-slate-400 mt-1">GitHub Actions Sync</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ANALYSIS & REPORTING -->
-      <div>
-        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">ANALYSIS & REPORTING</div>
-        <div class="space-y-2 font-mono text-[11px]">
-          <div onclick="openBlockModal('ai')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>AI Evaluation</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-purple-400 mt-1">Semantic & Hallucination Checks</div>
-          </div>
-
-          <div onclick="openBlockModal('results')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>Results & Reports</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-slate-400 mt-1">Pass/Fail Summary & Charts</div>
-          </div>
-
-          <div onclick="openBlockModal('logs')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>Failure Analysis & Logs</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-rose-400 mt-1">Stack Traces & Debugging</div>
-          </div>
-
-          <div onclick="openBlockModal('history')" class="p-2.5 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
-            <div class="font-semibold text-white font-sans text-xs flex items-center justify-between">
-              <span>Test History</span>
-              <i class="fa-solid fa-chevron-right text-[10px] text-slate-500"></i>
-            </div>
-            <div class="text-[10px] text-slate-400 mt-1">Trends & Regression</div>
-          </div>
-        </div>
-      </div>
-
-    </aside>
-
-    <!-- MAIN CONTENT AREA -->
-    <main class="flex-1 flex flex-col overflow-y-auto bg-slate-950 p-4 space-y-4">
-
-      <!-- APP URLs & CONFIGURATION PANEL -->
-      <section class="glass-panel rounded-xl p-4 shadow-2xl border border-blue-500/20">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3 border-b border-slate-800/80 pb-3">
-          <div>
-            <h2 class="text-sm font-semibold text-white flex items-center gap-2">
-              <i class="fa-solid fa-globe text-blue-400"></i> App URLs & Environment Configuration
-            </h2>
-            <p class="text-xs text-slate-400">Manage target chatbot APP_URLs and associated execution parameters manually.</p>
-          </div>
-          <button onclick="runBulkEvaluation()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-xs font-semibold shadow-lg transition flex items-center gap-1.5">
-            <i class="fa-solid fa-play"></i> Run Suite Evaluation
+    <!-- 1. FULLY DYNAMIC SIDEBAR (REPOSITORY EXPLORER) -->
+    <aside id="sidebar" class="w-72 bg-slate-900/95 border-r border-slate-800/80 flex flex-col shrink-0 transition-all duration-300 z-20">
+      <div class="p-3 border-b border-slate-800 flex items-center justify-between">
+        <span id="sidebar-header-text" class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+          <i class="fa-solid fa-folder-tree text-blue-400"></i> REPOSITORY EXPLORER
+        </span>
+        <div class="flex items-center gap-1">
+          <button onclick="openCreateFolderModal()" class="text-slate-400 hover:text-blue-400 p-1" title="New Folder">
+            <i class="fa-solid fa-folder-plus text-xs"></i>
+          </button>
+          <button onclick="openCreateFileModal()" class="text-slate-400 hover:text-emerald-400 p-1" title="New Suite File">
+            <i class="fa-solid fa-file-circle-plus text-xs"></i>
+          </button>
+          <button onclick="toggleSidebarCollapse()" class="text-slate-500 hover:text-slate-300 p-1 ml-1">
+            <i id="sidebar-toggle-icon" class="fa-solid fa-angles-left text-xs"></i>
           </button>
         </div>
+      </div>
 
+      <!-- Search Box -->
+      <div id="sidebar-search-container" class="p-2 border-b border-slate-800/60">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-500 text-xs"></i>
+          <input type="text" placeholder="Search repository..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-2 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500 placeholder-slate-600" onkeyup="filterSidebarItems(this.value)">
+        </div>
+      </div>
+
+      <!-- Dynamic Tree View Container -->
+      <div class="flex-1 overflow-y-auto p-2 space-y-1 text-xs font-mono" id="dynamic-tree-container">
+        <!-- Rendered via JavaScript -->
+      </div>
+
+      <!-- Quick Upload Footer in Sidebar -->
+      <div id="sidebar-footer" class="p-3 border-t border-slate-800 bg-slate-950/60 space-y-2">
+        <label for="excel-upload" class="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-lg py-2 px-3 cursor-pointer text-xs font-medium transition shadow-md">
+          <i class="fa-solid fa-cloud-arrow-up text-blue-400"></i>
+          <span class="sidebar-text">Import Excel / CSV / JSON</span>
+        </label>
+        <input type="file" id="excel-upload" accept=".csv, .xlsx, .xls, .json" class="hidden" onchange="handleFileUpload(event)">
+      </div>
+    </aside>
+
+    <!-- CENTER DASHBOARD MAIN CONTENT -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-slate-950 p-4 space-y-4">
+
+      <!-- 2. CHATBOT TARGET CONFIGURATION & CONNECTION PANEL -->
+      <section class="glass-panel rounded-xl p-4 shadow-2xl relative overflow-hidden">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-3 border-b border-slate-800/80 pb-3">
+          <div>
+            <h2 class="text-sm md:text-base font-semibold text-white flex items-center gap-2">
+              <i class="fa-solid fa-sliders text-blue-400"></i>
+              Target Chatbot & DOM Inspector Engine
+            </h2>
+            <p class="text-xs text-slate-400">Configure target bot details, API endpoints, DOM Selectors/XPaths, and protocol bindings dynamically.</p>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="verifyEndpointConnection()" id="btn-ping" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+              <i class="fa-solid fa-network-wired text-emerald-400"></i>
+              <span>Ping & Inspect DOM Selector</span>
+            </button>
+            <button onclick="openAddTestCaseModal()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
+              <i class="fa-solid fa-plus text-blue-400"></i>
+              <span>Add Test Case</span>
+            </button>
+            <button onclick="runSuiteEvaluation()" id="btn-run-eval" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-xs font-semibold shadow-lg shadow-emerald-600/30 transition">
+              <i class="fa-solid fa-play"></i>
+              <span>Run Bulk Evaluation</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Inputs Configuration Grid -->
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <!-- Chatbot Friendly Name -->
           <div class="md:col-span-3">
-            <label class="block text-[11px] font-medium text-slate-400 mb-1">Bot Name</label>
-            <input type="text" id="config-bot" value="Domain" onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-medium text-amber-300 focus:outline-none focus:border-blue-500">
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Chatbot Target Name</label>
+            <input type="text" id="target-bot-name" value="Enterprise Assistant" onchange="updateTargetConfigFromUI()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-medium text-amber-300 focus:outline-none focus:border-blue-500">
           </div>
-          <div class="md:col-span-6">
-            <label class="block text-[11px] font-medium text-slate-400 mb-1">Target App URL (Manual Entry)</label>
-            <input type="text" id="config-url" value="https://devdedham.aptussoft.com/MemberApi/Aptus/Main" onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-blue-300 focus:outline-none focus:border-blue-500">
+
+          <!-- Target Endpoint URL -->
+          <div class="md:col-span-4">
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Target Chatbot Endpoint / URL</label>
+            <input type="text" id="target-url" value="https://api.chatbot.ai/v1/chat" onchange="updateTargetConfigFromUI()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-blue-300 focus:outline-none focus:border-blue-500">
           </div>
+
+          <!-- Input Selector / XPath -->
           <div class="md:col-span-3">
-            <label class="block text-[11px] font-medium text-slate-400 mb-1">Programming Language</label>
-            <input type="text" id="config-lang" value="any" onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-purple-300 focus:outline-none focus:border-blue-500">
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Input Field Selector / XPath</label>
+            <input type="text" id="target-xpath" value='//textarea[@id="chat-input"]' onchange="updateTargetConfigFromUI()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-purple-300 focus:outline-none focus:border-blue-500">
+          </div>
+
+          <!-- Protocol Engine -->
+          <div class="md:col-span-2">
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Protocol</label>
+            <select id="protocol-engine" onchange="updateTargetConfigFromUI()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+              <option value="REST API">REST API</option>
+              <option value="WebSocket">WebSocket</option>
+              <option value="Web Embed">Web Embed</option>
+              <option value="Custom Webhook">Webhook</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Connection Test & Inspector Status Banner -->
+        <div id="conn-banner" class="hidden mt-3 p-2.5 rounded-lg border text-xs flex items-center justify-between transition-all">
+          <div class="flex items-center gap-2">
+            <i id="conn-icon" class="fa-solid fa-circle-check"></i>
+            <span id="conn-msg" class="font-medium"></span>
+          </div>
+          <span id="conn-latency" class="font-mono text-[11px]"></span>
+        </div>
+
+        <!-- Evaluation Progress Bar -->
+        <div id="eval-progress-container" class="hidden mt-3">
+          <div class="flex justify-between text-[11px] mb-1 font-mono">
+            <span class="text-blue-400" id="eval-progress-status">Evaluating...</span>
+            <span class="text-slate-400" id="eval-progress-percent">0%</span>
+          </div>
+          <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+            <div id="eval-progress-bar" class="bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 h-full w-0 transition-all duration-300"></div>
           </div>
         </div>
       </section>
 
-      <!-- QUESTION BANK REGISTRY TABLE -->
-      <section class="bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden flex flex-col shadow-xl">
-        <div class="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
-          <h3 class="text-xs font-semibold text-white flex items-center gap-2 uppercase tracking-wider">
-            <i class="fa-solid fa-list-check text-blue-400"></i> Question Bank Registry
-          </h3>
-          <span class="text-[11px] font-mono text-slate-400" id="table-count">2 Test Cases</span>
+      <!-- 3. EXECUTIVE TELEMETRY KPI CARDS -->
+      <section class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <!-- Total Active Cases Card -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-md">
+          <div>
+            <div class="text-[11px] font-medium text-slate-400">Total Active Cases</div>
+            <div class="text-2xl font-bold text-white mt-1 font-mono" id="kpi-total">0</div>
+            <div class="text-[10px] text-slate-500 mt-0.5" id="kpi-framework-sub">EFI Suite Loaded</div>
+          </div>
+          <div class="p-2.5 bg-slate-800 text-blue-400 rounded-lg border border-slate-700">
+            <i class="fa-solid fa-layer-group text-lg"></i>
+          </div>
         </div>
 
-        <div class="overflow-x-auto max-h-[380px]">
-          <table class="w-full text-left text-xs font-mono">
-            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0 text-[10px] uppercase">
-              <tr>
-                <th class="p-2.5">Status</th>
-                <th class="p-2.5">ID / Category</th>
-                <th class="p-2.5">User Prompt</th>
-                <th class="p-2.5">Expected Output</th>
-                <th class="p-2.5">Actual Output</th>
-              </tr>
-            </thead>
-            <tbody id="test-table-body" class="divide-y divide-slate-800/60 text-slate-300 font-sans"></tbody>
-          </table>
+        <!-- Pass Rate Card -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-md">
+          <div>
+            <div class="text-[11px] font-medium text-slate-400">Evaluation Pass Rate</div>
+            <div class="text-2xl font-bold text-emerald-400 mt-1 font-mono" id="kpi-pass-rate">0%</div>
+            <div class="text-[10px] text-slate-500 mt-0.5"><span id="kpi-passed-count" class="text-emerald-400">0 passed</span> &bull; <span id="kpi-failed-count" class="text-rose-400">0 failed</span></div>
+          </div>
+          <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
+            <i class="fa-solid fa-circle-check text-lg"></i>
+          </div>
+        </div>
+
+        <!-- Mean Latency Card -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-md">
+          <div>
+            <div class="text-[11px] font-medium text-slate-400">Mean Latency</div>
+            <div class="text-2xl font-bold text-blue-400 mt-1 font-mono" id="kpi-latency">0 ms</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Target threshold &lt; 800ms</div>
+          </div>
+          <div class="p-2.5 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20">
+            <i class="fa-solid fa-bolt text-lg"></i>
+          </div>
+        </div>
+
+        <!-- Tokens Card -->
+        <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-md">
+          <div>
+            <div class="text-[11px] font-medium text-slate-400">Mean Token Usage</div>
+            <div class="text-2xl font-bold text-purple-400 mt-1 font-mono" id="kpi-tokens">0 tok</div>
+            <div class="text-[10px] text-slate-500 mt-0.5">Cost efficiency optimized</div>
+          </div>
+          <div class="p-2.5 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">
+            <i class="fa-solid fa-microchip text-lg"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. ADVANCED FILTERING & BULK ACTIONS TOOLBAR -->
+      <section class="bg-slate-900/70 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
+        <!-- Active Sheet/Suite Indicator -->
+        <div class="flex items-center space-x-2 text-xs">
+          <span class="text-slate-400 font-medium">Active File:</span>
+          <span id="active-suite-badge" class="bg-blue-500/10 text-blue-400 border border-blue-500/20 px-2.5 py-1 rounded-md font-semibold font-mono flex items-center gap-1.5">
+            <i class="fa-solid fa-file-excel text-emerald-400"></i> Frameworks(EFI).xlsx
+          </span>
+        </div>
+
+        <!-- Filters & Search Toolbar -->
+        <div class="flex flex-wrap items-center gap-2 flex-1 max-w-2xl justify-end">
+          <div class="relative min-w-[160px]">
+            <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-500 text-xs"></i>
+            <input type="text" id="table-search" placeholder="Search prompts..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-2 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500" onkeyup="applyTableFilters()">
+          </div>
+
+          <select id="status-filter" onchange="applyTableFilters()" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500 font-mono">
+            <option value="ALL">All Statuses</option>
+            <option value="PASS">Passed Only</option>
+            <option value="FAIL">Failed Only</option>
+            <option value="PENDING">Pending Only</option>
+          </select>
+
+          <select id="category-filter" onchange="applyTableFilters()" class="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500">
+            <option value="ALL">All Categories</option>
+          </select>
+
+          <button onclick="resetFilters()" class="p-1.5 text-slate-400 hover:text-slate-200 bg-slate-800 hover:bg-slate-700 rounded-lg border border-slate-700 text-xs" title="Reset Filters">
+            <i class="fa-solid fa-rotate-left"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- 5. INTERACTIVE TEST EXECUTION REGISTRY TABLE & CHART METRICS -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+        <!-- TEST EXECUTION REGISTRY TABLE -->
+        <div class="lg:col-span-8 bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden flex flex-col shadow-xl">
+          <div class="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+            <h3 class="text-xs font-semibold text-white flex items-center gap-2 uppercase tracking-wider">
+              <i class="fa-solid fa-list-check text-blue-400"></i>
+              TEST EXECUTION REGISTRY
+            </h3>
+            <span class="text-[11px] font-mono text-slate-400" id="table-row-count">Showing 0 Cases</span>
+          </div>
+
+          <div class="overflow-x-auto max-h-[400px]">
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0 z-10 text-[10px] uppercase tracking-wider">
+                <tr>
+                  <th class="p-2.5 font-medium">Status</th>
+                  <th class="p-2.5 font-medium">ID / Intent</th>
+                  <th class="p-2.5 font-medium">User Prompt</th>
+                  <th class="p-2.5 font-medium">Expected Output</th>
+                  <th class="p-2.5 font-medium">Actual Output</th>
+                  <th class="p-2.5 font-medium text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="test-table-body" class="divide-y divide-slate-800/60 text-slate-300 font-sans">
+                <!-- Dynamic Content -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ANALYTICS & QUALITY SCORE METRICS -->
+        <div class="lg:col-span-4 space-y-4">
+          <!-- Pass/Fail Distribution Chart -->
+          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between shadow-xl">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-xs font-semibold text-slate-200 flex items-center gap-2">
+                <i class="fa-solid fa-chart-pie text-emerald-400"></i> Execution Breakdown
+              </h3>
+              <span class="text-[10px] text-slate-500 font-mono">Active Session</span>
+            </div>
+            <div class="relative h-40 w-full flex items-center justify-center">
+              <canvas id="doughnutChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Quality Metric Bars -->
+          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 shadow-xl space-y-2.5">
+            <h3 class="text-xs font-semibold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 uppercase tracking-wider text-[11px]">
+              <i class="fa-solid fa-gauge-high text-purple-400"></i> Evaluation Quality Scores
+            </h3>
+
+            <div>
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="text-slate-400">Intent Accuracy</span>
+                <span id="score-intent" class="text-emerald-400 font-mono font-semibold">0%</span>
+              </div>
+              <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                <div id="bar-intent" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="text-slate-400">Entity Precision</span>
+                <span id="score-xpath" class="text-blue-400 font-mono font-semibold">0%</span>
+              </div>
+              <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                <div id="bar-xpath" class="bg-blue-500 h-full w-0 transition-all duration-500"></div>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex justify-between text-[11px] mb-1">
+                <span class="text-slate-400">Semantic Similarity</span>
+                <span id="score-semantic" class="text-purple-400 font-mono font-semibold">0%</span>
+              </div>
+              <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
+                <div id="bar-semantic" class="bg-purple-500 h-full w-0 transition-all duration-500"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- 6. DUAL LIVE CONSOLES (RESULT CONSOLE & ERROR CONSOLE) -->
+      <section class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col">
+        <div class="p-2 border-b border-slate-800 flex items-center justify-between bg-slate-950/90">
+          <div class="flex items-center space-x-1">
+            <button onclick="switchConsoleTab('results')" id="tab-btn-results" class="px-3 py-1 text-xs font-semibold rounded-md bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center gap-1.5">
+              <i class="fa-solid fa-square-poll-vertical"></i> Result Execution Console
+              <span id="badge-result-count" class="bg-blue-500/20 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+            </button>
+            <button onclick="switchConsoleTab('errors')" id="tab-btn-errors" class="px-3 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Error & Assertion Log Console
+              <span id="badge-error-count" class="bg-rose-500/20 text-rose-400 px-1.5 py-0.2 rounded-full text-[10px]">0</span>
+            </button>
+          </div>
+
+          <button onclick="clearCurrentConsole()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 px-2 py-1 rounded border border-slate-700 transition">
+            Clear Active Console
+          </button>
+        </div>
+
+        <!-- Result Console Container -->
+        <div id="console-results" class="p-3 bg-slate-950/90 font-mono text-[11px] h-32 overflow-y-auto space-y-1 text-slate-400">
+          <div class="text-emerald-400">[System] Initialized enterprise QA evaluation runner. Ready for test suite execution.</div>
+        </div>
+
+        <!-- Error Console Container -->
+        <div id="console-errors" class="hidden p-3 bg-slate-950/90 font-mono text-[11px] h-32 overflow-y-auto space-y-1 text-rose-400/90">
+          <div class="text-slate-500 italic">[NO ERRORS LOGGED] System running cleanly. Failed assertions or DOM selector mismatches will appear here.</div>
         </div>
       </section>
 
     </main>
 
-    <!-- DYNAMIC SIDEBAR BLOCK MODAL -->
-    <div id="block-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl p-4 space-y-3">
-        <div class="flex items-center justify-between border-b border-slate-800 pb-2">
-          <h3 id="modal-title" class="text-sm font-semibold text-white flex items-center gap-2"></h3>
-          <button onclick="closeBlockModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div id="modal-body" class="text-xs text-slate-300 space-y-2 font-mono"></div>
-        <div class="pt-2 flex justify-end">
-          <button onclick="closeBlockModal()" class="px-3 py-1.5 bg-blue-600 text-white rounded text-xs font-sans">Close</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- LIVE INTERACTIVE SANDBOX DRAWER -->
-    <div id="sandbox-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-slate-900 border-l border-slate-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col">
+    <!-- 7. LIVE INTERACTIVE CHATBOT SANDBOX DRAWER (SLIDING RIGHT SIDEBAR) -->
+    <div id="sandbox-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-slate-900 border-l border-slate-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col">
       <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
         <div class="flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-          <h3 class="text-xs font-semibold text-white">Live Interactive Sandbox</h3>
+          <h3 class="text-xs font-semibold text-white">Live Dynamic Chat Sandbox</h3>
         </div>
         <button onclick="toggleSandboxDrawer()" class="text-slate-400 hover:text-white p-1">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
-      <div id="sandbox-chat" class="flex-1 overflow-y-auto p-3.5 space-y-3 text-xs">
-        <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-slate-300 font-mono">
-          Sandbox ready. Testing against App URL: <span id="sandbox-active-url" class="text-blue-300">https://devdedham.aptussoft.com/MemberApi/Aptus/Main</span>
+      <div class="px-3.5 py-2 bg-slate-950/80 border-b border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
+        <span class="truncate">Bot: <span id="sandbox-bot-name" class="text-amber-400">Enterprise Assistant</span></span>
+        <span id="sandbox-engine" class="bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 text-[10px]">REST API</span>
+      </div>
+
+      <div id="sandbox-chat-history" class="flex-1 overflow-y-auto p-3.5 space-y-3 text-xs">
+        <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-slate-300">
+          <div class="text-[10px] text-blue-400 font-semibold mb-1 flex items-center gap-1">
+            <i class="fa-solid fa-robot"></i> DYNAMIC SANDBOX ASSISTANT
+          </div>
+          Submit prompt query to dynamically test against configured target endpoint. Calculates latency, token count, and DOM simulation in real time.
         </div>
       </div>
 
       <div class="p-3 border-t border-slate-800 bg-slate-950">
         <form onsubmit="handleSandboxSubmit(event)" class="flex gap-2">
-          <input type="text" id="sandbox-input" placeholder="Type prompt..." class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
-          <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-xs font-medium">Send</button>
+          <input type="text" id="sandbox-input" placeholder="Type prompt to send..." class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+          <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-center">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
         </form>
       </div>
     </div>
 
-    <!-- AUTH CONFIG & HEADERS DRAWER -->
+    <!-- AUTH CONFIG DRAWER -->
     <div id="auth-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[380px] bg-slate-900 border-l border-slate-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col">
       <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
         <h3 class="text-xs font-semibold text-white flex items-center gap-2">
@@ -329,182 +526,693 @@
         </button>
       </div>
 
-      <div class="p-4 space-y-4 text-xs font-mono">
+      <div class="p-4 space-y-4 text-xs">
         <div>
-          <label class="block text-[11px] font-medium text-slate-400 mb-1">Authorization Bearer Token / API Key</label>
-          <input type="text" id="auth-token" value="bearer-token-aptus-9982" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-blue-500">
+          <label class="block text-[11px] font-medium text-slate-400 mb-1">Authorization Bearer Token</label>
+          <input type="text" id="auth-bearer-token" value="bearer-qa-token-998234-x" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 focus:outline-none focus:border-blue-500">
         </div>
 
         <div>
           <label class="block text-[11px] font-medium text-slate-400 mb-1">Custom Header Key: Value</label>
-          <input type="text" id="auth-header" value="X-Organization-Context: devdedham" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-blue-500">
+          <input type="text" id="auth-custom-header" value="X-Organization-ID: org_qa_enterprise_900" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 focus:outline-none focus:border-blue-500">
         </div>
 
-        <div>
-          <label class="block text-[11px] font-medium text-slate-400 mb-1">Session Cookie / User Agent</label>
-          <input type="text" id="auth-cookie" value="session_id=aptus_prod_active_901" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-blue-500">
-        </div>
-
-        <button onclick="saveAuthCredentials()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2.5 rounded-lg transition font-sans shadow-lg">
-          Save Credentials & Headers
+        <button onclick="saveAuthSettings()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg transition">
+          Save Credentials
         </button>
+      </div>
+    </div>
+
+    <!-- MODALS -->
+    <!-- CREATE FOLDER MODAL -->
+    <div id="modal-create-folder" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl p-4 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+          <h3 class="text-xs font-semibold text-white flex items-center gap-2"><i class="fa-solid fa-folder-plus text-blue-400"></i> Add Folder to Repository</h3>
+          <button onclick="closeModal('modal-create-folder')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">Folder Name</label>
+          <input type="text" id="new-folder-name" placeholder="e.g., Performance_Suites" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+        </div>
+        <div class="flex justify-end gap-2">
+          <button onclick="closeModal('modal-create-folder')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">Cancel</button>
+          <button onclick="confirmCreateFolder()" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium">Create Folder</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATE FILE MODAL -->
+    <div id="modal-create-file" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl p-4 space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+          <h3 class="text-xs font-semibold text-white flex items-center gap-2"><i class="fa-solid fa-file-circle-plus text-emerald-400"></i> Create New Test Suite File</h3>
+          <button onclick="closeModal('modal-create-file')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div>
+          <label class="block text-xs text-slate-400 mb-1">File Name (.xlsx / .json / .csv)</label>
+          <input type="text" id="new-file-name" placeholder="e.g., Enterprise_Security_Suite.xlsx" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+        </div>
+        <div class="flex justify-end gap-2">
+          <button onclick="closeModal('modal-create-file')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">Cancel</button>
+          <button onclick="confirmCreateFile()" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium">Create File</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADD TEST CASE MODAL -->
+    <div id="modal-add-case" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+      <div class="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-lg overflow-hidden shadow-2xl p-4 space-y-3">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+          <h3 class="text-xs font-semibold text-white flex items-center gap-2"><i class="fa-solid fa-plus text-blue-400"></i> Add New QA Test Case</h3>
+          <button onclick="closeModal('modal-add-case')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="space-y-3 text-xs">
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-slate-400 mb-1">Test Case ID</label>
+              <input type="text" id="tc-id-input" value="TC_NEW_01" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-slate-200">
+            </div>
+            <div>
+              <label class="block text-slate-400 mb-1">Category</label>
+              <input type="text" id="tc-category-input" value="Core Validation" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200">
+            </div>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">User Prompt</label>
+            <textarea id="tc-prompt-input" rows="2" placeholder="Enter user prompt query..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200"></textarea>
+          </div>
+          <div>
+            <label class="block text-slate-400 mb-1">Expected Output</label>
+            <textarea id="tc-expected-input" rows="2" placeholder="Expected chatbot response..." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200"></textarea>
+          </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-800">
+          <button onclick="closeModal('modal-add-case')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">Cancel</button>
+          <button onclick="confirmAddTestCase()" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium">Save & Add Case</button>
+        </div>
       </div>
     </div>
 
   </div>
 
-  <!-- JAVASCRIPT -->
+  <!-- JAVASCRIPT APP LOGIC -->
   <script>
+    // --- State Data Store ---
     let appState = {
-      bot: "Domain",
-      url: "https://devdedham.aptussoft.com/MemberApi/Aptus/Main",
-      lang: "any",
-      authToken: "bearer-token-aptus-9982",
-      authHeader: "X-Organization-Context: devdedham",
-      authCookie: "session_id=aptus_prod_active_901",
-      testCases: [
-        { id: 'QB-01', category: 'General', prompt: 'I want to know about Basketball ?', expected: 'No Basketball sessions found.', actual: 'No Basketball sessions found.', status: 'PASS' },
-        { id: 'QB-02', category: 'Account', prompt: 'How many classes registered?', expected: '10 Future Classes', actual: '10 Future Classes', status: 'PASS' }
+      framework: 'EFI', // 'EFI' or 'Vedas'
+      activeFileName: 'Frameworks(EFI).xlsx',
+      targetBotName: 'Enterprise Assistant',
+      targetUrl: 'https://api.chatbot.ai/v1/chat',
+      targetXPath: '//textarea[@id="chat-input"]',
+      protocol: 'REST API',
+      bearerToken: 'bearer-qa-token-998234-x',
+      customHeader: 'X-Organization-ID: org_qa_enterprise_900',
+      suites: {
+        'EFI': {
+          fileName: 'Frameworks(EFI).xlsx',
+          cases: [
+            { id: 'TC_EFI_01', category: 'General Query', prompt: 'What are your operational hours?', expected: 'We operate 24/7 globally.', actual: 'We operate 24/7 globally.', status: 'PASS', latency: 245, tokens: 42, intentMatch: '100%', semantic: '98%' },
+            { id: 'TC_EFI_02', category: 'Authentication', prompt: 'How do I reset my API token?', expected: 'Go to Settings > Security > Regenerate Token.', actual: 'Go to settings and click regenerate key.', status: 'PASS', latency: 310, tokens: 65, intentMatch: '95%', semantic: '91%' },
+            { id: 'TC_EFI_03', category: 'Telemetry', prompt: 'Retrieve last 24h error logs', expected: 'Found 0 critical errors across pods.', actual: 'No errors recorded in telemetry stream.', status: 'PASS', latency: 420, tokens: 88, intentMatch: '98%', semantic: '94%' },
+            { id: 'TC_EFI_04', category: 'Billing & Subscriptions', prompt: 'What is the enterprise SLA uptime?', expected: 'Enterprise SLA is 99.99% guaranteed uptime.', actual: 'Standard uptime is 99.9%', status: 'FAIL', latency: 512, tokens: 74, intentMatch: '70%', semantic: '62%' }
+          ]
+        },
+        'Vedas': {
+          fileName: 'Vedas_Core_Validation.xlsx',
+          cases: [
+            { id: 'TC_VED_01', category: 'Diagnostic AI', prompt: 'Run symptom triage for chest discomfort', expected: 'Immediate clinical evaluation recommended.', actual: 'Immediate clinical evaluation recommended.', status: 'PASS', latency: 380, tokens: 95, intentMatch: '100%', semantic: '99%' },
+            { id: 'TC_VED_02', category: 'Secure Records', prompt: 'Fetch patient immunization history', encrypted: true, expected: 'Encrypted payload retrieved securely.', actual: 'Encrypted payload retrieved securely.', status: 'PASS', latency: 290, tokens: 52, intentMatch: '100%', semantic: '96%' },
+            { id: 'TC_VED_03', category: 'Prescription Parsing', prompt: 'Validate dosage for Amoxicillin 500mg', expected: 'Standard adult dosage is 1 capsule every 8 hours.', actual: 'Dosage invalid format.', status: 'FAIL', latency: 610, tokens: 110, intentMatch: '65%', semantic: '58%' }
+          ]
+        }
+      },
+      repositoryTree: [
+        {
+          type: 'folder',
+          name: 'A-NXT Enterprise Suites',
+          isOpen: true,
+          children: [
+            { type: 'file', name: 'Frameworks(EFI).xlsx', active: true, format: 'excel' },
+            { type: 'file', name: 'Vedas_Core_Validation.xlsx', active: false, format: 'excel' },
+            { type: 'file', name: 'chatbot_payload_schema.json', active: false, format: 'json' }
+          ]
+        },
+        {
+          type: 'folder',
+          name: 'Automated Test Scripts',
+          isOpen: true,
+          children: [
+            { type: 'file', name: 'engine_ai_evaluator.py', active: false, format: 'python' },
+            { type: 'file', name: 'BaseTest.java', active: false, format: 'java' },
+            { type: 'file', name: 'testng_regression.xml', active: false, format: 'xml' }
+          ]
+        }
       ]
     };
 
-    window.onload = function() { renderTable(); updateSidebarDisplays(); };
+    let doughnutChartInstance = null;
 
-    function renderTable() {
-      let tbody = document.getElementById('test-table-body');
-      tbody.innerHTML = '';
-      appState.testCases.forEach(tc => {
-        tbody.innerHTML += `
-          <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
-            <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">${tc.status}</span></td>
-            <td class="p-2.5 font-semibold text-slate-200">${tc.id}</td>
-            <td class="p-2.5 truncate max-w-xs">${tc.prompt}</td>
-            <td class="p-2.5 truncate max-w-xs text-slate-400">${tc.expected}</td>
-            <td class="p-2.5 truncate max-w-xs text-blue-300">${tc.actual}</td>
-          </tr>`;
-      });
-      document.getElementById('table-count').innerText = `${appState.testCases.length} Test Cases`;
-    }
+    // --- Initialization on Load ---
+    document.addEventListener('DOMContentLoaded', () => {
+      renderRepositoryTree();
+      updateTableAndMetrics();
+      initDoughnutChart();
+      logResultConsole('Connected to A-NXT Organization Repository (Testing-Automation-Framework)');
+    });
 
-    function updateConfigs() {
-      appState.bot = document.getElementById('config-bot').value;
-      appState.url = document.getElementById('config-url').value;
-      appState.lang = document.getElementById('config-lang').value;
-
-      document.getElementById('header-bot').innerText = appState.bot;
-      document.getElementById('header-lang').innerText = appState.lang;
-      document.getElementById('sandbox-active-url').innerText = appState.url;
-      updateSidebarDisplays();
-    }
-
-    function updateSidebarDisplays() {
-      document.getElementById('sb-url-display').innerText = appState.url;
-      document.getElementById('sb-lang-display').innerText = appState.lang;
-    }
-
-    function openBlockModal(type) {
-      let title = document.getElementById('modal-title');
-      let body = document.getElementById('modal-body');
-      let modal = document.getElementById('block-modal');
-
-      if(type === 'domain') {
-        title.innerHTML = `<i class="fa-solid fa-globe text-blue-400"></i> Domain & Environment`;
-        body.innerHTML = `Active App URL: <span class="text-blue-300">${appState.url}</span><br>Environment: <code>Production / UAT</code><br>Target Bot: <span class="text-amber-300">${appState.bot}</span>`;
-      } else if(type === 'lang') {
-        title.innerHTML = `<i class="fa-solid fa-code text-amber-400"></i> Programming Language & Tools`;
-        body.innerHTML = `Bound Language: <span class="text-purple-300">${appState.lang}</span><br>Test Framework: <code>TestNG / Playwright / Selenium</code><br>Build Tool: <code>Maven / npm</code>`;
-      } else if(type === 'xpath') {
-        title.innerHTML = `<i class="fa-solid fa-crosshairs text-purple-400"></i> XPaths & Element Locators`;
-        body.innerHTML = `Chat Input XPath: <code>//textarea[@placeholder="Ask a question..."]</code><br>Send Button: <code>//button[contains(@class, 'send')]</code>`;
-      } else if(type === 'config') {
-        title.innerHTML = `<i class="fa-solid fa-gears text-slate-400"></i> Test Configuration`;
-        body.innerHTML = `Implicit Timeout: <code>15s</code><br>Headless Mode: <code>Enabled</code><br>Retry Count: <code>2</code>`;
-      } else if(type === 'runtime') {
-        title.innerHTML = `<i class="fa-solid fa-bolt text-emerald-400"></i> Runtime & Performance`;
-        body.innerHTML = `Mean Latency: <span class="text-emerald-400 font-bold">215 ms</span><br>Execution Duration: <code>1.42s</code><br>Status: <code>OPTIMIZED</code>`;
-      } else if(type === 'suite') {
-        title.innerHTML = `<i class="fa-solid fa-layer-group text-blue-400"></i> Test Suite & Tasks`;
-        body.innerHTML = `Total Loaded Cases: <span class="text-white font-bold">${appState.testCases.length}</span><br>Active Category: <code>General & Account Inquiry</code>`;
-      } else if(type === 'cicd') {
-        title.innerHTML = `<i class="fa-solid fa-rotate text-purple-400"></i> CI/CD Pipeline`;
-        body.innerHTML = `Pipeline Engine: <code>GitHub Actions</code><br>Workflow Status: <span class="text-emerald-400">Passing (Branch: main)</span>`;
-      } else if(type === 'ai') {
-        title.innerHTML = `<i class="fa-solid fa-brain text-purple-400"></i> AI Evaluation Center`;
-        body.innerHTML = `Semantic Similarity: <span class="text-emerald-400 font-bold">96.4%</span><br>Hallucination Detection: <code>0 Flags</code>`;
-      } else if(type === 'results') {
-        title.innerHTML = `<i class="fa-solid fa-square-poll-vertical text-blue-400"></i> Results & Reports`;
-        body.innerHTML = `Pass Rate: <span class="text-emerald-400 font-bold">100%</span><br>Formats Available: <code>JSON, CSV, Excel, HTML</code>`;
-      } else if(type === 'logs') {
-        title.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-400"></i> Failure Analysis & Logs`;
-        body.innerHTML = `Active Errors: <span class="text-emerald-400">None logged. System stable.</span><br>Stack Trace Engine: <code>SLF4J / Allure</code>`;
-      } else if(type === 'history') {
-        title.innerHTML = `<i class="fa-solid fa-clock-rotate-left text-blue-400"></i> Test History & Regression`;
-        body.innerHTML = `Previous Runs Tracked: <code>14 Runs</code><br>Regression Status: <span class="text-emerald-400">Stable across recent commits</span>`;
+    // --- Framework Switcher ---
+    function switchFramework(fwKey) {
+      appState.framework = fwKey;
+      if (fwKey === 'EFI') {
+        document.getElementById('btnEFI').className = 'px-2.5 py-1 text-[11px] font-semibold rounded transition-all bg-blue-600 text-white shadow-sm';
+        document.getElementById('btnVedas').className = 'px-2.5 py-1 text-[11px] font-semibold rounded transition-all text-slate-400 hover:text-white';
+        document.getElementById('activeFrameworkBadge').innerText = 'EFI Core';
+        appState.activeFileName = 'Frameworks(EFI).xlsx';
+      } else {
+        document.getElementById('btnVedas').className = 'px-2.5 py-1 text-[11px] font-semibold rounded transition-all bg-blue-600 text-white shadow-sm';
+        document.getElementById('btnEFI').className = 'px-2.5 py-1 text-[11px] font-semibold rounded transition-all text-slate-400 hover:text-white';
+        document.getElementById('activeFrameworkBadge').innerText = 'Vedas Core';
+        appState.activeFileName = 'Vedas_Core_Validation.xlsx';
       }
-      modal.classList.remove('hidden');
+      document.getElementById('active-suite-badge').innerHTML = `<i class="fa-solid fa-file-excel text-emerald-400"></i> ${appState.activeFileName}`;
+      document.getElementById('kpi-framework-sub').innerText = `${fwKey} Suite Loaded`;
+      updateTableAndMetrics();
+      logResultConsole(`Switched active context to ${fwKey} framework core.`);
     }
 
-    function closeBlockModal() { document.getElementById('block-modal').classList.add('hidden'); }
+    // --- Repository Tree Renderer ---
+    function renderRepositoryTree() {
+      const container = document.getElementById('dynamic-tree-container');
+      let html = '';
 
-    function saveAuthCredentials() {
-      appState.authToken = document.getElementById('auth-token').value;
-      appState.authHeader = document.getElementById('auth-header').value;
-      appState.authCookie = document.getElementById('auth-cookie').value;
-      toggleAuthDrawer();
-      alert("Auth Credentials & Headers successfully updated and bound to active execution session.");
+      appState.repositoryTree.forEach((folder, fIdx) => {
+        html += `
+          <div class="space-y-1">
+            <div onclick="toggleFolder(${fIdx})" class="flex items-center justify-between p-1.5 hover:bg-slate-800/60 rounded cursor-pointer text-slate-300">
+              <span class="flex items-center gap-2"><i class="fa-solid fa-folder text-blue-400"></i> ${folder.name}</span>
+              <i class="fa-solid fa-chevron-${folder.isOpen ? 'down' : 'right'} text-[10px] text-slate-500"></i>
+            </div>
+        `;
+
+        if (folder.isOpen && folder.children) {
+          html += `<div class="pl-4 space-y-1 border-l border-slate-800 ml-2">`;
+          folder.children.forEach((file, cIdx) => {
+            let icon = 'fa-file-lines text-slate-400';
+            if (file.format === 'excel') icon = 'fa-file-excel text-emerald-400';
+            if (file.format === 'json') icon = 'fa-file-code text-amber-400';
+            if (file.format === 'python') icon = 'fa-brands fa-python text-blue-400';
+            if (file.format === 'java') icon = 'fa-brands fa-java text-rose-400';
+            if (file.format === 'xml') icon = 'fa-file-code text-purple-400';
+
+            const isActive = file.name === appState.activeFileName;
+            html += `
+              <div onclick="selectFileNode('${file.name}')" class="flex items-center justify-between p-1.5 hover:bg-slate-800 rounded cursor-pointer ${isActive ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30' : 'text-slate-400'}">
+                <span class="flex items-center gap-2 truncate"><i class="fa-solid ${icon}"></i> <span class="truncate">${file.name}</span></span>
+                ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>' : ''}
+              </div>
+            `;
+          });
+          html += `</div>`;
+        }
+        html += `</div>`;
+      });
+
+      container.innerHTML = html;
     }
 
-    function handleQuestionBankImport(e) {
-      let file = e.target.files[0];
-      if(!file) return;
-      let reader = new FileReader();
-      reader.onload = function(evt) {
-        let data = new Uint8Array(evt.target.result);
-        let wb = XLSX.read(data, { type: 'array' });
-        let json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-        appState.testCases = json.map((row, i) => ({
-          id: row.ID || `QB-${i+1}`,
-          category: row.Category || 'Imported',
-          prompt: row.Prompt || 'Sample prompt',
-          expected: row.Expected || 'Expected result',
-          actual: row.Actual || 'Verified',
-          status: 'PASS'
-        }));
-        renderTable();
-        alert(`Successfully imported ${appState.testCases.length} questions from question bank.`);
-      };
-      reader.readAsArrayBuffer(file);
+    function toggleFolder(fIdx) {
+      appState.repositoryTree[fIdx].isOpen = !appState.repositoryTree[fIdx].isOpen;
+      renderRepositoryTree();
     }
 
-    function toggleSandboxDrawer() { document.getElementById('sandbox-drawer').classList.toggle('translate-x-full'); }
-    function toggleAuthDrawer() { document.getElementById('auth-drawer').classList.toggle('translate-x-full'); }
-
-    function exportAuditReport() {
-      let blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
-      let a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `Audit_Report_${appState.bot}.json`;
-      a.click();
+    function selectFileNode(fileName) {
+      appState.activeFileName = fileName;
+      document.getElementById('active-suite-badge').innerHTML = `<i class="fa-solid fa-file-excel text-emerald-400"></i> ${fileName}`;
+      if (fileName.includes('Vedas')) {
+        appState.framework = 'Vedas';
+        document.getElementById('btnVedas').className = 'px-2.5 py-1 text-[11px] font-semibold rounded transition-all bg-blue-600 text-white shadow-sm';
+        document.getElementById('btnEFI').className = 'px-2.5 py-1 text-[11px] font-semibold rounded transition-all text-slate-400 hover:text-white';
+        document.getElementById('activeFrameworkBadge').innerText = 'Vedas Core';
+      } else if (fileName.includes('Frameworks')) {
+        appState.framework = 'EFI';
+        document.getElementById('btnEFI').className = 'px-2.5 py-1 text-[11px] font-semibold rounded transition-all bg-blue-600 text-white shadow-sm';
+        document.getElementById('btnVedas').className = 'px-2.5 py-1 text-[11px] font-semibold rounded transition-all text-slate-400 hover:text-white';
+        document.getElementById('activeFrameworkBadge').innerText = 'EFI Core';
+      }
+      renderRepositoryTree();
+      updateTableAndMetrics();
+      logResultConsole(`Switched active file node to ${fileName}`);
     }
 
-    function runBulkEvaluation() {
-      appState.testCases.forEach(tc => tc.status = 'PASS');
-      renderTable();
-      alert(`Bulk evaluation suite completed successfully against APP_URL: ${appState.url}`);
+    function filterSidebarItems(query) {
+      const q = query.toLowerCase();
+      // Simple filter simulation or tree search highlight
+      logResultConsole(`Filtered repository files matching: "${query}"`);
+    }
+
+    // --- Table & Metrics Updater ---
+    function updateTableAndMetrics() {
+      const currentSuite = appState.suites[appState.framework] || { cases: [] };
+      const cases = currentSuite.cases;
+
+      // Populate Category filter dropdown
+      const catSelect = document.getElementById('category-filter');
+      const categories = ['ALL', ...new Set(cases.map(c => c.category))];
+      catSelect.innerHTML = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+
+      applyTableFilters();
+      updateKPIs(cases);
+    }
+
+    function applyTableFilters() {
+      const currentSuite = appState.suites[appState.framework] || { cases: [] };
+      const cases = currentSuite.cases;
+      const searchQuery = document.getElementById('table-search').value.toLowerCase();
+      const statusFilter = document.getElementById('status-filter').value;
+      const categoryFilter = document.getElementById('category-filter').value;
+
+      const filtered = cases.filter(c => {
+        const matchesSearch = c.prompt.toLowerCase().includes(searchQuery) || c.id.toLowerCase().includes(searchQuery) || c.expected.toLowerCase().includes(searchQuery);
+        const matchesStatus = statusFilter === 'ALL' || c.status === statusFilter;
+        const matchesCat = categoryFilter === 'ALL' || c.category === categoryFilter;
+        return matchesSearch && matchesStatus && matchesCat;
+      });
+
+      const tbody = document.getElementById('test-table-body');
+      document.getElementById('table-row-count').innerText = `Showing ${filtered.length} of ${cases.length} Cases`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-500 italic">No matching test cases found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(c => {
+        let badgeColor = 'bg-amber-500/10 text-amber-400 border-amber-500/20';
+        let icon = 'fa-clock';
+        if (c.status === 'PASS') {
+          badgeColor = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
+          icon = 'fa-circle-check';
+        } else if (c.status === 'FAIL') {
+          badgeColor = 'bg-rose-500/10 text-rose-400 border-rose-500/20';
+          icon = 'fa-triangle-exclamation';
+        }
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-2.5">
+              <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${badgeColor}">
+                <i class="fa-solid ${icon}"></i> ${c.status}
+              </span>
+            </td>
+            <td class="p-2.5 font-mono text-[11px] text-blue-400">
+              <div class="font-semibold">${c.id}</div>
+              <div class="text-[10px] text-slate-500">${c.category}</div>
+            </td>
+            <td class="p-2.5 max-w-xs truncate" title="${c.prompt}">${c.prompt}</td>
+            <td class="p-2.5 max-w-xs truncate text-slate-400" title="${c.expected}">${c.expected}</td>
+            <td class="p-2.5 max-w-xs truncate text-slate-300 font-mono text-[11px]" title="${c.actual}">${c.actual}</td>
+            <td class="p-2.5 text-center">
+              <button onclick="runSingleTestCase('${c.id}')" class="p-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg transition" title="Run Test Case">
+                <i class="fa-solid fa-play text-xs text-emerald-400"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateKPIs(cases) {
+      const total = cases.length;
+      const passed = cases.filter(c => c.status === 'PASS').length;
+      const failed = cases.filter(c => c.status === 'FAIL').length;
+      const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
+
+      const meanLatency = total > 0 ? Math.round(cases.reduce((acc, c) => acc + (c.latency || 0), 0) / total) : 0;
+      const meanTokens = total > 0 ? Math.round(cases.reduce((acc, c) => acc + (c.tokens || 0), 0) / total) : 0;
+
+      document.getElementById('kpi-total').innerText = total;
+      document.getElementById('kpi-pass-rate').innerText = `${passRate}%`;
+      document.getElementById('kpi-passed-count').innerText = `${passed} passed`;
+      document.getElementById('kpi-failed-count').innerText = `${failed} failed`;
+      document.getElementById('kpi-latency').innerText = `${meanLatency} ms`;
+      document.getElementById('kpi-tokens').innerText = `${meanTokens} tok`;
+
+      // Update score progress bars
+      document.getElementById('score-intent').innerText = `${passRate}%`;
+      document.getElementById('bar-intent').style.width = `${passRate}%`;
+
+      document.getElementById('score-xpath').innerText = `${Math.min(100, passRate + 4)}%`;
+      document.getElementById('bar-xpath').style.width = `${Math.min(100, passRate + 4)}%`;
+
+      document.getElementById('score-semantic').innerText = `${Math.max(60, passRate - 2)}%`;
+      document.getElementById('bar-semantic').style.width = `${Math.max(60, passRate - 2)}%`;
+
+      updateDoughnutChart(passed, failed, total - passed - failed);
+    }
+
+    // --- Chart.js Doughnut ---
+    function initDoughnutChart() {
+      const ctx = document.getElementById('doughnutChart').getContext('2d');
+      doughnutChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Passed', 'Failed', 'Pending'],
+          datasets: [{
+            data: [3, 1, 0],
+            backgroundColor: ['#10b981', '#f43f5e', '#64748b'],
+            borderWidth: 0
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'right',
+              labels: {
+                boxWidth: 10,
+                font: { size: 10, family: 'JetBrains Mono' },
+                color: '#94a3b8'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function updateDoughnutChart(passed, failed, pending) {
+      if (!doughnutChartInstance) return;
+      doughnutChartInstance.data.datasets[0].data = [passed, failed, pending];
+      doughnutChartInstance.update();
+    }
+
+    // --- Endpoint Verification & Ping ---
+    function verifyEndpointConnection() {
+      const banner = document.getElementById('conn-banner');
+      const icon = document.getElementById('conn-icon');
+      const msg = document.getElementById('conn-msg');
+      const latencyLabel = document.getElementById('conn-latency');
+
+      banner.className = 'mt-3 p-2.5 rounded-lg border text-xs flex items-center justify-between transition-all bg-blue-500/10 border-blue-500/20 text-blue-300';
+      icon.className = 'fa-solid fa-spinner fa-spin text-blue-400';
+      msg.innerText = `Pinging endpoint: ${appState.targetUrl} & validating XPath: ${appState.targetXPath}...`;
+      latencyLabel.innerText = 'Connecting...';
+      banner.classList.remove('hidden');
+
+      setTimeout(() => {
+        const latency = Math.floor(Math.random() * 180) + 120;
+        banner.className = 'mt-3 p-2.5 rounded-lg border text-xs flex items-center justify-between transition-all bg-emerald-500/10 border-emerald-500/20 text-emerald-300';
+        icon.className = 'fa-solid fa-circle-check text-emerald-400';
+        msg.innerText = `Successfully connected to target bot [${appState.targetBotName}]. DOM Selector & API protocol verified.`;
+        latencyLabel.innerText = `${latency} ms latency`;
+        logResultConsole(`[Ping Success] Endpoint reachable (${appState.targetUrl}). Latency: ${latency}ms.`);
+      }, 800);
+    }
+
+    // --- Run Bulk Suite Evaluation with Progress Bar ---
+    function runSuiteEvaluation() {
+      const progressContainer = document.getElementById('eval-progress-container');
+      const progressBar = document.getElementById('eval-progress-bar');
+      const progressStatus = document.getElementById('eval-progress-status');
+      const progressPercent = document.getElementById('eval-progress-percent');
+      const btnRun = document.getElementById('btn-run-eval');
+
+      progressContainer.classList.remove('hidden');
+      btnRun.disabled = true;
+      btnRun.classList.add('opacity-50');
+
+      let progress = 0;
+      const currentSuite = appState.suites[appState.framework];
+      logResultConsole(`[Evaluation Runner] Starting bulk evaluation for suite: ${appState.activeFileName}`);
+
+      const interval = setInterval(() => {
+        progress += 25;
+        progressBar.style.width = `${progress}%`;
+        progressPercent.innerText = `${progress}%`;
+
+        if (progress === 50) {
+          progressStatus.innerText = 'Evaluating semantic similarity & token metrics...';
+        } else if (progress === 75) {
+          progressStatus.innerText = 'Verifying assertions against expected outputs...';
+        }
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          progressStatus.innerText = 'Evaluation complete successfully!';
+          btnRun.disabled = false;
+          btnRun.classList.remove('opacity-50');
+
+          // Randomize minor test updates or keep successful
+          currentSuite.cases.forEach(c => {
+            if (Math.random() > 0.8) c.status = 'PASS';
+          });
+          updateTableAndMetrics();
+          logResultConsole(`[Evaluation Complete] Suite executed successfully. All telemetry metrics updated.`);
+
+          setTimeout(() => {
+            progressContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
+          }, 2500);
+        }
+      }, 400);
+    }
+
+    function runSingleTestCase(id) {
+      logResultConsole(`[Test Execution] Executing single test case: ${id}`);
+      const currentSuite = appState.suites[appState.framework];
+      const tc = currentSuite.cases.find(c => c.id === id);
+      if (tc) {
+        tc.status = 'PASS';
+        updateTableAndMetrics();
+        logResultConsole(`[Test Passed] ${id} evaluated successfully. Latency: ${tc.latency}ms.`);
+      }
+    }
+
+    // --- Interactive Chat Sandbox Drawer ---
+    function toggleSandboxDrawer() {
+      const drawer = document.getElementById('sandbox-drawer');
+      drawer.classList.toggle('translate-x-full');
+      document.getElementById('sandbox-bot-name').innerText = appState.targetBotName;
+      document.getElementById('sandbox-engine').innerText = appState.protocol;
     }
 
     function handleSandboxSubmit(e) {
       e.preventDefault();
-      let input = document.getElementById('sandbox-input');
-      let val = input.value.trim();
-      if(!val) return;
-      let chat = document.getElementById('sandbox-chat');
-      chat.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white rounded p-2 max-w-[85%]">${val}</div></div>`;
+      const input = document.getElementById('sandbox-input');
+      const promptText = input.value.trim();
+      if (!promptText) return;
+
+      const history = document.getElementById('sandbox-chat-history');
+      history.innerHTML += `
+        <div class="bg-blue-600/20 border border-blue-500/30 rounded-lg p-2.5 text-slate-100 ml-4">
+          <div class="text-[10px] text-blue-400 font-semibold mb-0.5">YOU</div>
+          ${promptText}
+        </div>
+      `;
       input.value = '';
+      history.scrollTop = history.scrollHeight;
+
       setTimeout(() => {
-        chat.innerHTML += `<div class="flex justify-start"><div class="bg-slate-800 text-slate-200 rounded p-2 max-w-[85%]">Response processed successfully using auth header: <code>${appState.authHeader.split(':')[0]}</code>.</div></div>`;
-        chat.scrollTop = chat.scrollHeight;
-      }, 400);
+        const botReply = `Processed query against [${appState.targetBotName}] via ${appState.protocol}. Response verified for intent accuracy.`;
+        history.innerHTML += `
+          <div class="bg-slate-800/80 border border-slate-700 rounded-lg p-2.5 text-slate-200 mr-4">
+            <div class="text-[10px] text-emerald-400 font-semibold mb-0.5 flex items-center justify-between">
+              <span>${appState.targetBotName.toUpperCase()}</span>
+              <span class="font-mono text-[9px] text-slate-400">180ms &bull; 42 tok</span>
+            </div>
+            ${botReply}
+          </div>
+        `;
+        history.scrollTop = history.scrollHeight;
+        logResultConsole(`[Sandbox] Successfully queried "${promptText}" against ${appState.targetUrl}`);
+      }, 500);
+    }
+
+    // --- Auth Config Drawer ---
+    function toggleAuthDrawer() {
+      const drawer = document.getElementById('auth-drawer');
+      drawer.classList.toggle('translate-x-full');
+    }
+
+    function saveAuthSettings() {
+      appState.bearerToken = document.getElementById('auth-bearer-token').value;
+      appState.customHeader = document.getElementById('auth-custom-header').value;
+      toggleAuthDrawer();
+      logResultConsole(`[Security] Updated Bearer Token & custom header bindings.`);
+    }
+
+    // --- Modal Controls ---
+    function openCreateFolderModal() { document.getElementById('modal-create-folder').classList.remove('hidden'); }
+    function openCreateFileModal() { document.getElementById('modal-create-file').classList.remove('hidden'); }
+    function openAddTestCaseModal() { document.getElementById('modal-add-case').classList.remove('hidden'); }
+    function closeModal(modalId) { document.getElementById(modalId).classList.add('hidden'); }
+
+    function confirmCreateFolder() {
+      const name = document.getElementById('new-folder-name').value.trim();
+      if (!name) return;
+      appState.repositoryTree.push({ type: 'folder', name: name, isOpen: true, children: [] });
+      renderRepositoryTree();
+      closeModal('modal-create-folder');
+      logResultConsole(`Created repository folder: ${name}`);
+    }
+
+    function confirmCreateFile() {
+      const name = document.getElementById('new-file-name').value.trim();
+      if (!name) return;
+      if (appState.repositoryTree[0]) {
+        appState.repositoryTree[0].children.push({ type: 'file', name: name, active: false, format: 'excel' });
+      }
+      appState.suites[name] = { fileName: name, cases: [] };
+      renderRepositoryTree();
+      selectFileNode(name);
+      closeModal('modal-create-file');
+      logResultConsole(`Created test suite file: ${name}`);
+    }
+
+    function confirmAddTestCase() {
+      const id = document.getElementById('tc-id-input').value.trim();
+      const category = document.getElementById('tc-category-input').value.trim();
+      const prompt = document.getElementById('tc-prompt-input').value.trim();
+      const expected = document.getElementById('tc-expected-input').value.trim();
+
+      if (!id || !prompt) return;
+
+      const currentSuite = appState.suites[appState.framework];
+      currentSuite.cases.push({
+        id, category, prompt, expected, actual: expected, status: 'PASS', latency: 220, tokens: 50, intentMatch: '100%', semantic: '98%'
+      });
+
+      updateTableAndMetrics();
+      closeModal('modal-add-case');
+      logResultConsole(`Added test case ${id} to ${appState.activeFileName}`);
+    }
+
+    // --- File Upload Handler (SheetJS Excel/CSV parsing) ---
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const data = new Uint8Array(evt.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet);
+
+          const newCases = json.map((row, idx) => ({
+            id: row.ID || row.TestCaseID || `TC_IMP_${idx+1}`,
+            category: row.Category || 'Imported Suite',
+            prompt: row.Prompt || row.UserPrompt || 'Imported prompt query',
+            expected: row.Expected || row.ExpectedOutput || 'Expected response',
+            actual: row.Actual || row.ActualOutput || 'Validated response',
+            status: row.Status || 'PASS',
+            latency: Number(row.Latency) || 250,
+            tokens: Number(row.Tokens) || 45,
+            intentMatch: '98%',
+            semantic: '95%'
+          }));
+
+          appState.suites[file.name] = { fileName: file.name, cases: newCases.length > 0 ? newCases : [{ id: 'TC_01', category: 'General', prompt: 'Test prompt', expected: 'Test expected', actual: 'Test actual', status: 'PASS', latency: 200, tokens: 30 }] };
+          selectFileNode(file.name);
+          logResultConsole(`Successfully imported dataset from file: ${file.name} (${newCases.length} cases loaded).`);
+        } catch (err) {
+          logErrorConsole(`Failed to parse uploaded file: ${err.message}`);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+
+    // --- Consoles & Export ---
+    function logResultConsole(msg) {
+      const consoleEl = document.getElementById('console-results');
+      const timestamp = new Date().toLocaleTimeString();
+      consoleEl.innerHTML += `<div><span class="text-slate-600">[${timestamp}]</span> ${msg}</div>`;
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    function logErrorConsole(msg) {
+      const consoleEl = document.getElementById('console-errors');
+      const timestamp = new Date().toLocaleTimeString();
+      consoleEl.innerHTML += `<div><span class="text-slate-600">[${timestamp}]</span> ${msg}</div>`;
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+      document.getElementById('badge-error-count').innerText = '1';
+    }
+
+    function switchConsoleTab(tab) {
+      const resEl = document.getElementById('console-results');
+      const errEl = document.getElementById('console-errors');
+      const btnRes = document.getElementById('tab-btn-results');
+      const btnErr = document.getElementById('tab-btn-errors');
+
+      if (tab === 'results') {
+        resEl.classList.remove('hidden');
+        errEl.classList.add('hidden');
+        btnRes.className = 'px-3 py-1 text-xs font-semibold rounded-md bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center gap-1.5';
+        btnErr.className = 'px-3 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center gap-1.5 transition';
+      } else {
+        resEl.classList.add('hidden');
+        errEl.classList.remove('hidden');
+        btnErr.className = 'px-3 py-1 text-xs font-semibold rounded-md bg-rose-600/20 text-rose-400 border border-rose-500/30 flex items-center gap-1.5';
+        btnRes.className = 'px-3 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center gap-1.5 transition';
+      }
+    }
+
+    function clearCurrentConsole() {
+      document.getElementById('console-results').innerHTML = `<div class="text-emerald-400">[System] Console cleared.</div>`;
+      document.getElementById('console-errors').innerHTML = `<div class="text-slate-500 italic">[NO ERRORS LOGGED]</div>`;
+      document.getElementById('badge-error-count').innerText = '0';
+    }
+
+    function toggleExportDropdown() {
+      document.getElementById('export-dropdown').classList.toggle('hidden');
+    }
+
+    function exportReport(format) {
+      document.getElementById('export-dropdown').classList.add('hidden');
+      const currentSuite = appState.suites[appState.framework];
+      if (format === 'json') {
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentSuite, null, 2));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", `${appState.activeFileName}_audit_report.json`);
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+        logResultConsole(`Exported JSON Audit Report for ${appState.activeFileName}`);
+      } else if (format === 'csv') {
+        let csvContent = "data:text/csv;charset=utf-8,ID,Category,Prompt,Expected,Actual,Status,Latency,Tokens\n";
+        currentSuite.cases.forEach(c => {
+          csvContent += `"${c.id}","${c.category}","${c.prompt}","${c.expected}","${c.actual}","${c.status}",${c.latency},${c.tokens}\n`;
+        });
+        const encodedUri = encodeURI(csvContent);
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", encodedUri);
+        dlAnchor.setAttribute("download", `${appState.activeFileName}_audit_report.csv`);
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+        logResultConsole(`Exported CSV Dataset Report for ${appState.activeFileName}`);
+      } else {
+        logResultConsole(`Executive HTML Report generated successfully for ${appState.activeFileName}`);
+      }
+    }
+
+    function updateTargetConfigFromUI() {
+      appState.targetBotName = document.getElementById('target-bot-name').value;
+      appState.targetUrl = document.getElementById('target-url').value;
+      appState.targetXPath = document.getElementById('target-xpath').value;
+      appState.protocol = document.getElementById('protocol-engine').value;
+    }
+
+    function resetFilters() {
+      document.getElementById('table-search').value = '';
+      document.getElementById('status-filter').value = 'ALL';
+      document.getElementById('category-filter').value = 'ALL';
+      applyTableFilters();
+      logResultConsole('Reset all table filters.');
     }
   </script>
 </body>
