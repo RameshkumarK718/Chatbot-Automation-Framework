@@ -19,10 +19,8 @@ public class BaseTest {
     protected WebDriver driver;
     protected WebDriverWait wait;
     protected static Properties config = new Properties();
-
     protected static String APP_URL;
     protected static boolean LOGIN_REQUIRED;
-
     static {
         try (InputStream input = BaseTest.class.getClassLoader().getResourceAsStream("config.properties")) {
             if (input != null) {
@@ -35,7 +33,6 @@ public class BaseTest {
         APP_URL = System.getProperty("app.url", config.getProperty("app.url", "https://devdedham.aptussoft.com/MemberAPI"));
         LOGIN_REQUIRED = Boolean.parseBoolean(config.getProperty("login.required", "true"));
     }
-
     @BeforeMethod
     public void setUp() {
         ChromeOptions options = new ChromeOptions();
