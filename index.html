@@ -91,220 +91,408 @@
         </div>
     </header>
 
-    <main class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6">
-
-        <!-- Executive KPI Telemetry Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Total Test Cases</p>
-                        <h3 id="statTotalTests" class="text-xl font-semibold mt-1 text-slate-100 font-mono">0</h3>
-                    </div>
-                    <div class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center">
-                        <i class="fa-solid fa-layer-group text-xs"></i>
-                    </div>
+    <!-- Main App Layout with Sidebar and Content -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Repository Explorer Sidebar -->
+        <aside class="w-72 bg-darkCard border-r border-darkBorder flex flex-col shrink-0">
+            <div class="p-3.5 border-b border-darkBorder flex items-center justify-between bg-darkBg/30">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-brands fa-github text-slate-300 text-sm"></i>
+                    <span class="font-semibold text-xs text-slate-200 uppercase tracking-wider">Repository Explorer</span>
                 </div>
-                <div class="mt-3 text-[11px] text-slate-400">
-                    <span id="statFrameworkName">EFI Suite Loaded</span>
-                </div>
+                <span class="text-[10px] font-mono text-slate-400 bg-darkBg px-2 py-0.5 rounded border border-darkBorder">main</span>
             </div>
 
-            <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Pass Rate</p>
-                        <h3 id="statPassRate" class="text-xl font-semibold mt-1 text-emerald-400 font-mono">0%</h3>
+            <div class="flex-1 overflow-y-auto p-2 space-y-1 text-xs font-mono">
+                <!-- .github/workflows -->
+                <div onclick="selectSidebarItem('.github/workflows', 'Fix formatting issues in efi-ci.yml', '4 days ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-200">
+                        <i class="fa-solid fa-folder-open text-amber-400 text-xs"></i>
+                        <span class="font-medium">.github/workflows</span>
                     </div>
-                    <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                        <i class="fa-solid fa-circle-check text-xs"></i>
-                    </div>
-                </div>
-                <div class="mt-3 text-[11px] text-slate-400 flex items-center space-x-1">
-                    <span id="statPassedCount" class="text-emerald-400 font-medium">0 passed</span>
-                    <span>&bull;</span>
-                    <span id="statFailedCount" class="text-rose-400 font-medium">0 failed</span>
-                </div>
-            </div>
-
-            <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Mean Latency</p>
-                        <h3 id="statAvgLatency" class="text-xl font-semibold mt-1 text-blue-400 font-mono">0 ms</h3>
-                    </div>
-                    <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                        <i class="fa-solid fa-bolt text-xs"></i>
-                    </div>
-                </div>
-                <div class="mt-3 text-[11px] text-slate-400">
-                    <span>Target threshold &lt; 800ms</span>
-                </div>
-            </div>
-
-            <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-medium text-slate-400">Mean Token Usage</p>
-                        <h3 id="statAvgTokens" class="text-xl font-semibold mt-1 text-purple-400 font-mono">0 tok</h3>
-                    </div>
-                    <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
-                        <i class="fa-solid fa-microchip text-xs"></i>
-                    </div>
-                </div>
-                <div class="mt-3 text-[11px] text-slate-400">
-                    <span>Cost efficiency optimized</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Filter & Execution Controls Toolbar -->
-        <div class="bg-darkCard border border-darkBorder rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                <div class="flex flex-col space-y-1">
-                    <label class="text-[11px] font-medium text-slate-400">Test Category / Sheet</label>
-                    <select id="sheetSelector" onchange="handleSheetChange(this.value)" class="bg-darkBg text-slate-200 text-xs px-3 py-2 rounded-lg border border-darkBorder focus:outline-none focus:border-blue-600 min-w-[200px]">
-                        <option value="">No Active Datasets</option>
-                    </select>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Fix formatting issues in efi-ci.yml</p>
+                    <span class="text-[9px] text-slate-500 pl-5">4 days ago</span>
                 </div>
 
-                <div class="flex flex-col space-y-1">
-                    <label class="text-[11px] font-medium text-slate-400">Import Excel / CSV Dataset</label>
-                    <label class="cursor-pointer bg-darkBg hover:bg-slate-800 text-slate-300 text-xs px-3 py-2 rounded-lg border border-darkBorder flex items-center space-x-2 transition-all">
+                <!-- src -->
+                <div onclick="selectSidebarItem('src', 'Refactor ExcelUtils.java formatting', '4 days ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-200">
+                        <i class="fa-solid fa-folder text-amber-400 text-xs"></i>
+                        <span class="font-medium">src</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Refactor ExcelUtils.java formatting</p>
+                    <span class="text-[9px] text-slate-500 pl-5">4 days ago</span>
+                </div>
+
+                <!-- .gitignore -->
+                <div onclick="selectSidebarItem('.gitignore', 'Unignore results.json in .gitignore', 'yesterday')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-code text-blue-400 text-xs"></i>
+                        <span>.gitignore</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Unignore results.json in .gitignore</p>
+                    <span class="text-[9px] text-slate-500 pl-5">yesterday</span>
+                </div>
+
+                <!-- .project -->
+                <div onclick="selectSidebarItem('.project', 'Fix framework configuration and POM dependencies', '3 weeks ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-lines text-slate-400 text-xs"></i>
+                        <span>.project</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Fix framework configuration and POM dependencies</p>
+                    <span class="text-[9px] text-slate-500 pl-5">3 weeks ago</span>
+                </div>
+
+                <!-- .pydevproject -->
+                <div onclick="selectSidebarItem('.pydevproject', 'Fix framework configuration and POM dependencies', '3 weeks ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-lines text-slate-400 text-xs"></i>
+                        <span>.pydevproject</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Fix framework configuration and POM dependencies</p>
+                    <span class="text-[9px] text-slate-500 pl-5">3 weeks ago</span>
+                </div>
+
+                <!-- Frameworks(EFI).xlsx -->
+                <div onclick="selectSidebarItem('Frameworks(EFI).xlsx', 'Add files via upload', 'last month')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
                         <i class="fa-solid fa-file-excel text-emerald-400 text-xs"></i>
-                        <span id="fileNameLabel">Upload Test Suite</span>
-                        <input type="file" id="excelUploader" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(event)" class="hidden">
-                    </label>
+                        <span>Frameworks(EFI).xlsx</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Add files via upload</p>
+                    <span class="text-[9px] text-slate-500 pl-5">last month</span>
                 </div>
 
-                <div class="flex flex-col space-y-1">
-                    <label class="text-[11px] font-medium text-slate-400">Search Test Cases</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-500">
-                            <i class="fa-solid fa-magnifying-glass text-[11px]"></i>
-                        </span>
-                        <input type="text" id="searchInput" oninput="filterTestTable()" placeholder="Filter by prompt or intent..." class="bg-darkBg text-slate-200 text-xs pl-8 pr-3 py-2 rounded-lg border border-darkBorder focus:outline-none focus:border-blue-600 w-48 sm:w-60">
+                <!-- Frameworks(Vedas).xlsx -->
+                <div onclick="selectSidebarItem('Frameworks(Vedas).xlsx', 'Add files via upload', 'last month')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-excel text-emerald-400 text-xs"></i>
+                        <span>Frameworks(Vedas).xlsx</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Add files via upload</p>
+                    <span class="text-[9px] text-slate-500 pl-5">last month</span>
+                </div>
+
+                <!-- Frameworks-Result(EFI).xlsx -->
+                <div onclick="selectSidebarItem('Frameworks-Result(EFI).xlsx', 'Add files via upload', '2 weeks ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-excel text-emerald-400 text-xs"></i>
+                        <span>Frameworks-Result(EFI).xlsx</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Add files via upload</p>
+                    <span class="text-[9px] text-slate-500 pl-5">2 weeks ago</span>
+                </div>
+
+                <!-- Frameworks-Result(Vedas).xlsx -->
+                <div onclick="selectSidebarItem('Frameworks-Result(Vedas).xlsx', 'Add files via upload', '2 weeks ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-excel text-emerald-400 text-xs"></i>
+                        <span>Frameworks-Result(Vedas).xlsx</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Add files via upload</p>
+                    <span class="text-[9px] text-slate-500 pl-5">2 weeks ago</span>
+                </div>
+
+                <!-- credentials(1).xlsx -->
+                <div onclick="selectSidebarItem('credentials(1).xlsx', 'Add files via upload', '4 days ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-excel text-emerald-400 text-xs"></i>
+                        <span>credentials(1).xlsx</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Add files via upload</p>
+                    <span class="text-[9px] text-slate-500 pl-5">4 days ago</span>
+                </div>
+
+                <!-- credentials(2).xlsx -->
+                <div onclick="selectSidebarItem('credentials(2).xlsx', 'Add files via upload', 'last month')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-excel text-emerald-400 text-xs"></i>
+                        <span>credentials(2).xlsx</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Add files via upload</p>
+                    <span class="text-[9px] text-slate-500 pl-5">last month</span>
+                </div>
+
+                <!-- engine_ai_evaluator.py -->
+                <div onclick="selectSidebarItem('engine_ai_evaluator.py', 'Update engine_ai_evaluator.py', '4 days ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-brands fa-python text-yellow-400 text-xs"></i>
+                        <span>engine_ai_evaluator.py</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Update engine_ai_evaluator.py</p>
+                    <span class="text-[9px] text-slate-500 pl-5">4 days ago</span>
+                </div>
+
+                <!-- index.html -->
+                <div onclick="selectSidebarItem('index.html', 'Update index.html', '2 weeks ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-code text-orange-400 text-xs"></i>
+                        <span>index.html</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Update index.html</p>
+                    <span class="text-[9px] text-slate-500 pl-5">2 weeks ago</span>
+                </div>
+
+                <!-- pom.xml -->
+                <div onclick="selectSidebarItem('pom.xml', 'Clean up pom.xml by removing blank line', '3 weeks ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-cube text-purple-400 text-xs"></i>
+                        <span>pom.xml</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Clean up pom.xml by removing blank line</p>
+                    <span class="text-[9px] text-slate-500 pl-5">3 weeks ago</span>
+                </div>
+
+                <!-- requirements.txt -->
+                <div onclick="selectSidebarItem('requirements.txt', 'Update requirements.txt', 'last month')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-lines text-slate-400 text-xs"></i>
+                        <span>requirements.txt</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Update requirements.txt</p>
+                    <span class="text-[9px] text-slate-500 pl-5">last month</span>
+                </div>
+
+                <!-- test.yml -->
+                <div onclick="selectSidebarItem('test.yml', 'Add CI configuration for Chatbot Test Automation', '2 months ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-gear text-sky-400 text-xs"></i>
+                        <span>test.yml</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Add CI configuration for Chatbot Test Automation</p>
+                    <span class="text-[9px] text-slate-500 pl-5">2 months ago</span>
+                </div>
+
+                <!-- testng.xml -->
+                <div onclick="selectSidebarItem('testng.xml', 'Add newline at end of testng.xml file', '2 weeks ago')" class="group p-2 rounded-lg hover:bg-darkBg cursor-pointer border border-transparent hover:border-darkBorder transition-all">
+                    <div class="flex items-center space-x-2 text-slate-300">
+                        <i class="fa-solid fa-file-code text-rose-400 text-xs"></i>
+                        <span>testng.xml</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-1 pl-5 font-sans truncate">Add newline at end of testng.xml file</p>
+                    <span class="text-[9px] text-slate-500 pl-5">2 weeks ago</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 max-w-7xl mx-auto w-full space-y-6 overflow-y-auto">
+
+            <!-- Executive KPI Telemetry Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400">Total Test Cases</p>
+                            <h3 id="statTotalTests" class="text-xl font-semibold mt-1 text-slate-100 font-mono">0</h3>
+                        </div>
+                        <div class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center">
+                            <i class="fa-solid fa-layer-group text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-[11px] text-slate-400">
+                        <span id="statFrameworkName">EFI Suite Loaded</span>
+                    </div>
+                </div>
+
+                <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400">Pass Rate</p>
+                            <h3 id="statPassRate" class="text-xl font-semibold mt-1 text-emerald-400 font-mono">0%</h3>
+                        </div>
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                            <i class="fa-solid fa-circle-check text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-[11px] text-slate-400 flex items-center space-x-1">
+                        <span id="statPassedCount" class="text-emerald-400 font-medium">0 passed</span>
+                        <span>&bull;</span>
+                        <span id="statFailedCount" class="text-rose-400 font-medium">0 failed</span>
+                    </div>
+                </div>
+
+                <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400">Mean Latency</p>
+                            <h3 id="statAvgLatency" class="text-xl font-semibold mt-1 text-blue-400 font-mono">0 ms</h3>
+                        </div>
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                            <i class="fa-solid fa-bolt text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-[11px] text-slate-400">
+                        <span>Target threshold &lt; 800ms</span>
+                    </div>
+                </div>
+
+                <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-medium text-slate-400">Mean Token Usage</p>
+                            <h3 id="statAvgTokens" class="text-xl font-semibold mt-1 text-purple-400 font-mono">0 tok</h3>
+                        </div>
+                        <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                            <i class="fa-solid fa-microchip text-xs"></i>
+                        </div>
+                    </div>
+                    <div class="mt-3 text-[11px] text-slate-400">
+                        <span>Cost efficiency optimized</span>
                     </div>
                 </div>
             </div>
 
-            <div class="flex items-center space-x-2.5 w-full md:w-auto justify-end">
-                <button onclick="runBulkEvaluation()" id="btnRunBulk" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg shadow-sm flex items-center space-x-2 transition-all">
-                    <i class="fa-solid fa-play text-[10px]"></i>
-                    <span>Run Bulk Evaluation</span>
-                </button>
-                <button onclick="resetTestData()" class="p-2 bg-darkBg hover:bg-slate-800 text-slate-400 hover:text-white border border-darkBorder rounded-lg transition-all" title="Reset dataset">
-                    <i class="fa-solid fa-rotate-right text-xs"></i>
-                </button>
-            </div>
-        </div>
-
-        <!-- Main Workspace Split: Table & Analytics -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            
-            <!-- Test Execution Table -->
-            <div class="lg:col-span-2 bg-darkCard border border-darkBorder rounded-xl flex flex-col overflow-hidden">
-                <div class="p-4 border-b border-darkBorder flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <h2 class="font-semibold text-xs uppercase tracking-wider text-slate-300">Test Execution Registry</h2>
-                        <span id="testCountBadge" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">0 cases</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-[11px] text-slate-400">Status:</span>
-                        <select id="statusFilter" onchange="filterTestTable()" class="bg-darkBg text-slate-300 text-xs px-2 py-1 rounded border border-darkBorder">
-                            <option value="ALL">All Statuses</option>
-                            <option value="PASSED">Passed</option>
-                            <option value="FAILED">Failed</option>
-                            <option value="PENDING">Pending</option>
+            <!-- Filter & Execution Controls Toolbar -->
+            <div class="bg-darkCard border border-darkBorder rounded-xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
+                <div class="flex flex-wrap items-center gap-3 w-full md:w-auto">
+                    <div class="flex flex-col space-y-1">
+                        <label class="text-[11px] font-medium text-slate-400">Test Category / Sheet</label>
+                        <select id="sheetSelector" onchange="handleSheetChange(this.value)" class="bg-darkBg text-slate-200 text-xs px-3 py-2 rounded-lg border border-darkBorder focus:outline-none focus:border-blue-600 min-w-[200px]">
+                            <option value="">No Active Datasets</option>
                         </select>
                     </div>
-                </div>
 
-                <div class="overflow-x-auto flex-1 max-h-[480px]">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-darkBg/60 text-[10px] font-semibold text-slate-400 uppercase border-b border-darkBorder tracking-wider">
-                                <th class="p-3">ID / Intent</th>
-                                <th class="p-3">User Prompt</th>
-                                <th class="p-3">Expected Output</th>
-                                <th class="p-3">Actual Output</th>
-                                <th class="p-3">Status</th>
-                                <th class="p-3 text-right">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="testTableBody" class="divide-y divide-darkBorder text-xs font-mono">
-                            <tr><td colspan="6" class="p-4 text-center text-slate-500">Awaiting GitHub sync or Excel file upload.</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Performance Metrics & Doughnut Analytics -->
-            <div class="bg-darkCard border border-darkBorder rounded-xl p-5 flex flex-col justify-between">
-                <div>
-                    <h2 class="font-semibold text-xs uppercase tracking-wider text-slate-300 mb-1">Evaluation Quality Scores</h2>
-                    <p class="text-[11px] text-slate-400 mb-4">Semantic match & intent recognition metrics</p>
-
-                    <div class="relative h-44 w-full mb-4 flex items-center justify-center">
-                        <canvas id="accuracyChart"></canvas>
+                    <div class="flex flex-col space-y-1">
+                        <label class="text-[11px] font-medium text-slate-400">Import Excel / CSV Dataset</label>
+                        <label class="cursor-pointer bg-darkBg hover:bg-slate-800 text-slate-300 text-xs px-3 py-2 rounded-lg border border-darkBorder flex items-center space-x-2 transition-all">
+                            <i class="fa-solid fa-file-excel text-emerald-400 text-xs"></i>
+                            <span id="fileNameLabel">Upload Test Suite</span>
+                            <input type="file" id="excelUploader" accept=".xlsx, .xls, .csv" onchange="handleFileUpload(event)" class="hidden">
+                        </label>
                     </div>
 
-                    <div class="space-y-3 pt-3 border-t border-darkBorder font-sans">
-                        <div>
-                            <div class="flex items-center justify-between text-xs mb-1">
-                                <span class="text-slate-400">Intent Accuracy</span>
-                                <span id="metricIntentScore" class="font-semibold text-emerald-400 font-mono">0%</span>
-                            </div>
-                            <div class="w-full bg-darkBg rounded-full h-1.5 overflow-hidden border border-darkBorder">
-                                <div id="barIntentScore" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex items-center justify-between text-xs mb-1">
-                                <span class="text-slate-400">Entity Precision</span>
-                                <span id="metricEntityScore" class="font-semibold text-blue-400 font-mono">0%</span>
-                            </div>
-                            <div class="w-full bg-darkBg rounded-full h-1.5 overflow-hidden border border-darkBorder">
-                                <div id="barEntityScore" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
-                            </div>
-                        </div>
-
-                        <div>
-                            <div class="flex items-center justify-between text-xs mb-1">
-                                <span class="text-slate-400">Semantic Similarity</span>
-                                <span id="metricSemanticScore" class="font-semibold text-purple-400 font-mono">0%</span>
-                            </div>
-                            <div class="w-full bg-darkBg rounded-full h-1.5 overflow-hidden border border-darkBorder">
-                                <div id="barSemanticScore" class="bg-purple-600 h-full w-0 transition-all duration-500"></div>
-                            </div>
+                    <div class="flex flex-col space-y-1">
+                        <label class="text-[11px] font-medium text-slate-400">Search Test Cases</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none text-slate-500">
+                                <i class="fa-solid fa-magnifying-glass text-[11px]"></i>
+                            </span>
+                            <input type="text" id="searchInput" oninput="filterTestTable()" placeholder="Filter by prompt or intent..." class="bg-darkBg text-slate-200 text-xs pl-8 pr-3 py-2 rounded-lg border border-darkBorder focus:outline-none focus:border-blue-600 w-48 sm:w-60">
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-6 pt-3 border-t border-darkBorder flex items-center justify-between text-[11px] text-slate-400">
-                    <span>Runtime Engine:</span>
-                    <span id="engineVersion" class="font-mono text-slate-300">EFI-Core v2.4.1</span>
+                <div class="flex items-center space-x-2.5 w-full md:w-auto justify-end">
+                    <button onclick="runBulkEvaluation()" id="btnRunBulk" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium rounded-lg shadow-sm flex items-center space-x-2 transition-all">
+                        <i class="fa-solid fa-play text-[10px]"></i>
+                        <span>Run Bulk Evaluation</span>
+                    </button>
+                    <button onclick="resetTestData()" class="p-2 bg-darkBg hover:bg-slate-800 text-slate-400 hover:text-white border border-darkBorder rounded-lg transition-all" title="Reset dataset">
+                        <i class="fa-solid fa-rotate-right text-xs"></i>
+                    </button>
                 </div>
             </div>
 
-        </div>
+            <!-- Main Workspace Split: Table & Analytics -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Test Execution Table -->
+                <div class="lg:col-span-2 bg-darkCard border border-darkBorder rounded-xl flex flex-col overflow-hidden">
+                    <div class="p-4 border-b border-darkBorder flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <h2 class="font-semibold text-xs uppercase tracking-wider text-slate-300">Test Execution Registry</h2>
+                            <span id="testCountBadge" class="text-[11px] px-2 py-0.5 rounded bg-slate-800 text-slate-400 font-mono">0 cases</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[11px] text-slate-400">Status:</span>
+                            <select id="statusFilter" onchange="filterTestTable()" class="bg-darkBg text-slate-300 text-xs px-2 py-1 rounded border border-darkBorder">
+                                <option value="ALL">All Statuses</option>
+                                <option value="PASSED">Passed</option>
+                                <option value="FAILED">Failed</option>
+                                <option value="PENDING">Pending</option>
+                            </select>
+                        </div>
+                    </div>
 
-        <!-- System Logs / Telemetry Stream Console -->
-        <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
-            <div class="flex items-center justify-between mb-2">
-                <div class="flex items-center space-x-2">
-                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
-                    <h3 class="font-semibold text-xs uppercase tracking-wider text-slate-300">Execution Console</h3>
+                    <div class="overflow-x-auto flex-1 max-h-[480px]">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-darkBg/60 text-[10px] font-semibold text-slate-400 uppercase border-b border-darkBorder tracking-wider">
+                                    <th class="p-3">ID / Intent</th>
+                                    <th class="p-3">User Prompt</th>
+                                    <th class="p-3">Expected Output</th>
+                                    <th class="p-3">Actual Output</th>
+                                    <th class="p-3">Status</th>
+                                    <th class="p-3 text-right">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="testTableBody" class="divide-y divide-darkBorder text-xs font-mono">
+                                <tr><td colspan="6" class="p-4 text-center text-slate-500">Awaiting GitHub sync or Excel file upload.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <button onclick="clearConsoleLogs()" class="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 bg-darkBg rounded border border-darkBorder">Clear Logs</button>
-            </div>
-            <div id="consoleLogBox" class="bg-darkBg rounded-lg p-3 font-mono text-[11px] text-slate-300 h-36 overflow-y-auto space-y-1 border border-darkBorder">
-                <div class="text-slate-500">[System] Initialized enterprise QA evaluation runner. Ready for test suite execution.</div>
-            </div>
-        </div>
 
-    </main>
+                <!-- Performance Metrics & Doughnut Analytics -->
+                <div class="bg-darkCard border border-darkBorder rounded-xl p-5 flex flex-col justify-between">
+                    <div>
+                        <h2 class="font-semibold text-xs uppercase tracking-wider text-slate-300 mb-1">Evaluation Quality Scores</h2>
+                        <p class="text-[11px] text-slate-400 mb-4">Semantic match & intent recognition metrics</p>
+
+                        <div class="relative h-44 w-full mb-4 flex items-center justify-center">
+                            <canvas id="accuracyChart"></canvas>
+                        </div>
+
+                        <div class="space-y-3 pt-3 border-t border-darkBorder font-sans">
+                            <div>
+                                <div class="flex items-center justify-between text-xs mb-1">
+                                    <span class="text-slate-400">Intent Accuracy</span>
+                                    <span id="metricIntentScore" class="font-semibold text-emerald-400 font-mono">0%</span>
+                                </div>
+                                <div class="w-full bg-darkBg rounded-full h-1.5 overflow-hidden border border-darkBorder">
+                                    <div id="barIntentScore" class="bg-emerald-500 h-full w-0 transition-all duration-500"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between text-xs mb-1">
+                                    <span class="text-slate-400">Entity Precision</span>
+                                    <span id="metricEntityScore" class="font-semibold text-blue-400 font-mono">0%</span>
+                                </div>
+                                <div class="w-full bg-darkBg rounded-full h-1.5 overflow-hidden border border-darkBorder">
+                                    <div id="barEntityScore" class="bg-blue-600 h-full w-0 transition-all duration-500"></div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between text-xs mb-1">
+                                    <span class="text-slate-400">Semantic Similarity</span>
+                                    <span id="metricSemanticScore" class="font-semibold text-purple-400 font-mono">0%</span>
+                                </div>
+                                <div class="w-full bg-darkBg rounded-full h-1.5 overflow-hidden border border-darkBorder">
+                                    <div id="barSemanticScore" class="bg-purple-600 h-full w-0 transition-all duration-500"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-3 border-t border-darkBorder flex items-center justify-between text-[11px] text-slate-400">
+                        <span>Runtime Engine:</span>
+                        <span id="engineVersion" class="font-mono text-slate-300">EFI-Core v2.4.1</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- System Logs / Telemetry Stream Console -->
+            <div class="bg-darkCard border border-darkBorder rounded-xl p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                        <h3 class="font-semibold text-xs uppercase tracking-wider text-slate-300">Execution Console</h3>
+                    </div>
+                    <button onclick="clearConsoleLogs()" class="text-[11px] text-slate-400 hover:text-white px-2 py-0.5 bg-darkBg rounded border border-darkBorder">Clear Logs</button>
+                </div>
+                <div id="consoleLogBox" class="bg-darkBg rounded-lg p-3 font-mono text-[11px] text-slate-300 h-36 overflow-y-auto space-y-1 border border-darkBorder">
+                    <div class="text-slate-500">[System] Initialized enterprise QA evaluation runner. Ready for test suite execution.</div>
+                </div>
+            </div>
+
+        </main>
+    </div>
 
     <!-- Interactive Live Sandbox Drawer -->
     <div id="chatDrawer" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-xs hidden flex justify-end transition-all">
@@ -415,6 +603,23 @@
             initChart();
             fetchLiveGitHubReports();
         };
+
+        // Sidebar Item Selection Handler
+        function selectSidebarItem(itemName, commitMsg, timestamp) {
+            logConsole(`Selected repository item: [${itemName}] - Last commit: "${commitMsg}" (${timestamp})`);
+            
+            // If selecting an Excel file from the sidebar, try to switch sheet if it matches
+            if (itemName.endsWith('.xlsx')) {
+                const sheetSelector = document.getElementById('sheetSelector');
+                for (let i = 0; i < sheetSelector.options.length; i++) {
+                    if (sheetSelector.options[i].value === itemName) {
+                        sheetSelector.value = itemName;
+                        handleSheetChange(itemName);
+                        break;
+                    }
+                }
+            }
+        }
 
         // Live GitHub API Synchronization Function
         async function fetchLiveGitHubReports() {
