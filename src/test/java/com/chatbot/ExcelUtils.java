@@ -23,22 +23,17 @@ public final class ExcelUtils {
         if (filePath == null || filePath.trim().isEmpty()) {
             throw new IllegalArgumentException("Excel file path cannot be null or empty.");
         }
-
         if (sheetName == null || sheetName.trim().isEmpty()) {
             throw new IllegalArgumentException("Sheet name cannot be null or empty.");
         }
-
         File excelFile = new File(filePath);
         if (!excelFile.exists() || !excelFile.isFile()) {
             throw new IllegalArgumentException("Excel file not found at: " + excelFile.getAbsolutePath());
         }
-
         List<Object[]> dataList = new ArrayList<>();
         DataFormatter formatter = new DataFormatter(Locale.US);
-
         try (FileInputStream inputStream = new FileInputStream(excelFile);
              Workbook workbook = new XSSFWorkbook(inputStream)) {
-
             Sheet sheet = workbook.getSheet(sheetName);
             if (sheet == null) {
                 sheet = workbook.getSheetAt(0); // Fallback to first sheet
