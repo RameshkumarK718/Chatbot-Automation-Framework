@@ -1,80 +1,131 @@
 package io.qameta.allure;
+import io.qameta.allure.listeners.TestListener;
 import io.qameta.allure.pages.ChatbotPage;
 import io.qameta.allure.utils.ExcelUtils;
-import io.qameta.allure.listeners.TestListener;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.Listeners;
-import org.testng.Assert;
+import java.time.Duration;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-
-import java.time.Duration;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 @Listeners(TestListener.class)
 public class ChatbotTest {
-    private static WebDriver driver;
-    private static ChatbotPage chatbotPage;
 
-    // Vedas MemberAPI Application URL
-    private static final String APP_URL = "https://devdedham.aptussoft.com/MemberAPI";
-    
-    // Local Vedas Framework path
-    private static final String FRAMEWORK_PATH = "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx";
+    private static final String APP_URL =
+            "https://devdedham.aptussoft.com/MemberAPI";
 
-    @BeforeClass
-    public static void setUpClass() {
+    private static final String FRAMEWORK_PATH =
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx";
+
+    private static final String SHEET_NAME = "Frameworks";
+    private static final Duration PAGE_LOAD_TIMEOUT = Duration.ofSeconds(90);
+
+    private WebDriver driver;
+    private ChatbotPage chatbotPage;
+
+    @BeforeClass(alwaysRun = true)
+    public void setUpClass() {
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless=new");
-        options.addArguments("--no-sandbox");
-        options.addArguments("--disable-dev-shm-usage");
-        options.addArguments("--disable-gpu");
-        options.addArguments("--window-size=1920,1080");
+        options.addArguments(
+                "--headless=new",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--window-size=1920,1080"
+        );
 
         driver = new ChromeDriver(options);
-        driver.manage().window().maximize();
-        driver.manage().timeouts().pageLoadTimeout(Duration.ofSeconds(90));
-        
-        System.out.println("--> Opening URL: " + APP_URL);
-        driver.get(APP_URL);
-        
-        // Pass driver directly to TestListener for failure diagnostics capture
+
+        driver.manage().timeouts()
+                .pageLoadTimeout(PAGE_LOAD_TIMEOUT);
+
         TestListener.setDriver(driver);
-        
+
+        driver.get(APP_URL);
         chatbotPage = new ChatbotPage(driver);
+
+        System.out.println("Application opened: " + APP_URL);
     }
 
     @DataProvider(name = "chatbotTestData")
-    public static Object[][] provideChatbotData() {
-        return ExcelUtils.getDataFromExcel(FRAMEWORK_PATH, "Frameworks");
+    public Object[][] provideChatbotData() {
+        Object[][] testData =
+                ExcelUtils.getDataFromExcel(FRAMEWORK_PATH, SHEET_NAME);
+
+        Assert.assertNotNull(testData,
+                "Excel test data must not be null.");
+
+        Assert.assertTrue(testData.length > 0,
+                "Excel test data must contain at least one test case.");
+
+        return testData;
     }
 
     @Test(dataProvider = "chatbotTestData")
-    public void testChatbotQuestion(String sheetName, int rowIndex, String testCaseId, String question, String expectedAnswer) {
-        System.out.println("Executing Test ID: " + testCaseId + " | Question: " + question);
+    public void testChatbotQuestion(
+            String sheetName,
+            int rowIndex,
+            String testCaseId,
+            String question,
+            String expectedAnswer) {
+
+        Assert.assertNotNull(question,
+                "Question must not be null. Test case: " + testCaseId);
+
+        Assert.assertFalse(question.trim().isEmpty(),
+                "Question must not be empty. Test case: " + testCaseId);
+
+        System.out.printf(
+                "Executing test case: %s | Question: %s%n",
+                testCaseId,
+                question
+        );
 
         chatbotPage.sendMessage(question);
+
         String actualAnswer = chatbotPage.getLatestResponse();
 
-        System.out.println("Captured Answer: " + actualAnswer);
+        System.out.println("Captured answer: " + actualAnswer);
 
-        // Determine status and write back to results Excel file
-        String status = (actualAnswer != null && !actualAnswer.trim().isEmpty()) ? "PASS" : "FAIL";
-        ExcelUtils.writeResult(sheetName, rowIndex, actualAnswer, status);
+        String status =
+                actualAnswer != null && !actualAnswer.trim().isEmpty()
+                        ? "PASS"
+                        : "FAIL";
 
-        // Assertions
-        Assert.assertNotNull(actualAnswer, "Chatbot response should not be null");
-        Assert.assertFalse(actualAnswer.trim().isEmpty(), "Chatbot response should not be empty");
+        ExcelUtils.writeResult(
+                sheetName,
+                rowIndex,
+                actualAnswer,
+                status
+        );
+
+        Assert.assertNotNull(actualAnswer,
+                "Chatbot response must not be null. Test case: " + testCaseId);
+
+        Assert.assertFalse(actualAnswer.trim().isEmpty(),
+                "Chatbot response must not be empty. Test case: " + testCaseId);
     }
 
-    @AfterClass
-    public static void tearDownClass() {
+    @AfterClass(alwaysRun = true)
+    public void tearDownClass() {
         if (driver != null) {
-            driver.quit();
-            System.out.println("--> WebDriver closed successfully.");
+            try {
+                driver.quit();
+                System.out.println("WebDriver closed successfully.");
+            } catch (Exception exception) {
+                System.err.println(
+                        "Error while closing WebDriver: "
+                                + exception.getMessage()
+                );
+            } finally {
+                driver = null;
+                chatbotPage = null;
+            }
         }
     }
 }
