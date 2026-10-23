@@ -150,17 +150,17 @@
   <!-- MAIN WRAPPER -->
   <div class="flex-1 flex overflow-hidden relative">
 
-    <!-- 1. FULLY DYNAMIC SIDEBAR (REPOSITORY EXPLORER) -->
+    <!-- 1. FULLY DYNAMIC SIDEBAR (CATEGORIZED SECTIONS & INTERACTIVE NODES) -->
     <aside id="sidebar" class="w-72 bg-slate-900/95 border-r border-slate-800/80 flex flex-col shrink-0 transition-all duration-300 z-20">
       <div class="p-3 border-b border-slate-800 flex items-center justify-between">
         <span id="sidebar-header-text" class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
           <i class="fa-solid fa-folder-tree text-blue-400"></i> REPOSITORY EXPLORER
         </span>
         <div class="flex items-center gap-1">
-          <button onclick="openCreateFolderModal()" class="text-slate-400 hover:text-blue-400 p-1" title="New Folder">
+          <button onclick="openCreateFolderModal()" class="text-slate-400 hover:text-blue-400 p-1" title="New Category">
             <i class="fa-solid fa-folder-plus text-xs"></i>
           </button>
-          <button onclick="openCreateFileModal()" class="text-slate-400 hover:text-emerald-400 p-1" title="New Suite File">
+          <button onclick="openCreateFileModal()" class="text-slate-400 hover:text-emerald-400 p-1" title="New Suite Node">
             <i class="fa-solid fa-file-circle-plus text-xs"></i>
           </button>
         </div>
@@ -170,12 +170,12 @@
       <div id="sidebar-search-container" class="p-2 border-b border-slate-800/60">
         <div class="relative">
           <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-2.5 text-slate-500 text-xs"></i>
-          <input type="text" placeholder="Search repository..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-2 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500 placeholder-slate-600" onkeyup="filterSidebarItems(this.value)">
+          <input type="text" placeholder="Search sidebar sections..." class="w-full bg-slate-950 border border-slate-800 rounded-lg pl-8 pr-2 py-1.5 text-xs text-slate-300 focus:outline-none focus:border-blue-500 placeholder-slate-600" onkeyup="filterSidebarItems(this.value)">
         </div>
       </div>
 
-      <!-- Dynamic Tree View Container -->
-      <div class="flex-1 overflow-y-auto p-2 space-y-1 text-xs font-mono" id="dynamic-tree-container">
+      <!-- Dynamic Categorized Tree View Container (Fully Interactive & Dynamic) -->
+      <div class="flex-1 overflow-y-auto p-2 space-y-3 text-xs font-mono" id="dynamic-tree-container">
         <!-- Rendered via JavaScript -->
       </div>
 
@@ -541,38 +541,45 @@
     </div>
 
     <!-- MODALS -->
-    <!-- CREATE FOLDER MODAL -->
+    <!-- CREATE CATEGORY MODAL -->
     <div id="modal-create-folder" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl p-4 space-y-4">
         <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-          <h3 class="text-xs font-semibold text-white flex items-center gap-2"><i class="fa-solid fa-folder-plus text-blue-400"></i> Add Folder to Repository</h3>
+          <h3 class="text-xs font-semibold text-white flex items-center gap-2"><i class="fa-solid fa-folder-plus text-blue-400"></i> Add Sidebar Category</h3>
           <button onclick="closeModal('modal-create-folder')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Folder Name</label>
-          <input type="text" id="new-folder-name" placeholder="e.g., Performance_Suites" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
+          <label class="block text-xs text-slate-400 mb-1">Category Name</label>
+          <input type="text" id="new-folder-name" placeholder="e.g., CUSTOM SECTION" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
         </div>
         <div class="flex justify-end gap-2">
           <button onclick="closeModal('modal-create-folder')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">Cancel</button>
-          <button onclick="confirmCreateFolder()" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium">Create Folder</button>
+          <button onclick="confirmCreateFolder()" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium">Create Category</button>
         </div>
       </div>
     </div>
 
-    <!-- CREATE FILE MODAL -->
+    <!-- CREATE NODE FILE MODAL -->
     <div id="modal-create-file" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
       <div class="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl p-4 space-y-4">
         <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-          <h3 class="text-xs font-semibold text-white flex items-center gap-2"><i class="fa-solid fa-file-circle-plus text-emerald-400"></i> Create New Test Suite File</h3>
+          <h3 class="text-xs font-semibold text-white flex items-center gap-2"><i class="fa-solid fa-file-circle-plus text-emerald-400"></i> Add Interactive Node Item</h3>
           <button onclick="closeModal('modal-create-file')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div>
-          <label class="block text-xs text-slate-400 mb-1">File Name (.xlsx / .json / .csv)</label>
-          <input type="text" id="new-file-name" placeholder="e.g., Enterprise_Security_Suite.xlsx" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+          <label class="block text-xs text-slate-400 mb-1">Parent Category</label>
+          <select id="new-file-parent" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 mb-2">
+            <option value="CONFIGURATION">CONFIGURATION</option>
+            <option value="EXECUTION">EXECUTION</option>
+            <option value="ANALYSIS & REPORTING">ANALYSIS & REPORTING</option>
+          </select>
+          <label class="block text-xs text-slate-400 mb-1">Node Title & Description</label>
+          <input type="text" id="new-file-name" placeholder="e.g., Custom Metric & Monitor" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono mb-2">
+          <input type="text" id="new-file-desc" placeholder="e.g., Detailed runtime checks" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
         </div>
         <div class="flex justify-end gap-2">
           <button onclick="closeModal('modal-create-file')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">Cancel</button>
-          <button onclick="confirmCreateFile()" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium">Create File</button>
+          <button onclick="confirmCreateFile()" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-medium">Add Node Item</button>
         </div>
       </div>
     </div>
@@ -615,7 +622,7 @@
 
   <!-- JAVASCRIPT APP LOGIC (FULLY DYNAMIC & INTERACTIVE WIRING) -->
   <script>
-    // --- State Data Store ---
+    // --- State Data Store with Full Sidebar Hierarchy ---
     let appState = {
       framework: 'EFI', // 'EFI' or 'Vedas'
       activeFileName: 'Frameworks(EFI).xlsx',
@@ -646,23 +653,33 @@
       },
       repositoryTree: [
         {
-          type: 'folder',
-          name: 'A-NXT Enterprise Suites',
+          category: 'CONFIGURATION',
           isOpen: true,
-          children: [
-            { type: 'file', name: 'Frameworks(EFI).xlsx', active: true, format: 'excel' },
-            { type: 'file', name: 'Vedas_Core_Validation.xlsx', active: false, format: 'excel' },
-            { type: 'file', name: 'chatbot_payload_schema.json', active: false, format: 'json' }
+          items: [
+            { title: 'Domain & Environment', desc: 'Application URL, QA/UAT/Production environment', icon: 'fa-globe', active: false },
+            { title: 'Programming Language & Tools', desc: 'Java, Selenium, Maven, TestNG, Python', icon: 'fa-code', active: false },
+            { title: 'XPaths / Locators', desc: 'XPath, CSS selectors, element identification', icon: 'fa-crosshairs', active: false },
+            { title: 'Test Configuration', desc: 'Timeouts, browser settings, headless mode, test data', icon: 'fa-gears', active: false }
           ]
         },
         {
-          type: 'folder',
-          name: 'Automated Test Scripts',
+          category: 'EXECUTION',
           isOpen: true,
-          children: [
-            { type: 'file', name: 'engine_ai_evaluator.py', active: false, format: 'python' },
-            { type: 'file', name: 'BaseTest.java', active: false, format: 'java' },
-            { type: 'file', name: 'testng_regression.xml', active: false, format: 'xml' }
+          items: [
+            { title: 'Runtime & Performance', desc: 'Execution duration, response latency, performance metrics', icon: 'fa-gauge-high', active: false },
+            { title: 'Test Suite & Total Tasks', desc: 'Test cases, sheets, categories, selected framework', icon: 'fa-layer-group', active: true, filename: 'Frameworks(EFI).xlsx' },
+            { title: 'Test Run', desc: 'Run, stop, rerun and monitor test execution', icon: 'fa-play-circle', active: false },
+            { title: 'CI/CD Pipeline', desc: 'GitHub Actions, workflow status, build history', icon: 'fa-network-wired', active: false }
+          ]
+        },
+        {
+          category: 'ANALYSIS & REPORTING',
+          isOpen: true,
+          items: [
+            { title: 'AI Evaluation', desc: 'Expected vs. actual answers, semantic similarity, hallucination checks', icon: 'fa-robot', active: false },
+            { title: 'Results & Reports', desc: 'Pass/fail summary, Excel results, HTML reports and charts', icon: 'fa-square-poll-vertical', active: false },
+            { title: 'Failure Analysis & Logs', desc: 'Error details, screenshots, stack traces and debugging logs', icon: 'fa-bug', active: false },
+            { title: 'Test History', desc: 'Previous runs, trends and regression comparisons', icon: 'fa-clock-rotate-left', active: false }
           ]
         }
       ]
@@ -695,39 +712,46 @@
       document.getElementById('active-suite-badge').innerHTML = `<i class="fa-solid fa-file-excel text-emerald-400"></i> ${appState.activeFileName}`;
       document.getElementById('kpi-framework-sub').innerText = `${fwKey} Suite Loaded`;
       document.getElementById('chart-session-label').innerText = `${fwKey} Suite`;
+      
+      // Update active state in sidebar tree
+      appState.repositoryTree.forEach(cat => {
+        cat.items.forEach(item => {
+          if (item.filename) {
+            item.active = item.filename === appState.activeFileName;
+          }
+        });
+      });
+
+      renderRepositoryTree();
       updateTableAndMetrics();
       logResultConsole(`Switched active context to ${fwKey} framework core.`);
     }
 
-    // --- Repository Tree Renderer ---
+    // --- Fully Dynamic Sidebar Tree Renderer ---
     function renderRepositoryTree() {
       const container = document.getElementById('dynamic-tree-container');
       let html = '';
 
-      appState.repositoryTree.forEach((folder, fIdx) => {
+      appState.repositoryTree.forEach((group, gIdx) => {
         html += `
-          <div class="space-y-1">
-            <div onclick="toggleFolder(${fIdx})" class="flex items-center justify-between p-1.5 hover:bg-slate-800/60 rounded cursor-pointer text-slate-300">
-              <span class="flex items-center gap-2"><i class="fa-solid fa-folder text-blue-400"></i> ${folder.name}</span>
-              <i class="fa-solid fa-chevron-${folder.isOpen ? 'down' : 'right'} text-[10px] text-slate-500"></i>
+          <div class="space-y-1 mb-3">
+            <div onclick="toggleSidebarCategory(${gIdx})" class="flex items-center justify-between p-1 bg-slate-950/80 rounded border border-slate-800/80 cursor-pointer text-slate-300 font-bold tracking-wider text-[10px]">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-folder text-blue-400"></i> ${group.category}</span>
+              <i class="fa-solid fa-chevron-${group.isOpen ? 'down' : 'right'} text-[9px] text-slate-500"></i>
             </div>
         `;
 
-        if (folder.isOpen && folder.children) {
-          html += `<div class="pl-4 space-y-1 border-l border-slate-800 ml-2">`;
-          folder.children.forEach((file, cIdx) => {
-            let icon = 'fa-file-lines text-slate-400';
-            if (file.format === 'excel') icon = 'fa-file-excel text-emerald-400';
-            if (file.format === 'json') icon = 'fa-file-code text-amber-400';
-            if (file.format === 'python') icon = 'fa-brands fa-python text-blue-400';
-            if (file.format === 'java') icon = 'fa-brands fa-java text-rose-400';
-            if (file.format === 'xml') icon = 'fa-file-code text-purple-400';
-
-            const isActive = file.name === appState.activeFileName;
+        if (group.isOpen && group.items) {
+          html += `<div class="pl-2 space-y-1 mt-1 border-l border-slate-800 ml-2">`;
+          group.items.forEach((item, iIdx) => {
+            const isActive = item.active || (item.filename && item.filename === appState.activeFileName);
             html += `
-              <div onclick="selectFileNode('${file.name}')" class="flex items-center justify-between p-1.5 hover:bg-slate-800 rounded cursor-pointer ${isActive ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30' : 'text-slate-400'}">
-                <span class="flex items-center gap-2 truncate"><i class="fa-solid ${icon}"></i> <span class="truncate">${file.name}</span></span>
-                ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>' : ''}
+              <div onclick="selectSidebarItem(${gIdx}, ${iIdx})" class="p-2 rounded cursor-pointer transition flex flex-col gap-0.5 ${isActive ? 'bg-blue-600/20 text-blue-300 border border-blue-500/30 shadow-md' : 'hover:bg-slate-800/70 text-slate-400'}">
+                <div class="flex items-center justify-between font-semibold text-xs">
+                  <span class="flex items-center gap-1.5 truncate"><i class="fa-solid ${item.icon || 'fa-file-lines'} text-blue-400"></i> <span class="truncate">${item.title}</span></span>
+                  ${isActive ? '<span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>' : ''}
+                </div>
+                <div class="text-[10px] text-slate-500 truncate font-sans">${item.desc}</div>
               </div>
             `;
           });
@@ -739,9 +763,23 @@
       container.innerHTML = html;
     }
 
-    function toggleFolder(fIdx) {
-      appState.repositoryTree[fIdx].isOpen = !appState.repositoryTree[fIdx].isOpen;
+    function toggleSidebarCategory(gIdx) {
+      appState.repositoryTree[gIdx].isOpen = !appState.repositoryTree[gIdx].isOpen;
       renderRepositoryTree();
+    }
+
+    function selectSidebarItem(gIdx, iIdx) {
+      // Clear all active flags
+      appState.repositoryTree.forEach(g => g.items.forEach(it => it.active = false));
+      const selectedItem = appState.repositoryTree[gIdx].items[iIdx];
+      selectedItem.active = true;
+
+      if (selectedItem.filename) {
+        selectFileNode(selectedItem.filename);
+      } else {
+        renderRepositoryTree();
+        logResultConsole(`Selected sidebar module: [${appState.repositoryTree[gIdx].category}] ${selectedItem.title}`);
+      }
     }
 
     function selectFileNode(fileName) {
@@ -767,7 +805,7 @@
 
     function filterSidebarItems(query) {
       const q = query.toLowerCase();
-      logResultConsole(`Filtered repository files matching: "${query}"`);
+      logResultConsole(`Filtered sidebar sections matching: "${query}"`);
     }
 
     // --- Table & Metrics Updater ---
@@ -1056,23 +1094,25 @@
     function confirmCreateFolder() {
       const name = document.getElementById('new-folder-name').value.trim();
       if (!name) return;
-      appState.repositoryTree.push({ type: 'folder', name: name, isOpen: true, children: [] });
+      appState.repositoryTree.push({ category: name, isOpen: true, items: [] });
       renderRepositoryTree();
       closeModal('modal-create-folder');
-      logResultConsole(`Created repository folder: ${name}`);
+      logResultConsole(`Created sidebar category: ${name}`);
     }
 
     function confirmCreateFile() {
-      const name = document.getElementById('new-file-name').value.trim();
-      if (!name) return;
-      if (appState.repositoryTree[0]) {
-        appState.repositoryTree[0].children.push({ type: 'file', name: name, active: false, format: 'excel' });
+      const parentCat = document.getElementById('new-file-parent').value;
+      const title = document.getElementById('new-file-name').value.trim();
+      const desc = document.getElementById('new-file-desc').value.trim() || 'Custom automated suite node';
+      if (!title) return;
+
+      const group = appState.repositoryTree.find(g => g.category === parentCat);
+      if (group) {
+        group.items.push({ title, desc, icon: 'fa-file-lines', active: false });
       }
-      appState.suites[name] = { fileName: name, cases: [] };
       renderRepositoryTree();
-      selectFileNode(name);
       closeModal('modal-create-file');
-      logResultConsole(`Created test suite file: ${name}`);
+      logResultConsole(`Added node [${title}] to category [${parentCat}]`);
     }
 
     function confirmAddTestCase() {
@@ -1125,12 +1165,10 @@
 
           appState.suites[file.name] = { fileName: file.name, cases: newCases.length > 0 ? newCases : [{ id: 'TC_01', category: 'General', prompt: 'Test prompt', expected: 'Test expected', actual: 'Test actual', status: 'PASS', latency: 200, tokens: 30 }] };
           
-          let foundFile = false;
-          appState.repositoryTree.forEach(f => {
-            if (f.children && f.children.some(ch => ch.name === file.name)) foundFile = true;
-          });
-          if (!foundFile && appState.repositoryTree[0]) {
-            appState.repositoryTree[0].children.push({ type: 'file', name: file.name, active: false, format: 'excel' });
+          // Add to EXECUTION category in sidebar
+          const execGroup = appState.repositoryTree.find(g => g.category === 'EXECUTION');
+          if (execGroup && !execGroup.items.some(it => it.filename === file.name)) {
+            execGroup.items.push({ title: file.name, desc: 'Imported dataset test suite', icon: 'fa-file-excel', filename: file.name, active: false });
           }
 
           selectFileNode(file.name);
