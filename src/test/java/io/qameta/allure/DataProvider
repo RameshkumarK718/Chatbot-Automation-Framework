@@ -9,7 +9,6 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import java.time.Duration;
-
 public class ChatbotTest {
     private WebDriver driver;
     private ChatbotPage chatbotPage;
@@ -27,7 +26,6 @@ public class ChatbotTest {
         
         chatbotPage = new ChatbotPage(driver);
     }
-
     @DataProvider(name = "chatbotTestData")
     public Object[][] provideChatbotData() {
         // Read test data directly from your local Vedas question bank
@@ -54,7 +52,6 @@ public class ChatbotTest {
         Assert.assertNotNull(actualAnswer, "Chatbot response should not be null");
         Assert.assertFalse(actualAnswer.trim().isEmpty(), "Chatbot response should not be empty");
     }
-
     @AfterMethod
     public void tearDown() {
         if (driver != null) {
