@@ -1,191 +1,131 @@
-package io.qameta.allure.utils;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
+package io.qameta.allure;
+import io.qameta.allure.listeners.TestListener;
+import io.qameta.allure.pages.ChatbotPage;
+import io.qameta.allure.utils.ExcelUtils;
+import java.time.Duration;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
-public final class ExcelUtils {
+@Listeners(TestListener.class)
+public class ChatbotTest {
 
-    private static final String RESULTS_PATH =
-            "target/Frameworks-Result(Vedas).xlsx";
+    private static final String APP_URL =
+            "https://devdedham.aptussoft.com/MemberAPI";
 
-    private static final DataFormatter FORMATTER = new DataFormatter();
+    private static final String FRAMEWORK_PATH =
+            "https://raw.githubusercontent.com/RameshkumarK718/Chatbot-Automation-Framework/main/Frameworks(Vedas).xlsx";
 
-    private ExcelUtils() {
-        // Utility class
+    private static final String SHEET_NAME = "Frameworks";
+    private static final Duration PAGE_LOAD_TIMEOUT = Duration.ofSeconds(90);
+
+    private WebDriver driver;
+    private ChatbotPage chatbotPage;
+
+    @BeforeClass(alwaysRun = true)
+    public void setUpClass() {
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments(
+                "--headless=new",
+                "--no-sandbox",
+                "--disable-dev-shm-usage",
+                "--disable-gpu",
+                "--window-size=1920,1080"
+        );
+
+        driver = new ChromeDriver(options);
+
+        driver.manage().timeouts()
+                .pageLoadTimeout(PAGE_LOAD_TIMEOUT);
+
+        TestListener.setDriver(driver);
+
+        driver.get(APP_URL);
+        chatbotPage = new ChatbotPage(driver);
+
+        System.out.println("Application opened: " + APP_URL);
     }
 
-    public static Object[][] getDataFromExcel(
-            String filePath, String sheetName) {
+    @DataProvider(name = "chatbotTestData")
+    public Object[][] provideChatbotData() {
+        Object[][] testData =
+                ExcelUtils.getDataFromExcel(FRAMEWORK_PATH, SHEET_NAME);
 
-        List<Object[]> testData = new ArrayList<>();
+        Assert.assertNotNull(testData,
+                "Excel test data must not be null.");
 
-        try (InputStream input = openInput(filePath);
-             Workbook workbook = WorkbookFactory.create(input)) {
+        Assert.assertTrue(testData.length > 0,
+                "Excel test data must contain at least one test case.");
 
-            Sheet sheet = workbook.getSheet(sheetName);
-
-            if (sheet == null) {
-                throw new IllegalArgumentException(
-                        "Worksheet not found: " + sheetName);
-            }
-
-            for (int i = 1; i <= sheet.getLastRowNum(); i++) {
-                Row row = sheet.getRow(i);
-
-                if (row == null) {
-                    continue;
-                }
-
-                String testCaseId = getCellString(row.getCell(0));
-                String question = getCellString(row.getCell(3));
-                String expectedAnswer = getCellString(row.getCell(4));
-
-                if (question.isBlank()) {
-                    continue;
-                }
-
-                testData.add(new Object[] {
-                        sheetName,
-                        i,
-                        testCaseId,
-                        question,
-                        expectedAnswer
-                });
-            }
-
-        } catch (Exception e) {
-            throw new IllegalStateException(
-                    "Unable to read Excel test data from: " + filePath, e);
-        }
-
-        return testData.toArray(new Object[0][]);
+        return testData;
     }
 
-    public static synchronized void writeResult(
+    @Test(dataProvider = "chatbotTestData")
+    public void testChatbotQuestion(
             String sheetName,
             int rowIndex,
-            String actualAnswer,
-            String status) {
+            String testCaseId,
+            String question,
+            String expectedAnswer) {
 
-        Path outputPath = Paths.get(RESULTS_PATH);
+        Assert.assertNotNull(question,
+                "Question must not be null. Test case: " + testCaseId);
 
-        try {
-            Files.createDirectories(outputPath.getParent());
+        Assert.assertFalse(question.trim().isEmpty(),
+                "Question must not be empty. Test case: " + testCaseId);
 
-            if (Files.exists(outputPath)) {
-                updateWorkbook(outputPath, sheetName,
-                        rowIndex, actualAnswer, status);
-            } else {
-                // Initialize the results workbook from the input workbook.
-                try (InputStream input = openInput(
-                        getFrameworkSourcePath());
-                     Workbook workbook = WorkbookFactory.create(input)) {
+        System.out.printf(
+                "Executing test case: %s | Question: %s%n",
+                testCaseId,
+                question
+        );
 
-                    writeCells(workbook, sheetName,
-                            rowIndex, actualAnswer, status);
+        chatbotPage.sendMessage(question);
 
-                    try (FileOutputStream output =
-                                 new FileOutputStream(outputPath.toFile())) {
-                        workbook.write(output);
-                    }
-                }
+        String actualAnswer = chatbotPage.getLatestResponse();
+
+        System.out.println("Captured answer: " + actualAnswer);
+
+        String status =
+                actualAnswer != null && !actualAnswer.trim().isEmpty()
+                        ? "PASS"
+                        : "FAIL";
+
+        ExcelUtils.writeResult(
+                sheetName,
+                rowIndex,
+                actualAnswer,
+                status
+        );
+
+        Assert.assertNotNull(actualAnswer,
+                "Chatbot response must not be null. Test case: " + testCaseId);
+
+        Assert.assertFalse(actualAnswer.trim().isEmpty(),
+                "Chatbot response must not be empty. Test case: " + testCaseId);
+    }
+
+    @AfterClass(alwaysRun = true)
+    public void tearDownClass() {
+        if (driver != null) {
+            try {
+                driver.quit();
+                System.out.println("WebDriver closed successfully.");
+            } catch (Exception exception) {
+                System.err.println(
+                        "Error while closing WebDriver: "
+                                + exception.getMessage()
+                );
+            } finally {
+                driver = null;
+                chatbotPage = null;
             }
-
-        } catch (Exception e) {
-            throw new IllegalStateException(
-                    "Unable to write Excel test result for row "
-                            + rowIndex, e);
         }
-    }
-
-    private static void updateWorkbook(
-            Path outputPath,
-            String sheetName,
-            int rowIndex,
-            String actualAnswer,
-            String status) throws Exception {
-
-        try (InputStream input =
-                     new FileInputStream(outputPath.toFile());
-             Workbook workbook = WorkbookFactory.create(input)) {
-
-            writeCells(workbook, sheetName,
-                    rowIndex, actualAnswer, status);
-
-            try (FileOutputStream output =
-                         new FileOutputStream(outputPath.toFile())) {
-                workbook.write(output);
-            }
-        }
-    }
-
-    private static void writeCells(
-            Workbook workbook,
-            String sheetName,
-            int rowIndex,
-            String actualAnswer,
-            String status) {
-
-        Sheet sheet = workbook.getSheet(sheetName);
-
-        if (sheet == null) {
-            throw new IllegalArgumentException(
-                    "Worksheet not found in results workbook: " + sheetName);
-        }
-
-        Row row = sheet.getRow(rowIndex);
-
-        if (row == null) {
-            row = sheet.createRow(rowIndex);
-        }
-
-        // Column F: actual chatbot response.
-        setCellValue(row, 5, actualAnswer);
-
-        // Column G: execution status.
-        setCellValue(row, 6, status);
-    }
-
-    private static void setCellValue(
-            Row row, int columnIndex, String value) {
-
-        Cell cell = row.getCell(columnIndex);
-
-        if (cell == null) {
-            cell = row.createCell(columnIndex);
-        }
-
-        cell.setCellValue(value == null ? "" : value);
-    }
-
-    private static String getCellString(Cell cell) {
-        return cell == null ? "" : FORMATTER.formatCellValue(cell).trim();
-    }
-
-    private static InputStream openInput(String path) throws Exception {
-        if (path.startsWith("https://") || path.startsWith("http://")) {
-            return new URL(path).openStream();
-        }
-
-        return new FileInputStream(new File(path));
-    }
-
-    private static String getFrameworkSourcePath() {
-        return "https://raw.githubusercontent.com/"
-                + "RameshkumarK718/Chatbot-Automation-Framework/"
-                + "main/Frameworks(Vedas).xlsx";
     }
 }
