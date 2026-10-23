@@ -1,12 +1,14 @@
 package io.qameta.allure.utils;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.poi.ss.usermodel.Cell;
@@ -29,7 +31,7 @@ public final class ExcelUtils {
     private static final DataFormatter FORMATTER = new DataFormatter();
 
     private ExcelUtils() {
-        // Prevent instantiation.
+        // Utility class; do not instantiate.
     }
 
     public static Object[][] getDataFromExcel(
@@ -47,6 +49,7 @@ public final class ExcelUtils {
                         "Worksheet not found: " + sheetName);
             }
 
+            // Row 0 is assumed to contain column headings.
             for (int i = 1; i <= sheet.getLastRowNum(); i++) {
                 Row row = sheet.getRow(i);
 
@@ -73,7 +76,7 @@ public final class ExcelUtils {
 
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "Unable to read test data from " + filePath, e);
+                    "Unable to read Excel test data from: " + filePath, e);
         }
 
         return testData.toArray(new Object[0][]);
@@ -86,52 +89,68 @@ public final class ExcelUtils {
             String status) {
 
         Path outputPath = Paths.get(RESULTS_PATH);
+        Path tempPath = null;
 
         try {
-            Files.createDirectories(outputPath.getParent());
+            Path parent = outputPath.getParent();
 
-            if (Files.exists(outputPath)) {
-                updateWorkbook(
-                        outputPath, sheetName, rowIndex,
-                        actualAnswer, status);
-            } else {
-                try (InputStream input = openInput(FRAMEWORK_URL);
-                     Workbook workbook = WorkbookFactory.create(input)) {
+            if (parent != null) {
+                Files.createDirectories(parent);
+            }
 
-                    writeCells(
-                            workbook, sheetName, rowIndex,
-                            actualAnswer, status);
+            String sourcePath = Files.exists(outputPath)
+                    ? outputPath.toString()
+                    : FRAMEWORK_URL;
 
-                    try (FileOutputStream output =
-                                 new FileOutputStream(outputPath.toFile())) {
-                        workbook.write(output);
-                    }
+            Workbook workbook;
+
+            // Close the input stream before attempting any file replacement.
+            try (InputStream input = openInput(sourcePath)) {
+                workbook = WorkbookFactory.create(input);
+            }
+
+            try (Workbook workbookToClose = workbook) {
+                writeCells(
+                        workbookToClose,
+                        sheetName,
+                        rowIndex,
+                        actualAnswer,
+                        status);
+
+                Path tempParent = outputPath.toAbsolutePath().getParent();
+                tempPath = Files.createTempFile(
+                        tempParent, "excel-results-", ".xlsx");
+
+                try (OutputStream output = Files.newOutputStream(tempPath)) {
+                    workbookToClose.write(output);
                 }
+            }
+
+            // Replace the output only after the workbook has been closed.
+            try {
+                Files.move(
+                        tempPath,
+                        outputPath,
+                        StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException e) {
+                Files.move(
+                        tempPath,
+                        outputPath,
+                        StandardCopyOption.REPLACE_EXISTING);
             }
 
         } catch (Exception e) {
             throw new IllegalStateException(
-                    "Unable to write test result for row " + rowIndex, e);
-        }
-    }
-
-    private static void updateWorkbook(
-            Path path,
-            String sheetName,
-            int rowIndex,
-            String actualAnswer,
-            String status) throws Exception {
-
-        try (InputStream input = new FileInputStream(path.toFile());
-             Workbook workbook = WorkbookFactory.create(input)) {
-
-            writeCells(
-                    workbook, sheetName, rowIndex,
-                    actualAnswer, status);
-
-            try (FileOutputStream output =
-                         new FileOutputStream(path.toFile())) {
-                workbook.write(output);
+                    "Unable to write test result for sheet '"
+                    + sheetName + "', row " + rowIndex, e);
+        } finally {
+            if (tempPath != null) {
+                try {
+                    Files.deleteIfExists(tempPath);
+                } catch (Exception ignored) {
+                    // Best-effort cleanup of the temporary file.
+                }
             }
         }
     }
@@ -156,7 +175,7 @@ public final class ExcelUtils {
             row = sheet.createRow(rowIndex);
         }
 
-        // F = Actual Answer; G = Status.
+        // Column F = Actual Answer; column G = Status.
         setCellValue(row, 5, actualAnswer);
         setCellValue(row, 6, status);
     }
@@ -174,14 +193,24 @@ public final class ExcelUtils {
     }
 
     private static String getCellString(Cell cell) {
-        return cell == null
-                ? ""
-                : FORMATTER.formatCellValue(cell).trim();
+        if (cell == null) {
+            return "";
+        }
+
+        return FORMATTER.formatCellValue(cell).trim();
     }
 
     private static InputStream openInput(String path) throws Exception {
+        if (path == null || path.isBlank()) {
+            throw new IllegalArgumentException(
+                    "Excel file path must not be empty.");
+        }
+
         if (path.startsWith("https://") || path.startsWith("http://")) {
-            return new URL(path).openStream();
+            URLConnection connection = new URL(path).openConnection();
+            connection.setConnectTimeout(15000);
+            connection.setReadTimeout(30000);
+            return connection.getInputStream();
         }
 
         return new FileInputStream(new File(path));
