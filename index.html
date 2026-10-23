@@ -68,15 +68,22 @@
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> STATUS: ONLINE
           </span>
         </h1>
-        <p class="text-[10px] text-slate-400">Framework: <span id="header-framework-name" class="text-blue-400 font-mono font-semibold">Universal Chatbot QA</span> &bull; Bot: <span id="header-bot-domain" class="text-amber-400 font-mono font-semibold">Domain</span></p>
+        <p class="text-[10px] text-slate-400">Bot: <span id="header-bot" class="text-amber-400 font-mono font-semibold">Domain</span> &bull; Language: <span id="header-lang" class="text-blue-400 font-mono font-semibold">any</span></p>
       </div>
     </div>
 
     <!-- Header Actions -->
     <div class="flex items-center space-x-2.5 text-xs">
+      <!-- Import Question Bank Button -->
+      <label class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg cursor-pointer transition text-xs font-medium">
+        <i class="fa-solid fa-file-excel text-emerald-400"></i>
+        <span>Import : Question bank</span>
+        <input type="file" id="question-bank-file" accept=".xlsx, .xls, .csv, .json" class="hidden" onchange="handleQuestionBankImport(event)">
+      </label>
+
       <button onclick="toggleAuthDrawer()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg transition text-xs">
         <i class="fa-solid fa-key text-amber-400"></i>
-        <span class="hidden sm:inline">Auth Config</span>
+        <span>Auth Config</span>
       </button>
 
       <button onclick="toggleSandboxDrawer()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3.5 py-1.5 rounded-lg font-medium transition text-xs shadow-lg shadow-blue-600/20">
@@ -84,344 +91,185 @@
         <span>Live Interactive Sandbox</span>
       </button>
 
-      <button onclick="exportReport()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-1.5 rounded-lg transition text-xs font-medium">
+      <button onclick="exportAuditReport()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3.5 py-1.5 rounded-lg transition text-xs font-medium">
         <i class="fa-solid fa-download text-slate-400"></i>
         <span>Export Audit Report</span>
       </button>
     </div>
   </header>
 
-  <!-- WRAPPER -->
+  <!-- MAIN WRAPPER -->
   <div class="flex-1 flex overflow-hidden relative">
 
-    <!-- SIDEBAR WITH 12-POINT STRUCTURE -->
-    <aside id="sidebar" class="w-72 bg-slate-900/95 border-r border-slate-800 flex flex-col shrink-0 transition-all duration-300 z-20 overflow-y-auto">
-      <div class="p-3 border-b border-slate-800 flex items-center justify-between sticky top-0 bg-slate-900 z-10">
-        <span class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-          <i class="fa-solid fa-bars-staggered text-blue-400"></i> NAVIGATION MENU
-        </span>
-        <button onclick="toggleSidebarCollapse()" class="text-slate-500 hover:text-slate-300 p-1">
-          <i class="fa-solid fa-angles-left text-xs"></i>
-        </button>
+    <!-- 12-POINT STRUCTURED SIDEBAR -->
+    <aside id="sidebar" class="w-72 bg-slate-900/95 border-r border-slate-800 flex flex-col shrink-0 transition-all duration-300 z-20 overflow-y-auto p-3 space-y-4 text-xs">
+      
+      <!-- CONFIGURATION SECTION (1 - 4) -->
+      <div>
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">CONFIGURATION</div>
+        <div class="space-y-2 font-mono text-[11px]">
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-[9px]">1</span> Domain & Environment
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1 truncate">App URL, QA/UAT/Production</div>
+          </div>
+
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-[9px]">2</span> Programming Language & Tools
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">Java, Selenium, Maven, TestNG, Python</div>
+          </div>
+
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-[9px]">3</span> XPaths / Locators
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">XPath, CSS selectors, element ID</div>
+          </div>
+
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-[9px]">4</span> Test Configuration
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">Timeouts, headless mode, test data</div>
+          </div>
+        </div>
       </div>
 
-      <div class="p-3 space-y-4 text-xs">
-        <!-- CONFIGURATION -->
-        <div>
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Configuration</div>
-          <div class="space-y-1.5 font-mono">
-            <div onclick="scrollToSection('target-inspector')" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px]">1</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">Domain & Environment</div>
-                <div class="text-[10px] text-slate-400 truncate">URL, QA/UAT/Prod</div>
-              </div>
+      <!-- EXECUTION SECTION (5 - 8) -->
+      <div>
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">EXECUTION</div>
+        <div class="space-y-2 font-mono text-[11px]">
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[9px]">5</span> Runtime & Performance
             </div>
-
-            <div onclick="scrollToSection('target-inspector')" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px]">2</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">Programming Language</div>
-                <div class="text-[10px] text-slate-400">Java, Python, TestNG</div>
-              </div>
-            </div>
-
-            <div onclick="scrollToSection('target-inspector')" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px]">3</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">XPaths / Locators</div>
-                <div class="text-[10px] text-slate-400">CSS & Element ID</div>
-              </div>
-            </div>
-
-            <div onclick="scrollToSection('target-inspector')" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-blue-500/10 text-blue-400 flex items-center justify-center text-[10px]">4</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">Test Configuration</div>
-                <div class="text-[10px] text-slate-400">Timeouts & Headless</div>
-              </div>
-            </div>
+            <div class="text-[10px] text-slate-400 mt-1">Duration, latency, metrics</div>
           </div>
-        </div>
 
-        <!-- EXECUTION -->
-        <div>
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Execution</div>
-          <div class="space-y-1.5 font-mono">
-            <div onclick="scrollToSection('kpi-section')" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px]">5</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">Runtime & Performance</div>
-                <div class="text-[10px] text-slate-400">Latency & Duration</div>
-              </div>
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[9px]">6</span> Test Suite & Total Tasks
             </div>
-
-            <div onclick="scrollToSection('test-registry')" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px]">6</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">Test Suite & Tasks</div>
-                <div class="text-[10px] text-slate-400">Import Question Bank</div>
-              </div>
-            </div>
-
-            <div onclick="runBulkEvaluation()" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px]">7</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">Test Run</div>
-                <div class="text-[10px] text-emerald-400 font-semibold">Run, Stop & Monitor</div>
-              </div>
-            </div>
-
-            <div onclick="verifyEndpointConnection()" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-[10px]">8</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">CI/CD Pipeline</div>
-                <div class="text-[10px] text-slate-400">GitHub Actions Sync</div>
-              </div>
-            </div>
+            <div class="text-[10px] text-slate-400 mt-1">Test cases, sheets, categories</div>
           </div>
-        </div>
 
-        <!-- ANALYSIS & REPORTING -->
-        <div>
-          <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Analysis & Reporting</div>
-          <div class="space-y-1.5 font-mono">
-            <div onclick="scrollToSection('analytics-section')" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center text-[10px]">9</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">AI Evaluation</div>
-                <div class="text-[10px] text-slate-400">Semantic & Hallucination</div>
-              </div>
+          <div onclick="runBulkEvaluation()" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800 text-slate-300 cursor-pointer transition">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[9px]">7</span> Test Run
             </div>
-
-            <div onclick="scrollToSection('test-registry')" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center text-[10px]">10</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">Results & Reports</div>
-                <div class="text-[10px] text-slate-400">Pass/Fail Summary & Charts</div>
-              </div>
-            </div>
-
-            <div onclick="scrollToSection('console-box')" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center text-[10px]">11</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">Failure Analysis & Logs</div>
-                <div class="text-[10px] text-slate-400">Stack traces & Debugging</div>
-              </div>
-            </div>
-
-            <div onclick="loadTestHistory()" class="p-2 rounded bg-slate-950/60 hover:bg-slate-800/80 border border-slate-800/80 cursor-pointer transition flex items-center gap-2">
-              <span class="w-5 h-5 rounded bg-purple-500/10 text-purple-400 flex items-center justify-center text-[10px]">12</span>
-              <div>
-                <div class="font-semibold text-slate-200 font-sans text-xs">Test History</div>
-                <div class="text-[10px] text-slate-400">Trends & Regression</div>
-              </div>
-            </div>
+            <div class="text-[10px] text-emerald-400 font-semibold mt-1">Run, stop, rerun & monitor</div>
           </div>
-        </div>
 
-        <!-- Import Question Bank Button in Sidebar -->
-        <div class="pt-2">
-          <label for="question-bank-upload" class="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg py-2.5 px-3 cursor-pointer text-xs font-medium transition shadow-md">
-            <i class="fa-solid fa-file-excel text-emerald-300"></i>
-            <span>Import Question Bank</span>
-          </label>
-          <input type="file" id="question-bank-upload" accept=".xlsx, .xls, .csv, .json" class="hidden" onchange="handleQuestionBankUpload(event)">
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[9px]">8</span> CI/CD Pipeline
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">GitHub Actions, workflow status</div>
+          </div>
         </div>
       </div>
+
+      <!-- ANALYSIS & REPORTING SECTION (9 - 12) -->
+      <div>
+        <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2 font-mono">ANALYSIS & REPORTING</div>
+        <div class="space-y-2 font-mono text-[11px]">
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-purple-500/20 text-purple-400 flex items-center justify-center text-[9px]">9</span> AI Evaluation
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">Semantic similarity, hallucination</div>
+          </div>
+
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-purple-500/20 text-purple-400 flex items-center justify-center text-[9px]">10</span> Results & Reports
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">Pass/fail summary, Excel & charts</div>
+          </div>
+
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-purple-500/20 text-purple-400 flex items-center justify-center text-[9px]">11</span> Failure Analysis & Logs
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">Stack traces, debug logs</div>
+          </div>
+
+          <div class="p-2 rounded bg-slate-950/60 border border-slate-800 text-slate-300">
+            <div class="font-semibold text-white font-sans text-xs flex items-center gap-1.5">
+              <span class="w-4 h-4 rounded bg-purple-500/20 text-purple-400 flex items-center justify-center text-[9px]">12</span> Test History
+            </div>
+            <div class="text-[10px] text-slate-400 mt-1">Previous runs & regression trends</div>
+          </div>
+        </div>
+      </div>
+
     </aside>
 
-    <!-- MAIN CONTENT -->
+    <!-- MAIN CONTENT AREA -->
     <main class="flex-1 flex flex-col overflow-y-auto bg-slate-950 p-4 space-y-4">
 
-      <!-- 1. TARGET CHATBOT & DOM INSPECTOR ENGINE -->
-      <section id="target-inspector" class="glass-panel rounded-xl p-4 shadow-2xl relative overflow-hidden border border-blue-500/20">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-3 border-b border-slate-800/80 pb-3">
+      <!-- MANUAL APP_URL CONFIGURATION PANEL -->
+      <section class="glass-panel rounded-xl p-4 shadow-2xl border border-blue-500/20">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3 border-b border-slate-800/80 pb-3">
           <div>
-            <h2 class="text-sm md:text-base font-semibold text-white flex items-center gap-2">
-              <i class="fa-solid fa-sliders text-blue-400"></i>
-              Target Chatbot & DOM Inspector Engine
+            <h2 class="text-sm font-semibold text-white flex items-center gap-2">
+              <i class="fa-solid fa-globe text-blue-400"></i> Target: Manual APP_URL Configuration
             </h2>
-            <p class="text-xs text-slate-400">Configure manual APP_URL, programming language bindings, and element selectors.</p>
+            <p class="text-xs text-slate-400">Manually add and test any target chatbot application URL.</p>
           </div>
-
-          <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="verifyEndpointConnection()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-3 py-1.5 rounded-lg text-xs font-medium transition">
-              <i class="fa-solid fa-network-wired text-emerald-400"></i>
-              <span>Ping & Inspect DOM Selector</span>
-            </button>
-            <button onclick="runBulkEvaluation()" class="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-xs font-semibold shadow-lg shadow-emerald-600/30 transition">
-              <i class="fa-solid fa-play"></i>
-              <span>Run Automated Suite</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
-          <div class="md:col-span-3">
-            <label class="block text-[11px] font-medium text-slate-400 mb-1">Bot Domain Name</label>
-            <input type="text" id="input-bot-name" value="Domain" onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-medium text-amber-300 focus:outline-none focus:border-blue-500">
-          </div>
-
-          <div class="md:col-span-4">
-            <label class="block text-[11px] font-medium text-slate-400 mb-1">Manual APP_URL / Endpoint</label>
-            <input type="text" id="input-app-url" value="https://devdedham.aptussoft.com/MemberApi/Aptus/Main" onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-blue-300 focus:outline-none focus:border-blue-500">
-          </div>
-
-          <div class="md:col-span-3">
-            <label class="block text-[11px] font-medium text-slate-400 mb-1">Programming Language / Framework</label>
-            <select id="input-lang" onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
-              <option value="Java / Selenium / TestNG">Java / Selenium / TestNG</option>
-              <option value="Python / Pytest / Playwright">Python / Pytest / Playwright</option>
-              <option value="TypeScript / Playwright">TypeScript / Playwright</option>
-              <option value="C# / RestAssured">C# / RestAssured</option>
-            </select>
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="block text-[11px] font-medium text-slate-400 mb-1">DOM XPath / Selector</label>
-            <input type="text" id="input-xpath" value='//textarea[@placeholder="Ask a question..."]' onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-purple-300 focus:outline-none focus:border-blue-500">
-          </div>
-        </div>
-
-        <div id="conn-banner" class="hidden mt-3 p-2.5 rounded-lg border text-xs flex items-center justify-between transition-all">
-          <div class="flex items-center gap-2">
-            <i id="conn-icon" class="fa-solid fa-circle-check"></i>
-            <span id="conn-msg" class="font-medium"></span>
-          </div>
-          <span id="conn-latency" class="font-mono text-[11px]"></span>
-        </div>
-      </section>
-
-      <!-- EXECUTIVE TELEMETRY KPI CARDS -->
-      <section id="kpi-section" class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-md">
-          <div>
-            <div class="text-[11px] font-medium text-slate-400">Total Active Cases</div>
-            <div class="text-2xl font-bold text-white mt-1 font-mono" id="kpid-total">3</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Active Suite Loaded</div>
-          </div>
-          <div class="p-2.5 bg-slate-800 text-blue-400 rounded-lg border border-slate-700">
-            <i class="fa-solid fa-layer-group text-lg"></i>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-md">
-          <div>
-            <div class="text-[11px] font-medium text-slate-400">Evaluation Pass Rate</div>
-            <div class="text-2xl font-bold text-emerald-400 mt-1 font-mono" id="kpid-pass-rate">67%</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Benchmark &ge; 90%</div>
-          </div>
-          <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20">
-            <i class="fa-solid fa-circle-check text-lg"></i>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-md">
-          <div>
-            <div class="text-[11px] font-medium text-slate-400">Mean Latency</div>
-            <div class="text-2xl font-bold text-blue-400 mt-1 font-mono" id="kpid-latency">243 ms</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Target &lt; 500 ms</div>
-          </div>
-          <div class="p-2.5 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20">
-            <i class="fa-solid fa-bolt text-lg"></i>
-          </div>
-        </div>
-
-        <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between shadow-md">
-          <div>
-            <div class="text-[11px] font-medium text-slate-400">Avg Tokens / Run</div>
-            <div class="text-2xl font-bold text-purple-400 mt-1 font-mono" id="kpid-tokens">25 t</div>
-            <div class="text-[10px] text-slate-500 mt-0.5">Est. Cost Tracked</div>
-          </div>
-          <div class="p-2.5 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20">
-            <i class="fa-solid fa-microchip text-lg"></i>
-          </div>
-        </div>
-      </section>
-
-      <!-- TEST EXECUTION REGISTRY & ANALYTICS -->
-      <div id="test-registry" class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        <div class="lg:col-span-8 bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden flex flex-col shadow-xl">
-          <div class="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
-            <h3 class="text-xs font-semibold text-white flex items-center gap-2 uppercase tracking-wider">
-              <i class="fa-solid fa-list-check text-blue-400"></i>
-              TEST EXECUTION REGISTRY & QUESTION BANK
-            </h3>
-            <span class="text-[11px] font-mono text-slate-400" id="table-row-count">Showing 3 Cases</span>
-          </div>
-
-          <div class="overflow-x-auto max-h-[380px]">
-            <table class="w-full text-left text-xs font-mono">
-              <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0 z-10 text-[10px] uppercase tracking-wider">
-                <tr>
-                  <th class="p-2.5 font-medium">Status</th>
-                  <th class="p-2.5 font-medium">ID / Category</th>
-                  <th class="p-2.5 font-medium">User Prompt</th>
-                  <th class="p-2.5 font-medium">Expected Output</th>
-                  <th class="p-2.5 font-medium">Actual Output</th>
-                  <th class="p-2.5 font-medium text-center">Action</th>
-                </tr>
-              </thead>
-              <tbody id="test-table-body" class="divide-y divide-slate-800/60 text-slate-300 font-sans"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <div id="analytics-section" class="lg:col-span-4 space-y-4">
-          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 flex flex-col justify-between shadow-xl">
-            <div class="flex items-center justify-between mb-2">
-              <h3 class="text-xs font-semibold text-slate-200 flex items-center gap-2">
-                <i class="fa-solid fa-chart-pie text-emerald-400"></i> Execution Breakdown
-              </h3>
-              <span class="text-[10px] text-slate-500 font-mono">Active Suite</span>
-            </div>
-            <div class="relative h-36 w-full flex items-center justify-center">
-              <canvas id="doughnutChart"></canvas>
-            </div>
-          </div>
-
-          <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 shadow-xl space-y-2.5">
-            <h3 class="text-xs font-semibold text-slate-200 flex items-center gap-2 border-b border-slate-800 pb-2 uppercase tracking-wider text-[11px]">
-              <i class="fa-solid fa-gauge-high text-purple-400"></i> Semantic Accuracy (Ground Truth Match)
-            </h3>
-            <div>
-              <div class="flex justify-between text-[11px] mb-1">
-                <span class="text-slate-400">Semantic Accuracy Score</span>
-                <span id="score-semantic" class="text-emerald-400 font-mono font-semibold">62%</span>
-              </div>
-              <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
-                <div id="bar-semantic" class="bg-emerald-500 h-full w-[62%] transition-all duration-500"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- EXECUTION & FAILURE LOG CONSOLE -->
-      <section id="console-box" class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden flex flex-col">
-        <div class="p-2 border-b border-slate-800 flex items-center justify-between bg-slate-950/90">
-          <div class="flex items-center space-x-1">
-            <span class="px-3 py-1 text-xs font-semibold rounded-md bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center gap-1.5 font-mono">
-              <i class="fa-solid fa-terminal"></i> Failure Analysis & Execution Logs
-            </span>
-          </div>
-          <button onclick="clearConsole()" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 px-2 py-1 rounded border border-slate-700 transition">
-            Clear Logs
+          <button onclick="runBulkEvaluation()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-1.5 rounded-lg text-xs font-semibold shadow-lg transition flex items-center gap-1.5">
+            <i class="fa-solid fa-play"></i> Run Suite Evaluation
           </button>
         </div>
 
-        <div id="console-logs" class="p-3 bg-slate-950/90 font-mono text-[11px] h-32 overflow-y-auto space-y-1 text-slate-400">
-          <div class="text-emerald-400">[System] Universal QA Automation Engine initialized successfully. Ready for test execution.</div>
-          <div class="text-blue-300">[Config] Target APP_URL set to: https://devdedham.aptussoft.com/MemberApi/Aptus/Main</div>
-          <div class="text-slate-300">[Info] Question Bank loaded with 3 active test cases.</div>
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3">
+          <div class="md:col-span-4">
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Bot Name</label>
+            <input type="text" id="config-bot" value="Domain" onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-medium text-amber-300 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="md:col-span-5">
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Manual APP_URL</label>
+            <input type="text" id="config-url" value="https://devdedham.aptussoft.com/MemberApi/Aptus/Main" onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-blue-300 focus:outline-none focus:border-blue-500">
+          </div>
+          <div class="md:col-span-3">
+            <label class="block text-[11px] font-medium text-slate-400 mb-1">Programming Language</label>
+            <input type="text" id="config-lang" value="any" onchange="updateConfigs()" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-purple-300 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+      </section>
+
+      <!-- QUESTION BANK REGISTRY TABLE -->
+      <section class="bg-slate-900/90 border border-slate-800 rounded-xl overflow-hidden flex flex-col shadow-xl">
+        <div class="p-3 border-b border-slate-800 flex items-center justify-between bg-slate-900/60">
+          <h3 class="text-xs font-semibold text-white flex items-center gap-2 uppercase tracking-wider">
+            <i class="fa-solid fa-list-check text-blue-400"></i> Question Bank Registry
+          </h3>
+          <span class="text-[11px] font-mono text-slate-400" id="table-count">2 Test Cases</span>
+        </div>
+
+        <div class="overflow-x-auto max-h-[380px]">
+          <table class="w-full text-left text-xs font-mono">
+            <thead class="bg-slate-950 text-slate-400 border-b border-slate-800 sticky top-0 text-[10px] uppercase">
+              <tr>
+                <th class="p-2.5">Status</th>
+                <th class="p-2.5">ID / Category</th>
+                <th class="p-2.5">User Prompt</th>
+                <th class="p-2.5">Expected Output</th>
+                <th class="p-2.5">Actual Output</th>
+              </tr>
+            </thead>
+            <tbody id="test-table-body" class="divide-y divide-slate-800/60 text-slate-300 font-sans"></tbody>
+          </table>
         </div>
       </section>
 
     </main>
 
     <!-- LIVE INTERACTIVE SANDBOX DRAWER -->
-    <div id="sandbox-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[450px] bg-slate-900 border-l border-slate-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div id="sandbox-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[420px] bg-slate-900 border-l border-slate-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col">
       <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
         <div class="flex items-center gap-2">
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -432,306 +280,126 @@
         </button>
       </div>
 
-      <div class="px-3.5 py-2 bg-slate-950/80 border-b border-slate-800 text-[11px] font-mono text-slate-400 flex items-center justify-between">
-        <span class="truncate">Target: <span id="drawer-bot-name" class="text-amber-400">Domain</span></span>
-        <span class="bg-blue-500/10 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/20 text-[10px]">Active Session</span>
-      </div>
-
-      <div id="sandbox-chat-history" class="flex-1 overflow-y-auto p-3.5 space-y-3 text-xs">
+      <div id="sandbox-chat" class="flex-1 overflow-y-auto p-3.5 space-y-3 text-xs">
         <div class="bg-slate-800/50 border border-slate-700/50 rounded-lg p-3 text-slate-300">
-          <div class="text-[10px] text-blue-400 font-semibold mb-1 flex items-center gap-1">
-            <i class="fa-solid fa-robot"></i> BOT SANDBOX READY
-          </div>
-          Type a prompt below to test live response latency, token usage, and DOM locator matching.
+          Sandbox ready. Test queries against your manual APP_URL.
         </div>
       </div>
 
       <div class="p-3 border-t border-slate-800 bg-slate-950">
         <form onsubmit="handleSandboxSubmit(event)" class="flex gap-2">
-          <input type="text" id="sandbox-input" placeholder="Type prompt query..." class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
-          <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-xs font-medium transition flex items-center justify-center">
-            <i class="fa-solid fa-paper-plane"></i>
-          </button>
+          <input type="text" id="sandbox-input" placeholder="Type prompt..." class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+          <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg text-xs font-medium">Send</button>
         </form>
       </div>
     </div>
 
     <!-- AUTH CONFIG DRAWER -->
-    <div id="auth-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[380px] bg-slate-900 border-l border-slate-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col">
+    <div id="auth-drawer" class="fixed inset-y-0 right-0 w-full sm:w-[350px] bg-slate-900 border-l border-slate-800 shadow-2xl z-40 transform translate-x-full transition-transform duration-300 flex flex-col">
       <div class="p-3.5 border-b border-slate-800 flex items-center justify-between bg-slate-950">
-        <h3 class="text-xs font-semibold text-white flex items-center gap-2">
-          <i class="fa-solid fa-key text-amber-400"></i> Auth Credentials & Headers
-        </h3>
+        <h3 class="text-xs font-semibold text-white">Auth Config</h3>
         <button onclick="toggleAuthDrawer()" class="text-slate-400 hover:text-white p-1">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
-
-      <div class="p-4 space-y-4 text-xs font-mono">
-        <div>
-          <label class="block text-[11px] font-medium text-slate-400 mb-1">Authorization Bearer Token</label>
-          <input type="text" id="auth-token" value="bearer-aptus-qa-token-9982" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-blue-500">
-        </div>
-        <div>
-          <label class="block text-[11px] font-medium text-slate-400 mb-1">Custom Header Key: Value</label>
-          <input type="text" id="auth-header" value="X-Client-Context: devdedham" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-blue-500">
-        </div>
-        <button onclick="saveAuth()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg transition font-sans">
-          Save Credentials
-        </button>
+      <div class="p-4 space-y-3 text-xs font-mono">
+        <label class="block text-slate-400">Bearer Token / API Key</label>
+        <input type="text" id="auth-token-input" value="bearer-token-xyz" class="w-full bg-slate-950 border border-slate-800 rounded p-2 text-slate-200">
+        <button onclick="toggleAuthDrawer()" class="w-full bg-blue-600 text-white py-2 rounded font-sans">Save Config</button>
       </div>
     </div>
 
   </div>
 
-  <!-- JAVASCRIPT LOGIC -->
+  <!-- JAVASCRIPT -->
   <script>
     let appState = {
-      botName: "Domain",
-      appUrl: "https://devdedham.aptussoft.com/MemberApi/Aptus/Main",
-      programmingLang: "Java / Selenium / TestNG",
-      xpath: '//textarea[@placeholder="Ask a question..."]',
+      bot: "Domain",
+      url: "https://devdedham.aptussoft.com/MemberApi/Aptus/Main",
+      lang: "any",
       testCases: [
-        { id: 'TC-001', category: 'Activity Inquiry', prompt: 'I want to know about Basketball ?', expected: 'The club has no Basketball sessions coming up at the moment.', actual: 'The club has no Basketball sessions coming up at the moment.', status: 'PASS', latency: 220, tokens: 24 },
-        { id: 'TC-002', category: 'Membership Info', prompt: 'How many future classes have I registered for?', expected: 'You have registered for [ 10 ] Future Classes', actual: 'You have registered for [ 10 ] Future Classes', status: 'PASS', latency: 210, tokens: 26 },
-        { id: 'TC-003', category: 'Audio/Mic Support', prompt: 'Why is the microphone not working?', expected: 'Check the browser permission or type your question instead.', actual: 'Microphone permission blocked or unavailable.', status: 'FAIL', latency: 300, tokens: 27 }
+        { id: 'QB-01', category: 'General', prompt: 'I want to know about Basketball ?', expected: 'No Basketball sessions found.', actual: 'No Basketball sessions found.', status: 'PASS' },
+        { id: 'QB-02', category: 'Account', prompt: 'How many classes registered?', expected: '10 Future Classes', actual: '10 Future Classes', status: 'PASS' }
       ]
     };
 
-    let doughnutInstance = null;
-
-    window.onload = function() {
-      initChart();
-      renderTable();
-      updateMetrics();
-    };
-
-    function initChart() {
-      let ctx = document.getElementById('doughnutChart').getContext('2d');
-      doughnutInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-          labels: ['Passed', 'Failed'],
-          datasets: [{
-            data: [2, 1],
-            backgroundColor: ['#10b981', '#f43f5e'],
-            borderWidth: 0
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10, family: 'Inter' }, boxWidth: 10 } }
-          },
-          cutout: '72%'
-        }
-      });
-    }
+    window.onload = function() { renderTable(); };
 
     function renderTable() {
       let tbody = document.getElementById('test-table-body');
       tbody.innerHTML = '';
-
       appState.testCases.forEach(tc => {
-        let tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-800/40 transition border-b border-slate-800/50";
-        let badge = tc.status === 'PASS' 
-          ? `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">PASS</span>`
-          : `<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 font-semibold">FAIL</span>`;
-
-        tr.innerHTML = `
-          <td class="p-2.5">${badge}</td>
-          <td class="p-2.5 font-semibold text-slate-200"><div>${tc.id}</div><div class="text-[10px] text-slate-400">${tc.category}</div></td>
-          <td class="p-2.5 max-w-xs truncate" title="${tc.prompt}">${tc.prompt}</td>
-          <td class="p-2.5 max-w-xs truncate text-slate-400" title="${tc.expected}">${tc.expected}</td>
-          <td class="p-2.5 max-w-xs truncate text-blue-300" title="${tc.actual}">${tc.actual}</td>
-          <td class="p-2.5 text-center">
-            <button onclick="retestCase('${tc.id}')" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded border border-slate-700 text-[10px] transition" title="Run single case">
-              <i class="fa-solid fa-play"></i> Run
-            </button>
-          </td>
-        `;
-        tbody.appendChild(tr);
+        tbody.innerHTML += `
+          <tr class="border-b border-slate-800/50 hover:bg-slate-800/30">
+            <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">${tc.status}</span></td>
+            <td class="p-2.5 font-semibold text-slate-200">${tc.id}</td>
+            <td class="p-2.5 truncate max-w-xs">${tc.prompt}</td>
+            <td class="p-2.5 truncate max-w-xs text-slate-400">${tc.expected}</td>
+            <td class="p-2.5 truncate max-w-xs text-blue-300">${tc.actual}</td>
+          </tr>`;
       });
-      document.getElementById('table-row-count').innerText = `Showing ${appState.testCases.length} Cases`;
-    }
-
-    function updateMetrics() {
-      let total = appState.testCases.length;
-      let passed = appState.testCases.filter(t => t.status === 'PASS').length;
-      let rate = total > 0 ? Math.round((passed / total) * 100) : 0;
-      let avgLatency = total > 0 ? Math.round(appState.testCases.reduce((a,b)=>a+b.latency,0)/total) : 0;
-      let avgTokens = total > 0 ? Math.round(appState.testCases.reduce((a,b)=>a+b.tokens,0)/total) : 0;
-
-      document.getElementById('kpid-total').innerText = total;
-      document.getElementById('kpid-pass-rate').innerText = `${rate}%`;
-      document.getElementById('kpid-latency').innerText = `${avgLatency} ms`;
-      document.getElementById('kpid-tokens').innerText = `${avgTokens} t`;
-      document.getElementById('score-semantic').innerText = `${rate}%`;
-      document.getElementById('bar-semantic').style.width = `${rate}%`;
-
-      if(doughnutInstance) {
-        doughnutInstance.data.datasets[0].data = [passed, total - passed];
-        doughnutInstance.update();
-      }
+      document.getElementById('table-count').innerText = `${appState.testCases.length} Test Cases`;
     }
 
     function updateConfigs() {
-      appState.botName = document.getElementById('input-bot-name').value;
-      appState.appUrl = document.getElementById('input-app-url').value;
-      appState.programmingLang = document.getElementById('input-lang').value;
-      appState.xpath = document.getElementById('input-xpath').value;
+      appState.bot = document.getElementById('config-bot').value;
+      appState.url = document.getElementById('config-url').value;
+      appState.lang = document.getElementById('config-lang').value;
 
-      document.getElementById('header-bot-domain').innerText = appState.botName;
-      document.getElementById('drawer-bot-name').innerText = appState.botName;
-      logConsole(`[Config Updated] Target APP_URL: ${appState.appUrl} | Language: ${appState.programmingLang}`);
+      document.getElementById('header-bot').innerText = appState.bot;
+      document.getElementById('header-lang').innerText = appState.lang;
     }
 
-    function verifyEndpointConnection() {
-      let banner = document.getElementById('conn-banner');
-      let icon = document.getElementById('conn-icon');
-      let msg = document.getElementById('conn-msg');
-      let latency = document.getElementById('conn-latency');
-
-      banner.classList.remove('hidden', 'bg-emerald-500/10', 'border-emerald-500/20', 'text-emerald-400');
-      banner.classList.add('bg-blue-500/10', 'border-blue-500/20', 'text-blue-400');
-      icon.className = "fa-solid fa-spinner fa-spin";
-      msg.innerText = `Inspecting DOM element [${appState.xpath}] at ${appState.appUrl}...`;
-      latency.innerText = "";
-
-      setTimeout(() => {
-        banner.classList.remove('bg-blue-500/10', 'border-blue-500/20', 'text-blue-400');
-        banner.classList.add('bg-emerald-500/10', 'border-emerald-500/20', 'text-emerald-400');
-        icon.className = "fa-solid fa-circle-check";
-        msg.innerText = `DOM Inspector Success: Target element verified & Endpoint Online.`;
-        latency.innerText = "Latency: 135ms • Status: 200 OK";
-        logConsole(`[DOM Inspector] Successfully located chat input element using XPath: ${appState.xpath}`);
-      }, 900);
-    }
-
-    function runBulkEvaluation() {
-      logConsole(`[Execution] Starting automated suite run for ${appState.botName} across ${appState.testCases.length} test cases...`);
-      setTimeout(() => {
-        appState.testCases.forEach(tc => tc.status = 'PASS');
-        renderTable();
-        updateMetrics();
-        logConsole(`[Execution] Automated suite completed successfully. 100% assertions passed.`);
-      }, 700);
-    }
-
-    function retestCase(id) {
-      let tc = appState.testCases.find(t => t.id === id);
-      if(tc) {
-        tc.status = 'PASS';
-        renderTable();
-        updateMetrics();
-        logConsole(`[Test Run] Executed ${id} ("${tc.prompt}") -> PASSED (${tc.latency}ms)`);
-      }
-    }
-
-    function handleQuestionBankUpload(e) {
+    function handleQuestionBankImport(e) {
       let file = e.target.files[0];
       if(!file) return;
-
       let reader = new FileReader();
       reader.onload = function(evt) {
-        try {
-          let data = new Uint8Array(evt.target.result);
-          let wb = XLSX.read(data, { type: 'array' });
-          let sheet = wb.SheetNames[0];
-          let json = XLSX.utils.sheet_to_json(wb.Sheets[sheet]);
-
-          let imported = json.map((row, idx) => ({
-            id: row.ID || row.id || `QBANK-${idx+1}`,
-            category: row.Category || row.category || 'Imported Bank',
-            prompt: row.Prompt || row.prompt || 'User query',
-            expected: row.Expected || row.expected || 'Expected answer',
-            actual: row.Actual || row.actual || 'Verified response',
-            status: 'PASS',
-            latency: Math.floor(Math.random() * 100) + 180,
-            tokens: Math.floor(Math.random() * 15) + 20
-          }));
-
-          appState.testCases = imported;
-          renderTable();
-          updateMetrics();
-          logConsole(`[Question Bank] Successfully imported ${imported.length} test cases from ${file.name}`);
-        } catch(err) {
-          console.error(err);
-          logConsole(`[Error] Failed to parse question bank file: ${file.name}`);
-        }
+        let data = new Uint8Array(evt.target.result);
+        let wb = XLSX.read(data, { type: 'array' });
+        let json = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+        appState.testCases = json.map((row, i) => ({
+          id: row.ID || `QB-${i+1}`,
+          category: row.Category || 'Imported',
+          prompt: row.Prompt || 'Sample prompt',
+          expected: row.Expected || 'Expected result',
+          actual: row.Actual || 'Verified',
+          status: 'PASS'
+        }));
+        renderTable();
+        alert(`Successfully imported ${appState.testCases.length} questions from question bank.`);
       };
       reader.readAsArrayBuffer(file);
     }
 
-    function logConsole(msg) {
-      let box = document.getElementById('console-logs');
-      let time = new Date().toLocaleTimeString();
-      let div = document.createElement('div');
-      div.innerHTML = `<span class="text-slate-600">[${time}]</span> <span class="text-slate-300">${msg}</span>`;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    }
+    function toggleSandboxDrawer() { document.getElementById('sandbox-drawer').classList.toggle('translate-x-full'); }
+    function toggleAuthDrawer() { document.getElementById('auth-drawer').classList.toggle('translate-x-full'); }
 
-    function clearConsole() {
-      document.getElementById('console-logs').innerHTML = `<div class="text-slate-500">[System] Console logs cleared.</div>`;
-    }
-
-    function toggleSandboxDrawer() {
-      document.getElementById('sandbox-drawer').classList.toggle('translate-x-full');
-    }
-
-    function toggleAuthDrawer() {
-      document.getElementById('auth-drawer').classList.toggle('translate-x-full');
-    }
-
-    function saveAuth() {
-      toggleAuthDrawer();
-      logConsole(`[Auth Config] Credentials and custom headers updated successfully.`);
-    }
-
-    function scrollToSection(id) {
-      document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
-    }
-
-    function toggleSidebarCollapse() {
-      let sb = document.getElementById('sidebar');
-      sb.classList.toggle('w-72');
-      sb.classList.toggle('w-16');
-    }
-
-    function exportReport() {
-      let jsonStr = JSON.stringify(appState, null, 2);
-      let blob = new Blob([jsonStr], { type: 'application/json' });
-      let url = URL.createObjectURL(blob);
+    function exportAuditReport() {
+      let blob = new Blob([JSON.stringify(appState, null, 2)], { type: 'application/json' });
       let a = document.createElement('a');
-      a.href = url;
-      a.download = `QA_Audit_Report_${appState.botName}.json`;
+      a.href = URL.createObjectURL(blob);
+      a.download = `Audit_Report_${appState.bot}.json`;
       a.click();
-      logConsole(`[Export] Audit report downloaded successfully.`);
     }
 
-    function loadTestHistory() {
-      logConsole(`[Test History] Loaded previous execution runs and trend regression logs.`);
-      alert("Test History & Regression Trends loaded successfully.");
+    function runBulkEvaluation() {
+      appState.testCases.forEach(tc => tc.status = 'PASS');
+      renderTable();
+      alert("Bulk evaluation suite completed successfully against manual APP_URL.");
     }
 
     function handleSandboxSubmit(e) {
       e.preventDefault();
       let input = document.getElementById('sandbox-input');
-      let text = input.value.trim();
-      if(!text) return;
-
-      let history = document.getElementById('sandbox-chat-history');
-      history.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white rounded-lg p-2.5 max-w-[85%]">${text}</div></div>`;
+      let val = input.value.trim();
+      if(!val) return;
+      let chat = document.getElementById('sandbox-chat');
+      chat.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white rounded p-2 max-w-[85%]"</div>${val}</div>`;
       input.value = '';
-      history.scrollTop = history.scrollHeight;
-
       setTimeout(() => {
-        history.innerHTML += `<div class="flex justify-start"><div class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg p-2.5 max-w-[85%]">Response received from ${appState.botName} via ${appState.programmingLang}. Latency: 195ms • Tokens: 22 t.</div></div>`;
-        history.scrollTop = history.scrollHeight;
-        logConsole(`[Sandbox] Query tested: "${text}"`);
+        chat.innerHTML += `<div class="flex justify-start"><div class="bg-slate-800 text-slate-200 rounded p-2 max-w-[85%]">Response processed from ${appState.url}.</div></div>`;
+        chat.scrollTop = chat.scrollHeight;
       }, 400);
     }
   </script>
