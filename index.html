@@ -59,7 +59,6 @@
     ::-webkit-scrollbar-thumb:hover {
       background: #334155;
     }
-
     /* Glassmorphism panel */
     .glass-panel {
       background: rgba(17, 24, 39, 0.85);
@@ -67,27 +66,23 @@
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-
     /* Sidebar Active Accent Animation */
     .sidebar-active {
       background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0.2) 100%);
       border-left: 3px solid #3b82f6 !important;
       color: #ffffff !important;
     }
-
     .sidebar-collapsed .sidebar-text,
     .sidebar-collapsed .sidebar-chevron,
     .sidebar-collapsed .sidebar-badge,
     .sidebar-collapsed .sidebar-header-title {
       display: none !important;
     }
-
     .sidebar-collapsed .sidebar-item {
       justify-content: center !important;
       padding-left: 0.75rem !important;
       padding-right: 0.75rem !important;
     }
-
     .sidebar-collapsed .section-header {
       justify-content: center !important;
       padding-left: 0.5rem !important;
@@ -96,7 +91,6 @@
   </style>
 </head>
 <body class="h-full flex flex-col font-sans overflow-hidden bg-slate-950 text-slate-200">
-
   <!-- 1. HEADER -->
   <header class="h-16 bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between shrink-0 z-30 backdrop-blur-md">
     <div class="flex items-center space-x-3">
@@ -104,7 +98,6 @@
       <button onclick="toggleSidebarCollapse()" title="Toggle Sidebar" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition border border-transparent hover:border-slate-700">
         <i id="sidebar-toggle-icon" class="fa-solid fa-bars-staggered text-sm"></i>
       </button>
-
       <!-- AspireNXT Logo Box -->
       <div class="w-9 h-9 rounded-xl bg-white border border-slate-700/80 flex flex-col items-center justify-center p-0.5 shadow-sm shrink-0">
         <svg viewBox="0 0 500 340" class="w-5 h-5 object-contain" xmlns="http://www.w3.org/2000/svg">
@@ -129,10 +122,8 @@
         </div>
       </div>
     </div>
-
     <!-- Header Controls & Configuration -->
-    <div class="flex items-center space-x-2 text-xs flex-wrap justify-end">
-      
+    <div class="flex items-center space-x-2 text-xs flex-wrap justify-end">     
       <!-- Domain Dropdown -->
       <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
         <label class="text-[10px] text-slate-400 font-medium">Domain:</label>
@@ -144,7 +135,6 @@
           <option value="IT Operations" class="bg-slate-900">IT Operations</option>
         </select>
       </div>
-
       <!-- Programming Language Dropdown -->
       <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
         <label class="text-[10px] text-slate-400 font-medium">Lang:</label>
@@ -155,20 +145,17 @@
           <option value="C#" class="bg-slate-900">C#</option>
         </select>
       </div>
-
       <!-- Target Application URL Input -->
       <div class="flex items-center gap-1 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 max-w-[220px]">
         <label class="text-[10px] text-slate-400 font-medium">APP_URL:</label>
         <input type="text" id="target-app-url" value="https://app.chatbot.ai" placeholder="https://..." class="bg-transparent text-blue-300 font-mono text-xs focus:outline-none w-full truncate">
       </div>
-
       <!-- Question Bank Import Button -->
       <label for="excel-upload" class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-lg cursor-pointer text-xs font-medium transition">
         <i class="fa-solid fa-cloud-arrow-up text-blue-400"></i>
         <span class="hidden md:inline">Import Question Bank</span>
       </label>
       <input type="file" id="excel-upload" accept=".csv, .xlsx, .xls, .json" class="hidden" onchange="handleFileUpload(event)">
-
       <!-- Export Audit Report Dropdown -->
       <div class="relative">
         <button onclick="toggleExportDropdown()" class="flex items-center gap-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-lg transition text-xs font-medium">
@@ -188,13 +175,11 @@
           </button>
         </div>
       </div>
-
       <!-- Auth Config Drawer Trigger -->
       <button onclick="toggleAuthDrawer()" class="flex items-center gap-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-lg font-medium transition text-xs" title="Authentication Configuration">
         <i class="fa-solid fa-key text-amber-400"></i>
         <span class="hidden sm:inline">Auth Config</span>
       </button>
-
       <!-- Sandbox Drawer Trigger -->
       <button onclick="toggleSandboxDrawer()" class="flex items-center gap-1.5 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg font-medium transition text-xs shadow-lg shadow-blue-600/20">
         <i class="fa-solid fa-terminal"></i>
@@ -202,13 +187,10 @@
       </button>
     </div>
   </header>
-
   <!-- MAIN WRAPPER -->
   <div class="flex-1 flex overflow-hidden relative">
-
     <!-- 2. REDESIGNED SIDEBAR NAVIGATION -->
-    <aside id="sidebar" class="w-64 bg-slate-900/95 border-r border-slate-800/90 flex flex-col shrink-0 transition-all duration-300 z-20 select-none">
-      
+    <aside id="sidebar" class="w-64 bg-slate-900/95 border-r border-slate-800/90 flex flex-col shrink-0 transition-all duration-300 z-20 select-none">     
       <!-- Sidebar Header -->
       <div class="p-3 border-b border-slate-800/80 flex items-center justify-between">
         <div class="flex items-center gap-2 text-xs font-semibold text-slate-300 tracking-wider">
@@ -219,10 +201,8 @@
         </div>
         <span class="sidebar-badge text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded font-mono font-medium">v2.4</span>
       </div>
-
       <!-- Sidebar Accordion Tree Menu -->
-      <div class="flex-1 overflow-y-auto p-2 space-y-3 text-xs font-sans" id="dynamic-tree-container">
-        
+      <div class="flex-1 overflow-y-auto p-2 space-y-3 text-xs font-sans" id="dynamic-tree-container">      
         <!-- SECTION 1: CONFIGURATION & SETUP -->
         <div class="space-y-1">
           <button onclick="toggleAccordion('acc-config')" class="section-header w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
@@ -231,7 +211,6 @@
             </span>
             <i id="acc-config-chevron" class="sidebar-chevron fa-solid fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
           </button>
-
           <div id="acc-config" class="space-y-0.5">
             <div id="nav-item-Domain & Environment" onclick="selectSidebarNode('Domain & Environment')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
@@ -242,7 +221,6 @@
                 </div>
               </div>
             </div>
-
             <div id="nav-item-Programming Language & Tools" onclick="selectSidebarNode('Programming Language & Tools')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
                 <i class="fa-solid fa-code text-emerald-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
@@ -252,7 +230,6 @@
                 </div>
               </div>
             </div>
-
             <div id="nav-item-XPath / Locators" onclick="selectSidebarNode('XPath / Locators')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
                 <i class="fa-solid fa-crosshairs text-amber-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
@@ -262,7 +239,6 @@
                 </div>
               </div>
             </div>
-
             <div id="nav-item-Test Configuration" onclick="selectSidebarNode('Test Configuration')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
                 <i class="fa-solid fa-sliders text-purple-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
@@ -272,7 +248,6 @@
                 </div>
               </div>
             </div>
-
             <div id="nav-item-Runtime & Performance" onclick="selectSidebarNode('Runtime & Performance')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
                 <i class="fa-solid fa-bolt text-indigo-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
@@ -284,7 +259,6 @@
             </div>
           </div>
         </div>
-
         <!-- SECTION 2: TEST EXECUTION -->
         <div class="space-y-1">
           <button onclick="toggleAccordion('acc-execution')" class="section-header w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
@@ -293,7 +267,6 @@
             </span>
             <i id="acc-execution-chevron" class="sidebar-chevron fa-solid fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
           </button>
-
           <div id="acc-execution" class="space-y-0.5">
             <div id="nav-item-Test Suite & Total Tasks" onclick="selectSidebarNode('Test Suite & Total Tasks')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
@@ -305,7 +278,6 @@
               </div>
               <span class="sidebar-badge text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded">3 Active</span>
             </div>
-
             <div id="nav-item-Test Run" onclick="selectSidebarNode('Test Run')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
                 <i class="fa-solid fa-play text-amber-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
@@ -316,7 +288,6 @@
               </div>
               <span class="sidebar-badge text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded">67% Pass</span>
             </div>
-
             <div id="nav-item-CI/CD Pipeline" onclick="selectSidebarNode('CI/CD Pipeline')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
                 <i class="fa-brands fa-github text-purple-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
@@ -328,7 +299,6 @@
             </div>
           </div>
         </div>
-
         <!-- SECTION 3: ANALYSIS & REPORTING -->
         <div class="space-y-1">
           <button onclick="toggleAccordion('acc-analysis')" class="section-header w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
@@ -337,7 +307,6 @@
             </span>
             <i id="acc-analysis-chevron" class="sidebar-chevron fa-solid fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
           </button>
-
           <div id="acc-analysis" class="space-y-0.5">
             <div id="nav-item-AI Evaluation" onclick="selectSidebarNode('AI Evaluation')" class="sidebar-item sidebar-active flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer transition group">
               <div class="flex items-center gap-2.5 min-w-0">
@@ -349,7 +318,6 @@
               </div>
               <span class="sidebar-badge text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded">Active</span>
             </div>
-
             <div id="nav-item-Results & Reports" onclick="selectSidebarNode('Results & Reports')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
                 <i class="fa-solid fa-square-poll-vertical text-emerald-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
@@ -359,7 +327,6 @@
                 </div>
               </div>
             </div>
-
             <div id="nav-item-Failure Analysis & Logs" onclick="selectSidebarNode('Failure Analysis & Logs')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
                 <i class="fa-solid fa-bug text-rose-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
@@ -370,7 +337,6 @@
               </div>
               <span class="sidebar-badge text-[9px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded">1 Fault</span>
             </div>
-
             <div id="nav-item-Test History" onclick="selectSidebarNode('Test History')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
               <div class="flex items-center gap-2.5 min-w-0">
                 <i class="fa-solid fa-clock-rotate-left text-blue-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
@@ -382,9 +348,7 @@
             </div>
           </div>
         </div>
-
       </div>
-
       <!-- Quick Action Footer Controls -->
       <div class="p-2 border-t border-slate-800/80 bg-slate-950/60 flex flex-col gap-1">
         <div class="sidebar-item flex items-center justify-between p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 cursor-pointer text-xs transition">
@@ -396,7 +360,6 @@
             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> 99.8%
           </span>
         </div>
-
         <div onclick="toggleAuthDrawer()" class="sidebar-item flex items-center justify-between p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 cursor-pointer text-xs transition">
           <div class="flex items-center gap-2">
             <i class="fa-solid fa-gear text-slate-400 w-4 text-center"></i>
@@ -404,12 +367,9 @@
           </div>
         </div>
       </div>
-
     </aside>
-
     <!-- 3. MAIN PAGE CONTENT -->
     <main class="flex-1 flex flex-col overflow-y-auto bg-slate-950 p-4 space-y-4">
-
       <!-- Target Chatbot & DOM Inspector Engine -->
       <section class="glass-panel rounded-xl p-4 shadow-2xl relative overflow-hidden">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-3 border-b border-slate-800 pb-3">
