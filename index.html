@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Universal Chatbot QA Automation & AI Evaluation</title>
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -50,8 +51,8 @@
   <style>
     /* Custom Scrollbar Styles */
     ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
+      width: 5px;
+      height: 5px;
     }
     ::-webkit-scrollbar-track {
       background: #030712;
@@ -71,6 +72,32 @@
       -webkit-backdrop-filter: blur(12px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
+
+    /* Sidebar Active Accent Animation */
+    .sidebar-active {
+      background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(15, 23, 42, 0.2) 100%);
+      border-left: 3px solid #3b82f6 !important;
+      color: #ffffff !important;
+    }
+
+    .sidebar-collapsed .sidebar-text,
+    .sidebar-collapsed .sidebar-chevron,
+    .sidebar-collapsed .sidebar-badge,
+    .sidebar-collapsed .sidebar-header-title {
+      display: none !important;
+    }
+
+    .sidebar-collapsed .sidebar-item {
+      justify-content: center !important;
+      padding-left: 0.75rem !important;
+      padding-right: 0.75rem !important;
+    }
+
+    .sidebar-collapsed .section-header {
+      justify-content: center !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
   </style>
 </head>
 <body class="h-full flex flex-col font-sans overflow-hidden bg-slate-950 text-slate-200">
@@ -78,6 +105,11 @@
   <!-- 1. HEADER -->
   <header class="h-16 bg-slate-900/90 border-b border-slate-800 px-4 flex items-center justify-between shrink-0 z-30 backdrop-blur-md">
     <div class="flex items-center space-x-3">
+      <!-- Sidebar Toggle Button -->
+      <button onclick="toggleSidebarCollapse()" title="Toggle Sidebar" class="text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition border border-transparent hover:border-slate-700">
+        <i id="sidebar-toggle-icon" class="fa-solid fa-bars-staggered text-sm"></i>
+      </button>
+
       <!-- AspireNXT Logo Box -->
       <div class="w-9 h-9 rounded-xl bg-white border border-slate-700/80 flex flex-col items-center justify-center p-0.5 shadow-sm shrink-0">
         <svg viewBox="0 0 500 340" class="w-5 h-5 object-contain" xmlns="http://www.w3.org/2000/svg">
@@ -109,30 +141,30 @@
       <!-- Domain Dropdown -->
       <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
         <label class="text-[10px] text-slate-400 font-medium">Domain:</label>
-        <select id="header-domain" class="bg-transparent text-slate-200 text-xs focus:outline-none font-medium">
-          <option value="eCommerce">eCommerce</option>
-          <option value="Customer Support">Customer Support</option>
-          <option value="Healthcare">Healthcare</option>
-          <option value="Banking & Finance">Banking & Finance</option>
-          <option value="IT Operations">IT Operations</option>
+        <select id="header-domain" class="bg-transparent text-slate-200 text-xs focus:outline-none font-medium cursor-pointer">
+          <option value="eCommerce" class="bg-slate-900">eCommerce</option>
+          <option value="Customer Support" class="bg-slate-900">Customer Support</option>
+          <option value="Healthcare" selected class="bg-slate-900">Healthcare</option>
+          <option value="Banking & Finance" class="bg-slate-900">Banking & Finance</option>
+          <option value="IT Operations" class="bg-slate-900">IT Operations</option>
         </select>
       </div>
 
       <!-- Programming Language Dropdown -->
       <div class="flex items-center gap-1 bg-slate-950 px-2 py-1 rounded-lg border border-slate-800">
         <label class="text-[10px] text-slate-400 font-medium">Lang:</label>
-        <select id="header-lang" class="bg-transparent text-slate-200 text-xs focus:outline-none font-medium">
-          <option value="Python">Python</option>
-          <option value="Java">Java</option>
-          <option value="TypeScript / JS">TypeScript / JS</option>
-          <option value="C#">C#</option>
+        <select id="header-lang" class="bg-transparent text-slate-200 text-xs focus:outline-none font-medium cursor-pointer">
+          <option value="Python" class="bg-slate-900">Python</option>
+          <option value="Java" selected class="bg-slate-900">Java</option>
+          <option value="TypeScript / JS" class="bg-slate-900">TypeScript / JS</option>
+          <option value="C#" class="bg-slate-900">C#</option>
         </select>
       </div>
 
       <!-- Target Application URL Input -->
       <div class="flex items-center gap-1 bg-slate-950 px-2.5 py-1 rounded-lg border border-slate-800 max-w-[220px]">
         <label class="text-[10px] text-slate-400 font-medium">APP_URL:</label>
-        <input type="text" id="target-app-url" value="https://app.chatbot-target.com" placeholder="https://..." class="bg-transparent text-blue-300 font-mono text-xs focus:outline-none w-full truncate">
+        <input type="text" id="target-app-url" value="https://app.chatbot.ai" placeholder="https://..." class="bg-transparent text-blue-300 font-mono text-xs focus:outline-none w-full truncate">
       </div>
 
       <!-- Question Bank Import Button -->
@@ -179,127 +211,205 @@
   <!-- MAIN WRAPPER -->
   <div class="flex-1 flex overflow-hidden relative">
 
-    <!-- 2. SIDEBAR NAVIGATION -->
-    <aside id="sidebar" class="w-64 bg-slate-900/95 border-r border-slate-800 flex flex-col shrink-0 transition-all duration-300 z-20">
-      <div class="p-3 border-b border-slate-800 flex items-center justify-between">
-        <span id="sidebar-header-text" class="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-          <i class="fa-solid fa-compass text-blue-400"></i> NAVIGATION
-        </span>
+    <!-- 2. REDESIGNED SIDEBAR NAVIGATION -->
+    <aside id="sidebar" class="w-64 bg-slate-900/95 border-r border-slate-800/90 flex flex-col shrink-0 transition-all duration-300 z-20 select-none">
+      
+      <!-- Sidebar Header -->
+      <div class="p-3 border-b border-slate-800/80 flex items-center justify-between">
+        <div class="flex items-center gap-2 text-xs font-semibold text-slate-300 tracking-wider">
+          <div class="w-6 h-6 rounded-md bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
+            <i class="fa-solid fa-compass text-xs"></i>
+          </div>
+          <span class="sidebar-header-title uppercase font-mono text-[11px] tracking-wide text-slate-400">Navigation</span>
+        </div>
+        <span class="sidebar-badge text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20 px-1.5 py-0.5 rounded font-mono font-medium">v2.4</span>
       </div>
 
-      <!-- Sidebar Dynamic Menu Structure -->
-      <div class="flex-1 overflow-y-auto p-2 space-y-4 text-xs font-sans" id="dynamic-tree-container">
-        <!-- Configuration & Setup -->
+      <!-- Sidebar Accordion Tree Menu -->
+      <div class="flex-1 overflow-y-auto p-2 space-y-3 text-xs font-sans" id="dynamic-tree-container">
+        
+        <!-- SECTION 1: CONFIGURATION & SETUP -->
         <div class="space-y-1">
-          <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Configuration & Setup</div>
-          
-          <div onclick="selectSidebarNode('Domain & Environment')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-globe text-blue-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">Domain & Environment</div>
-              <div class="text-[10px] text-slate-500">App URL, target env settings</div>
-            </div>
-          </div>
+          <button onclick="toggleAccordion('acc-config')" class="section-header w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+            <span class="sidebar-text flex items-center gap-1.5">
+              <i class="fa-solid fa-sliders text-blue-400/80"></i> Configuration & Setup
+            </span>
+            <i id="acc-config-chevron" class="sidebar-chevron fa-solid fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
+          </button>
 
-          <div onclick="selectSidebarNode('Programming Language & Tools')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-code text-emerald-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">Programming Language & Tools</div>
-              <div class="text-[10px] text-slate-500">Java, Selenium, Python, TestNG</div>
+          <div id="acc-config" class="space-y-0.5">
+            <div id="nav-item-Domain & Environment" onclick="selectSidebarNode('Domain & Environment')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-globe text-blue-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">Domain & Environment</div>
+                  <div class="text-[9px] text-slate-500 truncate">App URL, target env settings</div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div onclick="selectSidebarNode('XPath / Locators')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-crosshairs text-amber-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">XPath / Locators</div>
-              <div class="text-[10px] text-slate-500">XPath & DOM element selectors</div>
+            <div id="nav-item-Programming Language & Tools" onclick="selectSidebarNode('Programming Language & Tools')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-code text-emerald-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">Programming & Tools</div>
+                  <div class="text-[9px] text-slate-500 truncate">Java, Selenium, TestNG</div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div onclick="selectSidebarNode('Test Configuration')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-sliders text-purple-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">Test Configuration</div>
-              <div class="text-[10px] text-slate-500">Timeouts, headless, test data</div>
+            <div id="nav-item-XPath / Locators" onclick="selectSidebarNode('XPath / Locators')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-crosshairs text-amber-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">XPath / Locators</div>
+                  <div class="text-[9px] text-slate-500 truncate">XPath & DOM element selectors</div>
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div onclick="selectSidebarNode('Runtime & Performance')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-bolt text-indigo-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">Runtime & Performance</div>
-              <div class="text-[10px] text-slate-500">Latency metrics & execution time</div>
+            <div id="nav-item-Test Configuration" onclick="selectSidebarNode('Test Configuration')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-sliders text-purple-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">Test Configuration</div>
+                  <div class="text-[9px] text-slate-500 truncate">Timeouts, headless & data</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="nav-item-Runtime & Performance" onclick="selectSidebarNode('Runtime & Performance')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-bolt text-indigo-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">Runtime & Performance</div>
+                  <div class="text-[9px] text-slate-500 truncate">Latency metrics & SLA thresholds</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Test Execution -->
+        <!-- SECTION 2: TEST EXECUTION -->
         <div class="space-y-1">
-          <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Test Execution</div>
+          <button onclick="toggleAccordion('acc-execution')" class="section-header w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+            <span class="sidebar-text flex items-center gap-1.5">
+              <i class="fa-solid fa-vial text-emerald-400/80"></i> Test Execution
+            </span>
+            <i id="acc-execution-chevron" class="sidebar-chevron fa-solid fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
+          </button>
 
-          <div onclick="selectSidebarNode('Test Suite & Total Tasks')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-layer-group text-emerald-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">Test Suite & Total Tasks</div>
-              <div class="text-[10px] text-slate-500">Active question bank & cases</div>
+          <div id="acc-execution" class="space-y-0.5">
+            <div id="nav-item-Test Suite & Total Tasks" onclick="selectSidebarNode('Test Suite & Total Tasks')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-layer-group text-emerald-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">Test Suite & Tasks</div>
+                  <div class="text-[9px] text-slate-500 truncate">Active question bank & cases</div>
+                </div>
+              </div>
+              <span class="sidebar-badge text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-1.5 py-0.5 rounded">3 Active</span>
             </div>
-          </div>
 
-          <div onclick="selectSidebarNode('Test Run')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-play text-amber-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">Test Run</div>
-              <div class="text-[10px] text-slate-500">Execute, stop & monitor runs</div>
+            <div id="nav-item-Test Run" onclick="selectSidebarNode('Test Run')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-play text-amber-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">Test Run Manager</div>
+                  <div class="text-[9px] text-slate-500 truncate">Execute, stop & monitor runs</div>
+                </div>
+              </div>
+              <span class="sidebar-badge text-[9px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 px-1.5 py-0.5 rounded">67% Pass</span>
             </div>
-          </div>
 
-          <div onclick="selectSidebarNode('CI/CD Pipeline')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-brands fa-github text-purple-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">CI/CD Pipeline</div>
-              <div class="text-[10px] text-slate-500">GitHub actions & integrations</div>
+            <div id="nav-item-CI/CD Pipeline" onclick="selectSidebarNode('CI/CD Pipeline')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-brands fa-github text-purple-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">CI/CD Pipeline</div>
+                  <div class="text-[9px] text-slate-500 truncate">GitHub actions & integrations</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Analysis & Reporting -->
+        <!-- SECTION 3: ANALYSIS & REPORTING -->
         <div class="space-y-1">
-          <div class="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-500">Analysis & Reporting</div>
+          <button onclick="toggleAccordion('acc-analysis')" class="section-header w-full flex items-center justify-between px-2.5 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition">
+            <span class="sidebar-text flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-pie text-purple-400/80"></i> Analysis & Reporting
+            </span>
+            <i id="acc-analysis-chevron" class="sidebar-chevron fa-solid fa-chevron-down text-[10px] text-slate-500 transition-transform duration-200"></i>
+          </button>
 
-          <div onclick="selectSidebarNode('AI Evaluation')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-brain text-purple-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">AI Evaluation</div>
-              <div class="text-[10px] text-slate-500">Semantic & ground truth similarity</div>
+          <div id="acc-analysis" class="space-y-0.5">
+            <div id="nav-item-AI Evaluation" onclick="selectSidebarNode('AI Evaluation')" class="sidebar-item sidebar-active flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-brain text-purple-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-white">AI Evaluation</div>
+                  <div class="text-[9px] text-slate-400 truncate">Semantic & ground truth similarity</div>
+                </div>
+              </div>
+              <span class="sidebar-badge text-[9px] font-mono font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded">Active</span>
+            </div>
+
+            <div id="nav-item-Results & Reports" onclick="selectSidebarNode('Results & Reports')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-square-poll-vertical text-emerald-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">Results & Reports</div>
+                  <div class="text-[9px] text-slate-500 truncate">Pass/fail summary & exports</div>
+                </div>
+              </div>
+            </div>
+
+            <div id="nav-item-Failure Analysis & Logs" onclick="selectSidebarNode('Failure Analysis & Logs')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-bug text-rose-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">Failure Analysis</div>
+                  <div class="text-[9px] text-slate-500 truncate">Error stack traces & debug</div>
+                </div>
+              </div>
+              <span class="sidebar-badge text-[9px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20 px-1.5 py-0.5 rounded">1 Fault</span>
+            </div>
+
+            <div id="nav-item-Test History" onclick="selectSidebarNode('Test History')" class="sidebar-item flex items-center justify-between p-2 rounded-lg text-slate-300 hover:bg-slate-800/70 hover:text-white cursor-pointer border border-transparent transition group">
+              <div class="flex items-center gap-2.5 min-w-0">
+                <i class="fa-solid fa-clock-rotate-left text-blue-400 w-4 text-center group-hover:scale-110 transition-transform"></i>
+                <div class="sidebar-text truncate">
+                  <div class="font-medium text-slate-200 group-hover:text-white">Test History</div>
+                  <div class="text-[9px] text-slate-500 truncate">Historical trend comparisons</div>
+                </div>
+              </div>
             </div>
           </div>
+        </div>
 
-          <div onclick="selectSidebarNode('Results & Reports')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-square-poll-vertical text-emerald-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">Results & Reports</div>
-              <div class="text-[10px] text-slate-500">Pass/fail summary & exports</div>
-            </div>
+      </div>
+
+      <!-- Quick Action Footer Controls -->
+      <div class="p-2 border-t border-slate-800/80 bg-slate-950/60 flex flex-col gap-1">
+        <div class="sidebar-item flex items-center justify-between p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 cursor-pointer text-xs transition">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-emerald-400 w-4 text-center"></i>
+            <span class="sidebar-text text-[11px]">Engine Health</span>
           </div>
+          <span class="sidebar-badge flex items-center gap-1 text-[9px] text-emerald-400 font-mono">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span> 99.8%
+          </span>
+        </div>
 
-          <div onclick="selectSidebarNode('Failure Analysis & Logs')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-bug text-rose-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">Failure Analysis & Logs</div>
-              <div class="text-[10px] text-slate-500">Error stack traces & debug</div>
-            </div>
-          </div>
-
-          <div onclick="selectSidebarNode('Test History')" class="flex items-center gap-2.5 p-2 rounded-lg text-slate-300 hover:bg-slate-800/80 cursor-pointer border border-transparent hover:border-slate-800 transition">
-            <i class="fa-solid fa-clock-rotate-left text-blue-400 w-4 text-center"></i>
-            <div>
-              <div class="font-medium text-white">Test History</div>
-              <div class="text-[10px] text-slate-500">Historical trend comparisons</div>
-            </div>
+        <div onclick="toggleAuthDrawer()" class="sidebar-item flex items-center justify-between p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 cursor-pointer text-xs transition">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-gear text-slate-400 w-4 text-center"></i>
+            <span class="sidebar-text text-[11px]">Engine Settings</span>
           </div>
         </div>
       </div>
+
     </aside>
 
     <!-- 3. MAIN PAGE CONTENT -->
@@ -356,11 +466,11 @@
 
           <div class="md:col-span-2">
             <label class="block text-[11px] font-medium text-slate-400 mb-1">Protocol Binding</label>
-            <select id="protocol-engine" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
-              <option value="REST API">REST API</option>
-              <option value="WebSocket">WebSocket</option>
-              <option value="Web Embed">Web Embed</option>
-              <option value="Webhook">Webhook</option>
+            <select id="protocol-engine" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono cursor-pointer">
+              <option value="REST API" class="bg-slate-900">REST API</option>
+              <option value="WebSocket" class="bg-slate-900">WebSocket</option>
+              <option value="Web Embed" class="bg-slate-900">Web Embed</option>
+              <option value="Webhook" class="bg-slate-900">Webhook</option>
             </select>
           </div>
         </div>
@@ -555,44 +665,32 @@
         </button>
       </div>
 
-      <div class="p-4 space-y-4 text-xs">
+      <div class="p-4 space-y-4 text-xs overflow-y-auto flex-1">
         <div>
-          <label class="block text-[11px] font-medium text-slate-400 mb-1">Authorization Bearer Token</label>
-          <input type="text" value="bearer-qa-token-998234-x" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 focus:outline-none focus:border-blue-500">
+          <label class="block text-[11px] font-medium text-slate-400 mb-1">Auth Type</label>
+          <select class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-blue-500 font-mono">
+            <option value="bearer">Bearer Token</option>
+            <option value="apikey">API Key Header</option>
+            <option value="oauth">OAuth 2.0</option>
+          </select>
         </div>
 
         <div>
-          <label class="block text-[11px] font-medium text-slate-400 mb-1">Custom Security Header Key: Value</label>
-          <input type="text" value="X-Organization-ID: org_qa_enterprise_900" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 font-mono text-slate-200 focus:outline-none focus:border-blue-500">
+          <label class="block text-[11px] font-medium text-slate-400 mb-1">API Token / Secret Key</label>
+          <input type="password" value="sk-qa-auto-8923479182391283" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs font-mono text-amber-300 focus:outline-none focus:border-blue-500">
         </div>
 
-        <button onclick="toggleAuthDrawer()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg transition">
-          Save Credentials
+        <div>
+          <label class="block text-[11px] font-medium text-slate-400 mb-1">Custom Request Headers (JSON)</label>
+          <textarea rows="4" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs font-mono text-purple-300 focus:outline-none focus:border-blue-500">{
+  "X-Tenant-ID": "qa-prod-01",
+  "Content-Type": "application/json"
+}</textarea>
+        </div>
+
+        <button onclick="saveAuthConfig()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 rounded-lg text-xs shadow-md transition">
+          Save Configuration
         </button>
-      </div>
-    </div>
-
-    <!-- MODAL FOR ADDING TEST CASES -->
-    <div id="modal-add-test" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-      <div class="bg-slate-900 border border-slate-800 rounded-xl w-full max-w-lg overflow-hidden shadow-2xl p-4 space-y-4">
-        <div class="flex justify-between items-center border-b border-slate-800 pb-2">
-          <h3 class="text-xs font-semibold text-white flex items-center gap-2"><i class="fa-solid fa-plus text-blue-400"></i> Add Test Case to Question Bank</h3>
-          <button onclick="closeModal('modal-add-test')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="block text-slate-400 mb-1">User Prompt Query</label>
-            <textarea id="add-test-prompt" rows="2" placeholder="e.g., How do I track my order?" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
-          </div>
-          <div>
-            <label class="block text-slate-400 mb-1">Expected Ground Truth Pattern</label>
-            <textarea id="add-test-expected" rows="2" placeholder="e.g., Navigate to My Orders and select Track Order." class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2 text-slate-200 focus:outline-none focus:border-blue-500"></textarea>
-          </div>
-        </div>
-        <div class="flex justify-end gap-2">
-          <button onclick="closeModal('modal-add-test')" class="px-3 py-1.5 bg-slate-800 text-slate-300 rounded-lg text-xs">Cancel</button>
-          <button onclick="submitAddTestCase()" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium">Save Test Case</button>
-        </div>
       </div>
     </div>
 
@@ -600,188 +698,241 @@
 
   <!-- JAVASCRIPT LOGIC -->
   <script>
-    const appState = {
-      testCases: [
-        { id: 'TC_001', category: 'General Query', prompt: 'What are your operational hours?', expected: 'We operate 24/7 globally.', actual: 'We operate 24/7 globally.', latency: 210, tokens: 20, status: 'PASS' },
-        { id: 'TC_002', category: 'Authentication', prompt: 'How do I reset my account password?', expected: 'Click Forgot Password on the login page.', actual: 'Click Forgot Password on the login page.', latency: 290, tokens: 22, status: 'PASS' },
-        { id: 'TC_003', category: 'SLA Policy', prompt: 'What is the guaranteed uptime SLA?', expected: 'Enterprise SLA guarantees 99.99% uptime.', actual: 'Standard uptime is maintained.', latency: 230, tokens: 33, status: 'FAIL', errorMsg: 'Failed to match expected ground truth SLA pattern threshold.' }
-      ]
+    // Initial Test Suite Data
+    let testCases = [
+      { id: 'TC_001', intent: 'General Query', prompt: 'What are your operational hours?', expected: 'We operate 24/7 globally.', actual: 'We operate 24/7 globally.', status: 'PASS' },
+      { id: 'TC_002', intent: 'Authentication', prompt: 'How do I reset my account password?', expected: 'Click Forgot Password on the login page.', actual: 'Click Forgot Password on the login page.', status: 'PASS' },
+      { id: 'TC_003', intent: 'Billing Inquiry', prompt: 'Where can I download my monthly invoice?', expected: 'Invoices are available under Account > Billing.', actual: 'Please contact customer support at support@app.com.', status: 'FAIL' }
+    ];
+
+    let currentConsoleTab = 'results';
+    let isSidebarCollapsed = false;
+
+    // Load initial table
+    window.onload = function() {
+      renderTestTable();
     };
 
-    window.addEventListener('DOMContentLoaded', () => {
-      renderTable();
-    });
+    // Toggle Sidebar Width Collapse/Expand
+    function toggleSidebarCollapse() {
+      const sidebar = document.getElementById('sidebar');
+      const icon = document.getElementById('sidebar-toggle-icon');
+      isSidebarCollapsed = !isSidebarCollapsed;
 
-    function selectSidebarNode(nodeTitle) {
-      logResult(`Navigated to: [${nodeTitle}]`);
+      if (isSidebarCollapsed) {
+        sidebar.classList.add('w-16', 'sidebar-collapsed');
+        sidebar.classList.remove('w-64');
+        icon.classList.remove('fa-bars-staggered');
+        icon.classList.add('fa-bars');
+      } else {
+        sidebar.classList.remove('w-16', 'sidebar-collapsed');
+        sidebar.classList.add('w-64');
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-bars-staggered');
+      }
     }
 
-    function renderTable(filter = '') {
+    // Toggle Navigation Accordion Sections
+    function toggleAccordion(accId) {
+      if (isSidebarCollapsed) toggleSidebarCollapse(); // auto expand on interaction
+      const content = document.getElementById(accId);
+      const chevron = document.getElementById(accId + '-chevron');
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        if (chevron) chevron.style.transform = 'rotate(0deg)';
+      } else {
+        content.classList.add('hidden');
+        if (chevron) chevron.style.transform = 'rotate(-90deg)';
+      }
+    }
+
+    // Handle Active Sidebar Node Selection
+    function selectSidebarNode(nodeName) {
+      document.querySelectorAll('.sidebar-item').forEach(item => {
+        item.classList.remove('sidebar-active');
+        item.classList.add('border-transparent');
+      });
+
+      const selected = document.getElementById('nav-item-' + nodeName);
+      if (selected) {
+        selected.classList.add('sidebar-active');
+        selected.classList.remove('border-transparent');
+      }
+
+      logToConsole('results', `[Navigation] Navigated to: [${nodeName}]`);
+    }
+
+    // Render Execution Registry Table
+    function renderTestTable() {
       const tbody = document.getElementById('test-table-body');
       tbody.innerHTML = '';
 
-      const filtered = appState.testCases.filter(c => 
-        c.prompt.toLowerCase().includes(filter.toLowerCase()) || 
-        c.id.toLowerCase().includes(filter.toLowerCase())
-      );
+      testCases.forEach((tc, idx) => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition border-b border-slate-800/50';
+        
+        const isPass = tc.status === 'PASS';
+        const statusBadge = isPass 
+          ? `<span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded text-[10px] font-bold">PASS</span>`
+          : `<span class="bg-rose-500/10 text-rose-400 border border-rose-500/20 px-2 py-0.5 rounded text-[10px] font-bold">FAIL</span>`;
 
-      document.getElementById('table-row-count').innerText = `Showing ${filtered.length} Cases`;
-
-      filtered.forEach(item => {
-        let badgeClass = item.status === 'PASS' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border-rose-500/20';
-
-        const row = document.createElement('tr');
-        row.className = 'hover:bg-slate-900/60 transition';
-        row.innerHTML = `
-          <td class="p-2.5">
-            <span class="px-2 py-0.5 rounded text-[10px] font-semibold border ${badgeClass}">${item.status}</span>
-          </td>
-          <td class="p-2.5">
-            <div class="font-bold text-white font-mono">${item.id}</div>
-            <div class="text-[10px] text-slate-500 font-sans">${item.category}</div>
-          </td>
-          <td class="p-2.5 max-w-[200px] truncate text-slate-200 font-sans" title="${escapeHtml(item.prompt)}">${escapeHtml(item.prompt)}</td>
-          <td class="p-2.5 max-w-[200px] truncate text-slate-400 font-sans" title="${escapeHtml(item.expected)}">${escapeHtml(item.expected)}</td>
-          <td class="p-2.5 max-w-[200px] truncate text-slate-300 font-sans" title="${escapeHtml(item.actual)}">${escapeHtml(item.actual)}</td>
+        tr.innerHTML = `
+          <td class="p-2.5">${statusBadge}</td>
+          <td class="p-2.5 font-semibold text-slate-200">${tc.id}<div class="text-[10px] font-normal text-slate-500 font-sans">${tc.intent}</div></td>
+          <td class="p-2.5 text-slate-300 font-sans max-w-xs truncate" title="${tc.prompt}">${tc.prompt}</td>
+          <td class="p-2.5 text-slate-400 font-sans max-w-xs truncate" title="${tc.expected}">${tc.expected}</td>
+          <td class="p-2.5 ${isPass ? 'text-slate-300' : 'text-rose-300 font-medium'} font-sans max-w-xs truncate" title="${tc.actual}">${tc.actual}</td>
           <td class="p-2.5 text-center">
-            <button onclick="deleteTestCase('${item.id}')" class="p-1 text-slate-400 hover:text-rose-400" title="Delete Case">
-              <i class="fa-solid fa-trash text-xs"></i>
+            <button onclick="deleteTestCase(${idx})" class="text-slate-500 hover:text-rose-400 p-1 transition" title="Delete Case">
+              <i class="fa-solid fa-trash-can"></i>
             </button>
           </td>
         `;
-        tbody.appendChild(row);
+        tbody.appendChild(tr);
       });
 
+      document.getElementById('table-row-count').innerText = `Showing ${testCases.length} Cases`;
+      document.getElementById('kpi-total').innerText = testCases.length;
       updateMetrics();
     }
 
     function updateMetrics() {
-      const total = appState.testCases.length;
-      const passed = appState.testCases.filter(c => c.status === 'PASS').length;
-      const passRate = total > 0 ? Math.round((passed / total) * 100) : 0;
-
-      document.getElementById('kpi-total').innerText = total;
-      document.getElementById('kpi-pass-rate').innerText = `${passRate}%`;
+      const passes = testCases.filter(c => c.status === 'PASS').length;
+      const rate = testCases.length ? Math.round((passes / testCases.length) * 100) : 0;
+      document.getElementById('kpi-pass-rate').innerText = rate + '%';
     }
 
-    function applyTableFilters() {
-      const search = document.getElementById('table-search').value;
-      renderTable(search);
+    function deleteTestCase(idx) {
+      testCases.splice(idx, 1);
+      renderTestTable();
+      logToConsole('results', '[System] Test case removed from execution registry.');
     }
 
+    // Live Execution Suite Run Simulator
+    function runSuiteEvaluation() {
+      const btn = document.getElementById('btn-run-eval');
+      const progressContainer = document.getElementById('eval-progress-container');
+      const progressBar = document.getElementById('eval-progress-bar');
+      const progressPercent = document.getElementById('eval-progress-percent');
+      
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
+      progressContainer.classList.remove('hidden');
+
+      let percent = 0;
+      logToConsole('results', '[Suite Engine] Triggering test suite batch execution...');
+
+      const interval = setInterval(() => {
+        percent += 20;
+        progressBar.style.width = percent + '%';
+        progressPercent.innerText = percent + '%';
+
+        if (percent >= 100) {
+          clearInterval(interval);
+          setTimeout(() => {
+            progressContainer.classList.add('hidden');
+            progressBar.style.width = '0%';
+            btn.disabled = false;
+            btn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            logToConsole('results', '[Suite Engine] Execution completed successfully. All metrics refreshed.');
+            renderTestTable();
+          }, 400);
+        }
+      }, 250);
+    }
+
+    // Ping DOM Inspector Simulator
     function verifyEndpointConnection() {
       const banner = document.getElementById('conn-banner');
       const icon = document.getElementById('conn-icon');
       const msg = document.getElementById('conn-msg');
-      const latencyEl = document.getElementById('conn-latency');
+      const latency = document.getElementById('conn-latency');
+      const targetUrl = document.getElementById('target-url').value;
 
-      banner.classList.remove('hidden');
-      banner.className = 'mt-3 p-2.5 rounded-lg border text-xs flex items-center justify-between transition-all bg-emerald-500/10 border-emerald-500/30 text-emerald-400';
-      icon.className = 'fa-solid fa-circle-check';
-      msg.innerText = `Target APP_URL verified & XPath selector identified in DOM.`;
-      latencyEl.innerText = 'Latency: 243 ms';
+      banner.classList.remove('hidden', 'bg-rose-950/40', 'border-rose-800', 'text-rose-300', 'bg-emerald-950/40', 'border-emerald-800', 'text-emerald-300');
+      
+      if (!targetUrl) {
+        banner.classList.add('bg-rose-950/40', 'border-rose-800', 'text-rose-300');
+        icon.className = 'fa-solid fa-triangle-exclamation text-rose-400';
+        msg.innerText = 'DOM Inspection Failed: Endpoint URL is empty.';
+        latency.innerText = '0 ms';
+        logToConsole('errors', '[DOM Inspector] Invalid endpoint URL provided.');
+        return;
+      }
 
-      logResult('Pinged target chatbot endpoint & inspected DOM successfully.');
+      banner.classList.add('bg-emerald-950/40', 'border-emerald-800', 'text-emerald-300');
+      icon.className = 'fa-solid fa-circle-check text-emerald-400';
+      msg.innerText = `Successfully pinged DOM Target ${targetUrl}`;
+      latency.innerText = 'Latency: 18ms';
+      logToConsole('results', `[DOM Inspector] Handshake OK with ${targetUrl}. Elements active.`);
     }
 
     function validateSelectors() {
       const xpath = document.getElementById('target-xpath').value;
-      logResult(`Validated DOM Selector XPath: [${xpath}] -> 1 matching element found.`);
-      alert(`Selector Verified: Target DOM element found for XPath ${xpath}`);
-    }
-
-    async function runSuiteEvaluation() {
-      const progressContainer = document.getElementById('eval-progress-container');
-      const progressBar = document.getElementById('eval-progress-bar');
-      const progressPercent = document.getElementById('eval-progress-percent');
-
-      progressContainer.classList.remove('hidden');
-      logResult('Started automated test suite evaluation execution...');
-
-      for (let i = 0; i <= 100; i += 25) {
-        progressBar.style.width = `${i}%`;
-        progressPercent.innerText = `${i}%`;
-        await new Promise(r => setTimeout(r, 200));
-      }
-
-      logResult('Automated test suite run completed successfully.');
-      setTimeout(() => progressContainer.classList.add('hidden'), 1500);
-    }
-
-    function handleSandboxSubmit(e) {
-      e.preventDefault();
-      const input = document.getElementById('sandbox-input');
-      const val = input.value.trim();
-      if (!val) return;
-
-      const history = document.getElementById('sandbox-chat-history');
-      history.innerHTML += `
-        <div class="bg-blue-600/20 border border-blue-500/30 rounded-lg p-2.5 text-blue-200 text-right">
-          <div class="text-[10px] text-blue-400 font-semibold mb-0.5">PROMPT</div>
-          ${escapeHtml(val)}
-        </div>
-      `;
-      input.value = '';
-
-      setTimeout(() => {
-        history.innerHTML += `
-          <div class="bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200">
-            <div class="text-[10px] text-emerald-400 font-semibold mb-0.5">BOT RESPONSE (243ms)</div>
-            Verified endpoint answer generated matching ground truth pattern.
-          </div>
-        `;
-        history.scrollTop = history.scrollHeight;
-      }, 300);
-    }
-
-    function handleFileUpload(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-
-      logResult(`Imported question bank file: [${file.name}]`);
-      alert(`Question bank [${file.name}] imported successfully.`);
+      logToConsole('results', `[Selector Inspector] Validated XPath: "${xpath}" - 1 matching element found in DOM frame.`);
     }
 
     function openAddTestCaseModal() {
-      document.getElementById('modal-add-test').classList.remove('hidden');
-    }
+      const promptText = prompt("Enter Test User Prompt:");
+      if (!promptText) return;
+      const expectedText = prompt("Enter Expected Ground Truth Answer:");
+      if (!expectedText) return;
 
-    function submitAddTestCase() {
-      const prompt = document.getElementById('add-test-prompt').value.trim();
-      const expected = document.getElementById('add-test-expected').value.trim();
-
-      if (!prompt) return;
-
-      const newId = `TC_00${appState.testCases.length + 1}`;
-      appState.testCases.push({
+      const newId = `TC_00${testCases.length + 1}`;
+      testCases.push({
         id: newId,
-        category: 'Custom Test',
-        prompt,
-        expected,
-        actual: expected,
-        latency: 240,
-        tokens: 25,
+        intent: 'Dynamic Case',
+        prompt: promptText,
+        expected: expectedText,
+        actual: expectedText,
         status: 'PASS'
       });
 
-      closeModal('modal-add-test');
-      document.getElementById('add-test-prompt').value = '';
-      document.getElementById('add-test-expected').value = '';
-
-      renderTable();
-      logResult(`Added test case [${newId}] to Question Bank.`);
+      renderTestTable();
+      logToConsole('results', `[Registry] Added new test case: ${newId}`);
     }
 
-    function deleteTestCase(id) {
-      appState.testCases = appState.testCases.filter(c => c.id !== id);
-      renderTable();
-      logResult(`Deleted test case [${id}]`);
+    // Console Logging & Tab Switching
+    function switchConsoleTab(tab) {
+      currentConsoleTab = tab;
+      const resTab = document.getElementById('console-results');
+      const errTab = document.getElementById('console-errors');
+      const btnRes = document.getElementById('tab-btn-results');
+      const btnErr = document.getElementById('tab-btn-errors');
+
+      if (tab === 'results') {
+        resTab.classList.remove('hidden');
+        errTab.classList.add('hidden');
+        btnRes.className = 'px-3 py-1 text-xs font-semibold rounded-md bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center gap-1.5';
+        btnErr.className = 'px-3 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center gap-1.5 transition';
+      } else {
+        errTab.classList.remove('hidden');
+        resTab.classList.add('hidden');
+        btnErr.className = 'px-3 py-1 text-xs font-semibold rounded-md bg-rose-600/20 text-rose-400 border border-rose-500/30 flex items-center gap-1.5';
+        btnRes.className = 'px-3 py-1 text-xs font-semibold rounded-md text-slate-400 hover:text-slate-200 hover:bg-slate-800 flex items-center gap-1.5 transition';
+      }
     }
 
-    function closeModal(id) {
-      document.getElementById(id).classList.add('hidden');
+    function logToConsole(type, text) {
+      const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      const targetDiv = type === 'results' ? document.getElementById('console-results') : document.getElementById('console-errors');
+      const entry = document.createElement('div');
+      entry.className = type === 'results' ? 'text-slate-300' : 'text-rose-400';
+      entry.innerHTML = `<span class="text-slate-500">[${timestamp}]</span> ${text}`;
+      targetDiv.appendChild(entry);
+      targetDiv.scrollTop = targetDiv.scrollHeight;
     }
 
+    function clearCurrentConsole() {
+      if (currentConsoleTab === 'results') {
+        document.getElementById('console-results').innerHTML = '';
+      } else {
+        document.getElementById('console-errors').innerHTML = '';
+      }
+    }
+
+    // Drawers & Dropdowns
     function toggleSandboxDrawer() {
       document.getElementById('sandbox-drawer').classList.toggle('translate-x-full');
     }
@@ -794,40 +945,93 @@
       document.getElementById('export-dropdown').classList.toggle('hidden');
     }
 
-    function switchConsoleTab(tab) {
-      const results = document.getElementById('console-results');
-      const errors = document.getElementById('console-errors');
-
-      if (tab === 'results') {
-        results.classList.remove('hidden');
-        errors.classList.add('hidden');
-      } else {
-        results.classList.add('hidden');
-        errors.classList.remove('hidden');
-      }
+    function saveAuthConfig() {
+      toggleAuthDrawer();
+      logToConsole('results', '[Auth] Secret credentials & authorization headers updated.');
     }
 
-    function logResult(msg) {
-      const container = document.getElementById('console-results');
-      const entry = document.createElement('div');
-      entry.innerHTML = `<span class="text-slate-500">[${new Date().toLocaleTimeString()}]</span> ${escapeHtml(msg)}`;
-      container.appendChild(entry);
-      container.scrollTop = container.scrollHeight;
+    // Live Sandbox Chat
+    function handleSandboxSubmit(e) {
+      e.preventDefault();
+      const input = document.getElementById('sandbox-input');
+      const val = input.value.trim();
+      if (!val) return;
+
+      const history = document.getElementById('sandbox-chat-history');
+      
+      // User prompt message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'bg-blue-600/20 border border-blue-500/30 rounded-lg p-2.5 text-blue-200 ml-6 text-right';
+      userMsg.innerText = val;
+      history.appendChild(userMsg);
+
+      input.value = '';
+      history.scrollTop = history.scrollHeight;
+
+      // Simulated Bot Reply
+      setTimeout(() => {
+        const botMsg = document.createElement('div');
+        botMsg.className = 'bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200 mr-6';
+        botMsg.innerHTML = `<div class="text-[10px] text-amber-400 font-mono mb-1">Bot Response (Latency: 198ms)</div>[Automated Sandbox Reply] Processing requested query: "${val}"`;
+        history.appendChild(botMsg);
+        history.scrollTop = history.scrollHeight;
+      }, 500);
     }
 
-    function clearCurrentConsole() {
-      document.getElementById('console-results').innerHTML = '';
-      document.getElementById('console-errors').innerHTML = '';
+    // File Upload (CSV/Excel Question Bank parser)
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheet = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheet];
+          const json = XLSX.utils.sheet_to_json(worksheet);
+
+          if (json.length > 0) {
+            testCases = json.map((row, idx) => ({
+              id: row.ID || row.id || `TC_00${idx + 1}`,
+              intent: row.Intent || row.intent || 'Imported Question',
+              prompt: row.Prompt || row.prompt || row.Question || 'N/A',
+              expected: row.Expected || row.expected || row.Answer || 'N/A',
+              actual: row.Expected || row.expected || 'N/A',
+              status: 'PASS'
+            }));
+            renderTestTable();
+            logToConsole('results', `[Import] Successfully imported ${testCases.length} cases from ${file.name}`);
+          }
+        } catch (err) {
+          logToConsole('errors', `[Import Failure] Unable to parse file: ${err.message}`);
+        }
+      };
+      reader.readAsArrayBuffer(file);
     }
 
-    function exportReport(type) {
+    // Filter Table Search
+    function applyTableFilters() {
+      const query = document.getElementById('table-search').value.toLowerCase();
+      const rows = document.querySelectorAll('#test-table-body tr');
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(query) ? '' : 'none';
+      });
+    }
+
+    // Export Reports
+    function exportReport(format) {
       toggleExportDropdown();
-      alert(`Exporting Audit Report as ${type.toUpperCase()} format.`);
-      logResult(`Exported executive audit report in ${type.toUpperCase()} format.`);
-    }
-
-    function escapeHtml(str) {
-      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(testCases, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `chatbot_qa_report.${format}`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      logToConsole('results', `[Export] Generated and downloaded ${format.toUpperCase()} audit report.`);
     }
   </script>
 </body>
