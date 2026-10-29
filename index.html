@@ -1,100 +1,4 @@
-<!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-950 text-slate-100">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Chatbot QA Automation & AI Evaluation Dashboard</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tailwind Config -->
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#f0f6ff',
-                            100: '#e0edff',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            900: '#1e3a8a',
-                            950: '#0f172a'
-                        },
-                        emerald: {
-                            500: '#10b981',
-                            400: '#34d399'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                        mono: ['JetBrains Mono', 'monospace']
-                    }
-                }
-            }
-        }
-    </script>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- SheetJS for XLSX/CSV import -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <style>
-        /* Custom scrollbar for dark tech aesthetic */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569;
-        }
-        .glass-panel {
-            background: rgba(15, 23, 42, 0.75);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(51, 65, 85, 0.5);
-        }
-        .terminal-glow {
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.15);
-        }
-    </style>
-</head>
-<body class="h-full font-sans antialiased flex flex-col overflow-hidden text-slate-200 bg-slate-950">
-
-    <!-- TOP HEADER NAVBAR -->
-    <header class="h-16 border-b border-slate-800 bg-slate-900/90 backdrop-blur px-4 flex items-center justify-between z-30 shrink-0">
-        <!-- Left Title & Branding -->
-        <div class="flex items-center gap-3">
-            <button id="sidebar-toggle-btn" onclick="toggleSidebar()" class="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors">
-                <i class="fa-solid fa-bars text-lg"></i>
-            </button>
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30">
-                    <i class="fa-solid fa-robot text-sm"></i>
-                </div>
-                <div>
-                    <h1 class="font-bold text-slate-100 text-sm tracking-wide leading-tight flex items-center gap-2">
-                        CHATBOT QA & AI EVAL ENGINE
-                        <span class="text-[10px] bg-blue-500/20 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-mono font-medium">v3.4-PROD</span>
-                    </h1>
-                    <p class="text-[11px] text-slate-400 flex items-center gap-2">
-                        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span id="system-status-text">System Ready • All Agents Operational</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-
+<!-- ... existing code ... -->
         <!-- Center Controls: Target URL & Context Selectors -->
         <div class="hidden xl:flex items-center gap-3 bg-slate-950/60 p-1.5 rounded-xl border border-slate-800/80 max-w-2xl w-full mx-4">
             <div class="flex items-center gap-2 px-2 border-r border-slate-800">
@@ -137,6 +41,12 @@
             <button onclick="openAuthDrawer()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 font-medium flex items-center gap-2 transition-all">
                 <i class="fa-solid fa-key text-amber-400"></i>
                 <span class="hidden md:inline">Auth Config</span>
+            </button>
+
+            <!-- CI/CD Pipeline Generator Trigger -->
+            <button onclick="openCicdDrawer()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 font-medium flex items-center gap-2 transition-all">
+                <i class="fa-solid fa-code-branch text-purple-400"></i>
+                <span class="hidden md:inline">CI/CD YAML</span>
             </button>
 
             <!-- Live Sandbox Trigger -->
@@ -195,10 +105,10 @@
                         </button>
                         <button onclick="switchTab('xpath-locators')" id="nav-xpath-locators" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
                             <i class="fa-solid fa-crosshairs w-4 text-slate-400"></i>
-                            <span>XPath / DOM Locators</span>
+                            <span>XPath / Self-Healing Locators</span>
                         </button>
                         <button onclick="switchTab('test-config')" id="nav-test-config" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                            <i class="fa-solid fa-[#000] fa-sliders w-4 text-slate-400"></i>
+                            <i class="fa-solid fa-sliders w-4 text-slate-400"></i>
                             <span>Test Configuration</span>
                         </button>
                     </div>
@@ -218,7 +128,7 @@
                             <span>Runtime & Performance</span>
                         </button>
                         <button onclick="switchTab('test-suite-tasks')" id="nav-test-suite-tasks" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
-                            <i class="fa-solid fa-[#000] fa-list-check w-4 text-slate-400"></i>
+                            <i class="fa-solid fa-list-check w-4 text-slate-400"></i>
                             <span>Test Suite & Tasks</span>
                         </button>
                         <button onclick="switchTab('test-run-manager')" id="nav-test-run-manager" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
@@ -251,7 +161,7 @@
                         </button>
                         <button onclick="switchTab('failure-analysis')" id="nav-failure-analysis" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
                             <i class="fa-solid fa-bug w-4 text-slate-400"></i>
-                            <span>Failure Analysis & Logs</span>
+                            <span>Failure Root Cause Visualizer</span>
                         </button>
                         <button onclick="switchTab('test-history')" id="nav-test-history" class="nav-btn w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition-colors">
                             <i class="fa-solid fa-clock-rotate-left w-4 text-slate-400"></i>
@@ -289,41 +199,53 @@
                         </div>
                         <p class="text-xs text-slate-400 flex items-center gap-3">
                             <span><i class="fa-solid fa-link text-slate-500"></i> Endpoint: <span id="display-target-endpoint" class="font-mono text-slate-300">https://bot.enterprise-demo.ai/v1/chat</span></span>
-                            <span><i class="fa-solid fa-[#000] fa-shield-halved text-slate-500"></i> Protocol: <span id="display-protocol" class="font-mono text-amber-400">REST / WebSocket Hybrid</span></span>
+                            <span><i class="fa-solid fa-shield-halved text-slate-500"></i> Protocol: <span id="display-protocol" class="font-mono text-amber-400">REST / WebSocket Hybrid</span></span>
                         </p>
                     </div>
 
-                    <!-- Inspector Action Control Buttons -->
+                    <!-- Inspector Action Control Buttons & Automated Controls -->
                     <div class="flex flex-wrap items-center gap-2">
                         <button onclick="pingTargetBot()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 font-medium flex items-center gap-2 transition-all">
                             <i class="fa-solid fa-bolt text-amber-400"></i>
-                            <span>Ping & Inspect DOM</span>
+                            <span>Ping Endpoint</span>
                         </button>
-                        <button onclick="autoIdentifySelectors()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 font-medium flex items-center gap-2 transition-all">
+                        <button onclick="triggerSelfHealingLocators()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-2 rounded-lg border border-slate-700 font-medium flex items-center gap-2 transition-all">
                             <i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i>
-                            <span>Validate Selectors</span>
+                            <span>Auto-Heal Locators</span>
                         </button>
-                        <button onclick="runAutomationSuite()" id="btn-run-tests" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-4 py-2 rounded-lg font-semibold flex items-center gap-2 shadow-lg shadow-emerald-600/20 transition-all">
-                            <i class="fa-solid fa-play"></i>
-                            <span>Execute Automated Suite</span>
-                        </button>
+                        
+                        <!-- Execution Controls -->
+                        <div class="flex items-center gap-1 border-l border-slate-800 pl-2">
+                            <button onclick="runAutomationSuite()" id="btn-run-tests" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs px-3.5 py-2 rounded-lg font-semibold flex items-center gap-1.5 shadow-lg shadow-emerald-600/20 transition-all">
+                                <i class="fa-solid fa-play"></i>
+                                <span>Start Suite</span>
+                            </button>
+                            <button onclick="pauseExecution()" id="btn-pause-tests" disabled class="bg-amber-600/50 text-slate-400 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1 opacity-50 cursor-not-allowed transition-all">
+                                <i class="fa-solid fa-pause"></i>
+                                <span>Pause</span>
+                            </button>
+                            <button onclick="stopExecution()" id="btn-stop-tests" disabled class="bg-rose-600/50 text-slate-400 text-xs px-3 py-2 rounded-lg font-medium flex items-center gap-1 opacity-50 cursor-not-allowed transition-all">
+                                <i class="fa-solid fa-stop"></i>
+                                <span>Stop</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Locators & Connection Status Bar -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 text-xs">
                     <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                        <span class="text-slate-400">Input Field XPath:</span>
+                        <span class="text-slate-400">Input Field Selector:</span>
                         <code id="xpath-input-display" class="text-indigo-300 font-mono bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-[11px]">//*[@id="chat-input"]</code>
                     </div>
                     <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                        <span class="text-slate-400">Response Node Selector:</span>
+                        <span class="text-slate-400">Response Container Selector:</span>
                         <code id="xpath-response-display" class="text-emerald-300 font-mono bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-[11px]">div.chat-msg.bot:last-child</code>
                     </div>
                     <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 flex items-center justify-between">
-                        <span class="text-slate-400">Protocol Binding:</span>
-                        <span class="text-emerald-400 font-medium flex items-center gap-1.5">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> HTTP/2 Keep-Alive
+                        <span class="text-slate-400">Locator Health & Self-Healing:</span>
+                        <span id="locator-health-badge" class="text-emerald-400 font-medium flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-check"></i> 100% Validated
                         </span>
                     </div>
                 </div>
@@ -383,7 +305,7 @@
                     <div class="text-slate-400 text-xs font-medium">Flaky Test Ratio</div>
                     <div class="text-2xl font-bold text-rose-400 font-mono mt-1" id="kpi-flaky-rate">2.1%</div>
                     <div class="text-[11px] text-slate-400 mt-2 flex items-center gap-1">
-                        <span>3 non-deterministic</span>
+                        <span>Auto-retry healed 3</span>
                     </div>
                     <div class="absolute -right-2 -bottom-2 opacity-5 text-rose-400 group-hover:opacity-10 transition-opacity">
                         <i class="fa-solid fa-triangle-exclamation text-5xl"></i>
@@ -392,10 +314,10 @@
 
                 <!-- System Reliability Index -->
                 <div class="glass-panel p-4 rounded-2xl border border-slate-800/80 relative overflow-hidden group hover:border-slate-700 transition-all col-span-2 md:col-span-1">
-                    <div class="text-slate-400 text-xs font-medium">AI Reliability Score</div>
-                    <div class="text-2xl font-bold text-indigo-400 font-mono mt-1" id="kpi-ai-reliability">98.4/100</div>
+                    <div class="text-slate-400 text-xs font-medium">Weighted AI Quality Score</div>
+                    <div class="text-2xl font-bold text-indigo-400 font-mono mt-1" id="kpi-ai-reliability">96.5/100</div>
                     <div class="text-[11px] text-indigo-300 mt-2 flex items-center gap-1">
-                        <i class="fa-solid fa-shield-halved text-[9px]"></i> Guardrails Active
+                        <i class="fa-solid fa-brain text-[9px]"></i> LLM Judge Calibrated
                     </div>
                     <div class="absolute -right-2 -bottom-2 opacity-5 text-indigo-400 group-hover:opacity-10 transition-opacity">
                         <i class="fa-solid fa-brain text-5xl"></i>
@@ -418,7 +340,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                             <div class="space-y-2">
                                 <label class="text-slate-300 font-medium">Target Business Domain</label>
-                                <select id="tab-domain-select" onchange="document.getElementById('header-domain-select').value=this.value" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 focus:border-blue-500 focus:outline-none">
+                                <select id="tab-domain-select" onchange="document.getElementById('header-domain-select').value=this.value; onHeaderDomainChange(this.value);" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2.5 text-slate-200 focus:border-blue-500 focus:outline-none">
                                     <option value="e-commerce">E-Commerce & Retail Support</option>
                                     <option value="fintech">Fintech & Retail Banking</option>
                                     <option value="healthcare">Healthcare & Clinical Triage</option>
@@ -461,25 +383,39 @@
                     </div>
                 </div>
 
-                <!-- TAB 3: XPATH / DOM LOCATORS -->
+                <!-- TAB 3: XPATH / SELF-HEALING LOCATORS -->
                 <div id="tab-xpath-locators" class="tab-pane hidden space-y-4">
                     <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-                        <h3 class="text-sm font-bold text-slate-100 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-crosshairs text-amber-400"></i>
-                            DOM Selector Configurator & XPath Rules
-                        </h3>
-                        <div class="space-y-3 text-xs">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                                <i class="fa-solid fa-crosshairs text-amber-400"></i>
+                                DOM Selector Configurator & Self-Healing Locators
+                            </h3>
+                            <button onclick="triggerSelfHealingLocators()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i> Test & Auto-Heal
+                            </button>
+                        </div>
+                        <div class="space-y-4 text-xs">
                             <div>
-                                <label class="text-slate-300 font-medium block mb-1">Chat Input Selector (XPath / CSS)</label>
-                                <input type="text" value='//*[@id="chat-input"]' class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-indigo-300 focus:outline-none">
+                                <div class="flex justify-between mb-1">
+                                    <label class="text-slate-300 font-medium">Chat Input Selector (XPath / CSS)</label>
+                                    <span class="text-emerald-400 font-mono text-[10px]">Primary Active</span>
+                                </div>
+                                <input type="text" id="locator-input-val" value='//*[@id="chat-input"]' class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-indigo-300 focus:outline-none">
                             </div>
                             <div>
-                                <label class="text-slate-300 font-medium block mb-1">Send Button Selector</label>
-                                <input type="text" value='//button[@type="submit" or @id="send-btn"]' class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-indigo-300 focus:outline-none">
+                                <div class="flex justify-between mb-1">
+                                    <label class="text-slate-300 font-medium">Send Button Selector</label>
+                                    <span class="text-emerald-400 font-mono text-[10px]">Primary Active</span>
+                                </div>
+                                <input type="text" id="locator-button-val" value='//button[@type="submit" or @id="send-btn"]' class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-indigo-300 focus:outline-none">
                             </div>
                             <div>
-                                <label class="text-slate-300 font-medium block mb-1">Last Response Message Container Selector</label>
-                                <input type="text" value='div.chat-container div.message.bot-msg:last-child' class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-emerald-300 focus:outline-none">
+                                <div class="flex justify-between mb-1">
+                                    <label class="text-slate-300 font-medium">Last Response Message Container Selector</label>
+                                    <span class="text-emerald-400 font-mono text-[10px]">Primary Active</span>
+                                </div>
+                                <input type="text" id="locator-response-val" value='div.chat-container div.message.bot-msg:last-child' class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 font-mono text-emerald-300 focus:outline-none">
                             </div>
                         </div>
                     </div>
@@ -489,154 +425,145 @@
                 <div id="tab-test-config" class="tab-pane hidden space-y-4">
                     <div class="glass-panel p-5 rounded-2xl border border-slate-800">
                         <h3 class="text-sm font-bold text-slate-100 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-[#000] fa-sliders text-emerald-400"></i>
-                            Execution Parameters & Thresholds
+                            <i class="fa-solid fa-sliders text-emerald-400"></i>
+                            Execution Parameters & Flaky Test Retry Rules
                         </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                             <div class="space-y-1">
                                 <label class="text-slate-300">Timeout per Query (Seconds)</label>
                                 <input type="number" value="10" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200">
                             </div>
                             <div class="space-y-1">
-                                <label class="text-slate-300">Retry Count on Failure</label>
+                                <label class="text-slate-300">Auto-Retry Count on Failure</label>
                                 <input type="number" value="2" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200">
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-slate-300">Parallel Worker Threads</label>
+                                <input type="number" value="4" class="w-full bg-slate-900 border border-slate-800 rounded-lg p-2 text-slate-200">
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- TAB 5: AI EVALUATION (DEFAULT VISIBLE / MAIN FEATURE) -->
+                <!-- TAB 5: ADVANCED AI EVALUATION FRAMEWORK (WITH WEIGHT ADJUSTMENTS) -->
                 <div id="tab-ai-evaluation" class="tab-pane space-y-4">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         
                         <!-- Metric Cards: AI Quality Metrics -->
                         <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4">
-                            <h3 class="text-sm font-bold text-slate-100 flex items-center justify-between">
-                                <span><i class="fa-solid fa-brain text-indigo-400 mr-2"></i> LLM Evaluation Metrics</span>
-                                <span class="text-xs font-mono bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2 py-0.5 rounded">BERT & ROUGE Evaluator</span>
-                            </h3>
-
-                            <!-- Metric 1: Semantic Similarity -->
-                            <div class="space-y-1">
-                                <div class="flex justify-between text-xs">
-                                    <span class="text-slate-300 font-medium">Semantic Cosine Similarity</span>
-                                    <span class="text-emerald-400 font-mono font-bold">0.94 / 1.00</span>
-                                </div>
-                                <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                                    <div class="bg-emerald-500 h-full w-[94%] rounded-full"></div>
-                                </div>
-                                <p class="text-[11px] text-slate-500">Measures intent agreement against ground truth standard answers.</p>
+                            <div class="flex items-center justify-between">
+                                <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                                    <i class="fa-solid fa-brain text-indigo-400"></i> Interactive LLM Judge Framework
+                                </h3>
+                                <button onclick="recalculateAIQualityScores()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded-lg">
+                                    Recalculate Score
+                                </button>
                             </div>
 
-                            <!-- Metric 2: Ground Truth Alignment -->
-                            <div class="space-y-1">
-                                <div class="flex justify-between text-xs">
-                                    <span class="text-slate-300 font-medium">Ground Truth Fact Alignment</span>
-                                    <span class="text-blue-400 font-mono font-bold">96.8%</span>
+                            <!-- Interactive Metric Sliders -->
+                            <div class="space-y-3 text-xs">
+                                <!-- Semantic Similarity -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-300 font-medium">Semantic Similarity (Weight: <span id="weight-sem-val">30%</span>)</span>
+                                        <span id="score-sem-val" class="text-emerald-400 font-mono font-bold">0.94</span>
+                                    </div>
+                                    <input type="range" id="slider-weight-sem" min="0" max="50" value="30" oninput="onWeightChange()" class="w-full accent-indigo-500 cursor-pointer">
                                 </div>
-                                <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                                    <div class="bg-blue-500 h-full w-[96.8%] rounded-full"></div>
-                                </div>
-                                <p class="text-[11px] text-slate-500">Verifies factual entities (dates, prices, order numbers) match DB.</p>
-                            </div>
 
-                            <!-- Metric 3: Hallucination Index -->
-                            <div class="space-y-1">
-                                <div class="flex justify-between text-xs">
-                                    <span class="text-slate-300 font-medium">Hallucination Risk Index</span>
-                                    <span class="text-amber-400 font-mono font-bold">1.2% (Low)</span>
+                                <!-- Ground Truth Alignment -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-300 font-medium">Ground Truth Fact Alignment (Weight: <span id="weight-gt-val">30%</span>)</span>
+                                        <span id="score-gt-val" class="text-blue-400 font-mono font-bold">96.8%</span>
+                                    </div>
+                                    <input type="range" id="slider-weight-gt" min="0" max="50" value="30" oninput="onWeightChange()" class="w-full accent-blue-500 cursor-pointer">
                                 </div>
-                                <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                                    <div class="bg-amber-400 h-full w-[1.2%] rounded-full"></div>
-                                </div>
-                                <p class="text-[11px] text-slate-500">Detects ungrounded assertions or fabricated facts.</p>
-                            </div>
 
-                            <!-- Metric 4: Tone & Safety Score -->
-                            <div class="space-y-1">
-                                <div class="flex justify-between text-xs">
-                                    <span class="text-slate-300 font-medium">Safety & Toxicity Guardrail</span>
-                                    <span class="text-emerald-400 font-mono font-bold">100.0% Clean</span>
+                                <!-- Hallucination Risk -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-300 font-medium">Hallucination Index Guard (Weight: <span id="weight-hal-val">20%</span>)</span>
+                                        <span id="score-hal-val" class="text-amber-400 font-mono font-bold">98.8% Clean</span>
+                                    </div>
+                                    <input type="range" id="slider-weight-hal" min="0" max="50" value="20" oninput="onWeightChange()" class="w-full accent-amber-500 cursor-pointer">
                                 </div>
-                                <div class="w-full bg-slate-900 h-2 rounded-full overflow-hidden border border-slate-800">
-                                    <div class="bg-emerald-400 h-full w-[100%] rounded-full"></div>
+
+                                <!-- Tone & Toxicity -->
+                                <div class="space-y-1">
+                                    <div class="flex justify-between">
+                                        <span class="text-slate-300 font-medium">Toxicity & Tone Safety (Weight: <span id="weight-tox-val">20%</span>)</span>
+                                        <span id="score-tox-val" class="text-emerald-400 font-mono font-bold">100.0% Safe</span>
+                                    </div>
+                                    <input type="range" id="slider-weight-tox" min="0" max="50" value="20" oninput="onWeightChange()" class="w-full accent-emerald-500 cursor-pointer">
                                 </div>
-                                <p class="text-[11px] text-slate-500">Evaluates toxic language, prompt injection vulnerability, and PII leaks.</p>
                             </div>
                         </div>
 
-                        <!-- Visual Radar / Gauge SVG Mock -->
+                        <!-- Visual Polygon SVG Chart -->
                         <div class="glass-panel p-5 rounded-2xl border border-slate-800 flex flex-col items-center justify-center relative">
-                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 self-start">AI Quality Polygon</h4>
+                            <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 self-start">Dynamic AI Evaluator Polygon</h4>
                             <div class="w-full h-56 flex items-center justify-center">
                                 <svg class="w-48 h-48 text-indigo-500" viewBox="0 0 100 100">
-                                    <!-- Hexagon grid -->
                                     <polygon points="50,5 90,25 90,75 50,95 10,75 10,25" fill="none" stroke="#334155" stroke-width="1"/>
                                     <polygon points="50,20 80,35 80,65 50,80 20,65 20,35" fill="none" stroke="#1e293b" stroke-width="1"/>
-                                    <!-- Data polygon -->
-                                    <polygon points="50,10 85,28 82,72 50,90 15,70 18,28" fill="rgba(99, 102, 241, 0.2)" stroke="#6366f1" stroke-width="2"/>
-                                    <!-- Points -->
-                                    <circle cx="50" cy="10" r="2" fill="#818cf8"/>
-                                    <circle cx="85" cy="28" r="2" fill="#818cf8"/>
-                                    <circle cx="82" cy="72" r="2" fill="#818cf8"/>
-                                    <circle cx="50" cy="90" r="2" fill="#818cf8"/>
-                                    <circle cx="15" cy="70" r="2" fill="#818cf8"/>
-                                    <circle cx="18" cy="28" r="2" fill="#818cf8"/>
+                                    <polygon id="radar-polygon" points="50,10 85,28 82,72 50,90 15,70 18,28" fill="rgba(99, 102, 241, 0.25)" stroke="#6366f1" stroke-width="2"/>
+                                    <circle cx="50" cy="10" r="2.5" fill="#818cf8"/>
+                                    <circle cx="85" cy="28" r="2.5" fill="#818cf8"/>
+                                    <circle cx="82" cy="72" r="2.5" fill="#818cf8"/>
+                                    <circle cx="50" cy="90" r="2.5" fill="#818cf8"/>
+                                    <circle cx="15" cy="70" r="2.5" fill="#818cf8"/>
+                                    <circle cx="18" cy="28" r="2.5" fill="#818cf8"/>
                                 </svg>
                             </div>
                             <div class="grid grid-cols-2 gap-x-6 gap-y-1 text-[11px] text-slate-400 w-full mt-2">
-                                <div><span class="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-1"></span> Accuracy: 96%</div>
-                                <div><span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"></span> Safety: 100%</div>
-                                <div><span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span> Tone: 92%</div>
-                                <div><span class="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1"></span> Latency: 95%</div>
+                                <div><span class="inline-block w-2 h-2 rounded-full bg-indigo-500 mr-1"></span> Semantic: 94%</div>
+                                <div><span class="inline-block w-2 h-2 rounded-full bg-blue-500 mr-1"></span> Alignment: 96.8%</div>
+                                <div><span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1"></span> Safety: 100%</div>
+                                <div><span class="inline-block w-2 h-2 rounded-full bg-amber-500 mr-1"></span> Hallucination Guard: 98.8%</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- OTHER TABS PLACEHOLDERS (ALL SWITCHABLE) -->
-                <div id="tab-runtime-perf" class="tab-pane hidden space-y-4">
-                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-                        <h3 class="text-sm font-bold text-slate-100">Runtime Latency & Load Performance</h3>
-                        <p class="text-xs text-slate-400 mt-1">Simulate concurrent user chat streams and evaluate p95 response latencies.</p>
-                    </div>
-                </div>
-                <div id="tab-test-suite-tasks" class="tab-pane hidden space-y-4">
-                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-                        <h3 class="text-sm font-bold text-slate-100">Scheduled Test Suites & Background Cron Jobs</h3>
-                        <p class="text-xs text-slate-400 mt-1">Configure automated hourly sanity runs and alert Webhooks.</p>
-                    </div>
-                </div>
-                <div id="tab-test-run-manager" class="tab-pane hidden space-y-4">
-                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-                        <h3 class="text-sm font-bold text-slate-100">Active Test Run Session Manager</h3>
-                        <p class="text-xs text-slate-400 mt-1">Monitor currently active thread execution pools.</p>
-                    </div>
-                </div>
-                <div id="tab-cicd-pipeline" class="tab-pane hidden space-y-4">
-                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-                        <h3 class="text-sm font-bold text-slate-100">GitHub Actions / Jenkins Pipeline Webhooks</h3>
-                        <p class="text-xs text-slate-400 mt-1">Integrate automated evaluation triggers on every pull request.</p>
-                    </div>
-                </div>
-                <div id="tab-results-reports" class="tab-pane hidden space-y-4">
-                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-                        <h3 class="text-sm font-bold text-slate-100">Comprehensive Quality Analytics & Trend Reports</h3>
-                        <p class="text-xs text-slate-400 mt-1">Historical pass-rate graphs and regression matrices.</p>
-                    </div>
-                </div>
+                <!-- TAB 6: FAILURE ROOT CAUSE VISUALIZER -->
                 <div id="tab-failure-analysis" class="tab-pane hidden space-y-4">
-                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-                        <h3 class="text-sm font-bold text-slate-100">Failure Root Cause & Exception Analyzer</h3>
-                        <p class="text-xs text-slate-400 mt-1">Categorization of failed assertions by API timeout vs LLM hallucination.</p>
+                    <div class="glass-panel p-5 rounded-2xl border border-slate-800 space-y-4">
+                        <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
+                            <i class="fa-solid fa-bug text-rose-400"></i> Failure Root Cause Categorization & Breakdown
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                            <div class="p-3 bg-rose-950/30 border border-rose-800/50 rounded-xl">
+                                <div class="text-rose-400 font-bold mb-1">DOM Locator Timeout</div>
+                                <div class="text-xl font-mono font-bold text-slate-100">1 Case</div>
+                                <p class="text-[10px] text-slate-400 mt-1">Button XPath shifted on target update.</p>
+                            </div>
+                            <div class="p-3 bg-amber-950/30 border border-amber-800/50 rounded-xl">
+                                <div class="text-amber-400 font-bold mb-1">Hallucination Threshold</div>
+                                <div class="text-xl font-mono font-bold text-slate-100">0 Cases</div>
+                                <p class="text-[10px] text-slate-400 mt-1">All ground-truth assertions passed.</p>
+                            </div>
+                            <div class="p-3 bg-blue-950/30 border border-blue-800/50 rounded-xl">
+                                <div class="text-blue-400 font-bold mb-1">SLA Latency Breach</div>
+                                <div class="text-xl font-mono font-bold text-slate-100">1 Case</div>
+                                <p class="text-[10px] text-slate-400 mt-1">Response time exceeded 1200ms.</p>
+                            </div>
+                            <div class="p-3 bg-emerald-950/30 border border-emerald-800/50 rounded-xl">
+                                <div class="text-emerald-400 font-bold mb-1">Guardrail Triggered</div>
+                                <div class="text-xl font-mono font-bold text-slate-100">0 Cases</div>
+                                <p class="text-[10px] text-slate-400 mt-1">No toxicity or injection detected.</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div id="tab-test-history" class="tab-pane hidden space-y-4">
-                    <div class="glass-panel p-5 rounded-2xl border border-slate-800">
-                        <h3 class="text-sm font-bold text-slate-100">Execution History Log Archive</h3>
-                        <p class="text-xs text-slate-400 mt-1">Browse past test run reports and audit trails.</p>
-                    </div>
-                </div>
+
+                <!-- OTHER TAB PANES PLACEHOLDERS -->
+                <div id="tab-runtime-perf" class="tab-pane hidden space-y-4"><div class="glass-panel p-5 rounded-2xl border border-slate-800"><h3 class="text-sm font-bold text-slate-100">Runtime Latency & Load Performance</h3></div></div>
+                <div id="tab-test-suite-tasks" class="tab-pane hidden space-y-4"><div class="glass-panel p-5 rounded-2xl border border-slate-800"><h3 class="text-sm font-bold text-slate-100">Scheduled Test Suites & Background Cron Jobs</h3></div></div>
+                <div id="tab-test-run-manager" class="tab-pane hidden space-y-4"><div class="glass-panel p-5 rounded-2xl border border-slate-800"><h3 class="text-sm font-bold text-slate-100">Active Test Run Session Manager</h3></div></div>
+                <div id="tab-cicd-pipeline" class="tab-pane hidden space-y-4"><div class="glass-panel p-5 rounded-2xl border border-slate-800"><h3 class="text-sm font-bold text-slate-100">GitHub Actions / Jenkins Pipeline Webhooks</h3></div></div>
+                <div id="tab-results-reports" class="tab-pane hidden space-y-4"><div class="glass-panel p-5 rounded-2xl border border-slate-800"><h3 class="text-sm font-bold text-slate-100">Comprehensive Quality Analytics & Trend Reports</h3></div></div>
+                <div id="tab-test-history" class="tab-pane hidden space-y-4"><div class="glass-panel p-5 rounded-2xl border border-slate-800"><h3 class="text-sm font-bold text-slate-100">Execution History Log Archive</h3></div></div>
 
             </div>
 
@@ -653,9 +580,16 @@
 
                     <!-- Search & Filter Controls -->
                     <div class="flex items-center gap-2">
+                        <select id="table-tag-filter" onchange="filterTestCaseTable()" class="bg-slate-950 border border-slate-800 text-xs rounded-lg px-2.5 py-1.5 text-slate-200 focus:outline-none">
+                            <option value="ALL">All Tag Suites</option>
+                            <option value="Order Tracking">Order Tracking</option>
+                            <option value="Refund Policy">Refund Policy</option>
+                            <option value="Edge Case">Edge Case</option>
+                            <option value="Authentication">Authentication</option>
+                        </select>
                         <div class="relative">
                             <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-slate-500"></i>
-                            <input type="text" id="table-search-input" onkeyup="filterTestCaseTable()" placeholder="Search questions..." class="bg-slate-950 border border-slate-800 text-xs rounded-lg pl-8 pr-3 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500 w-48 lg:w-64">
+                            <input type="text" id="table-search-input" onkeyup="filterTestCaseTable()" placeholder="Search prompts..." class="bg-slate-950 border border-slate-800 text-xs rounded-lg pl-8 pr-3 py-1.5 text-slate-200 focus:outline-none focus:border-blue-500 w-36 lg:w-48">
                         </div>
                         <button onclick="openAddTestCaseModal()" class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg font-medium flex items-center gap-1.5 transition-all">
                             <i class="fa-solid fa-plus text-[10px]"></i>
@@ -671,7 +605,7 @@
                             <tr>
                                 <th class="p-3">ID</th>
                                 <th class="p-3">Category / Tag</th>
-                                <th class="p-3">User Promp / Query</th>
+                                <th class="p-3">User Prompt / Query</th>
                                 <th class="p-3">Expected Ground Truth</th>
                                 <th class="p-3">Last Bot Response</th>
                                 <th class="p-3">Status</th>
@@ -694,7 +628,7 @@
                             <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
                             <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
                         </div>
-                        <span class="text-xs font-mono text-slate-400 ml-2">Console Output & Socket Events</span>
+                        <span class="text-xs font-mono text-slate-400 ml-2">Console Output & Live Streaming Logs</span>
                     </div>
                     <button onclick="clearTerminalLogs()" class="text-[11px] text-slate-400 hover:text-white flex items-center gap-1">
                         <i class="fa-solid fa-trash-can"></i> Clear
@@ -716,7 +650,7 @@
                 <div class="flex justify-between items-center pb-4 border-b border-slate-800 mb-6">
                     <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
                         <i class="fa-solid fa-key text-amber-400"></i>
-                        Authentication & API Keys
+                        Authentication & Header Config
                     </h3>
                     <button onclick="closeAuthDrawer()" class="text-slate-400 hover:text-white">
                         <i class="fa-solid fa-xmark text-base"></i>
@@ -728,7 +662,7 @@
                         <label class="text-slate-300 font-medium block mb-1">Auth Strategy</label>
                         <select id="auth-type-select" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200">
                             <option value="bearer">Bearer Token (JWT)</option>
-                            <option value="apikey">API Key / Header Secret</option>
+                            <option value="apikey">API Key Secret</option>
                             <option value="oauth2">OAuth2 Client Credentials</option>
                         </select>
                     </div>
@@ -739,7 +673,7 @@
                     </div>
 
                     <div>
-                        <label class="text-slate-300 font-medium block mb-1">Custom Header Name (Optional)</label>
+                        <label class="text-slate-300 font-medium block mb-1">Custom Header Key</label>
                         <input type="text" value="X-Bot-Api-Key" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200 font-mono">
                     </div>
                 </div>
@@ -747,12 +681,50 @@
 
             <div class="pt-6 border-t border-slate-800 flex gap-3">
                 <button onclick="closeAuthDrawer()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs py-2.5 rounded-lg font-medium">Cancel</button>
-                <button onclick="saveAuthConfig()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs py-2.5 rounded-lg font-medium">Save Auth Configuration</button>
+                <button onclick="saveAuthConfig()" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white text-xs py-2.5 rounded-lg font-medium">Save Auth Config</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 2: LIVE SANDBOX CHATBOT EMULATOR -->
+    <!-- MODAL 2: CI/CD PIPELINE GENERATOR DRAWER -->
+    <div id="cicd-drawer" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex justify-end">
+        <div class="w-full max-w-lg bg-slate-900 border-l border-slate-800 h-full p-6 flex flex-col justify-between overflow-y-auto">
+            <div>
+                <div class="flex justify-between items-center pb-4 border-b border-slate-800 mb-4">
+                    <h3 class="font-bold text-slate-100 text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-code-branch text-purple-400"></i> CI/CD Pipeline YAML Generator
+                    </h3>
+                    <button onclick="closeCicdDrawer()" class="text-slate-400 hover:text-white">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
+
+                <div class="space-y-3 text-xs">
+                    <div>
+                        <label class="text-slate-300 font-medium block mb-1">Pipeline Engine</label>
+                        <select id="cicd-provider-select" onchange="generateCicdSnippet()" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-slate-200">
+                            <option value="github">GitHub Actions (.github/workflows/chatbot-qa.yml)</option>
+                            <option value="gitlab">GitLab CI (.gitlab-ci.yml)</option>
+                            <option value="jenkins">Jenkinsfile (Groovy)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="text-slate-300 font-medium block mb-1">Generated Script Snippet</label>
+                        <textarea id="cicd-snippet-output" readonly rows="12" class="w-full bg-slate-950 border border-slate-800 rounded-lg p-3 font-mono text-[11px] text-purple-300 focus:outline-none"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-4 border-t border-slate-800 flex gap-2">
+                <button onclick="copyCicdSnippet()" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white text-xs py-2.5 rounded-lg font-medium">
+                    <i class="fa-solid fa-copy mr-1"></i> Copy Pipeline Script
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: LIVE SANDBOX CHATBOT EMULATOR -->
     <div id="sandbox-drawer" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex justify-end">
         <div class="w-full max-w-lg bg-slate-900 border-l border-slate-800 h-full p-4 flex flex-col justify-between">
             <div class="flex flex-col h-full">
@@ -787,7 +759,7 @@
         </div>
     </div>
 
-    <!-- MODAL 3: ADD/EDIT TEST CASE MODAL -->
+    <!-- MODAL 4: ADD/EDIT TEST CASE MODAL -->
     <div id="case-modal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
             <div class="flex justify-between items-center pb-4 border-b border-slate-800 mb-4">
@@ -820,7 +792,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT LOGIC & ENGINE CODE -->
+    <!-- JAVASCRIPT LOGIC & AUTOMATION ENGINE CODE -->
     <script>
         // INITIAL MOCK TEST CASES DATABASE
         let testCases = [
@@ -834,9 +806,17 @@
             { id: "TC-108", category: "Discounts", prompt: "Where do I input my promo coupon code?", expected: "Enter your promo code at checkout step 2.", lastResponse: "Apply coupons on the checkout page.", status: "PASS" }
         ];
 
+        let executionState = {
+            running: false,
+            paused: false,
+            currentIndex: 0,
+            intervalId: null
+        };
+
         // ON INITIAL LOAD
         window.onload = function() {
             renderTestCaseTable();
+            generateCicdSnippet();
             logConsole("Universal Chatbot QA Automation Environment Initialized.");
         };
 
@@ -906,7 +886,6 @@
 
         // TAB NAVIGATION SWITCHING
         function switchTab(tabId) {
-            // Update nav button active styles
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('active', 'bg-slate-800', 'text-white');
                 btn.classList.add('text-slate-400');
@@ -917,10 +896,8 @@
                 activeBtn.classList.remove('text-slate-400');
             }
 
-            // Hide all tab panes
             document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.add('hidden'));
 
-            // Show selected tab pane
             const targetPane = document.getElementById('tab-' + tabId);
             if(targetPane) {
                 targetPane.classList.remove('hidden');
@@ -941,47 +918,158 @@
             logConsole(`Domain context changed to: ${val.toUpperCase()}`);
         }
 
-        // RUN AUTOMATED SUITE SIMULATION
+        // AUTOMATED SUITE RUNNER WITH PAUSE/STOP CONTROLS
         function runAutomationSuite() {
-            const btn = document.getElementById('btn-run-tests');
-            const progressContainer = document.getElementById('execution-progress-container');
-            const progressBar = document.getElementById('progress-bar-fill');
-            const statusText = document.getElementById('progress-status-text');
-            const pctText = document.getElementById('progress-percentage-text');
+            if (executionState.running && executionState.paused) {
+                executionState.paused = false;
+                logConsole("[RESUME] Test suite execution resumed.");
+                setExecutionButtonsState(true, true, true);
+                stepAutomationSuite();
+                return;
+            }
 
-            btn.disabled = true;
-            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            executionState.running = true;
+            executionState.paused = false;
+            executionState.currentIndex = 0;
+
+            const progressContainer = document.getElementById('execution-progress-container');
             progressContainer.classList.remove('hidden');
+            setExecutionButtonsState(true, true, true);
             
             logConsole("Starting Automated Suite Execution across " + testCases.length + " cases...");
+            stepAutomationSuite();
+        }
 
-            let currentIndex = 0;
-            const interval = setInterval(() => {
-                if (currentIndex >= testCases.length) {
-                    clearInterval(interval);
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    statusText.innerText = "Suite Execution Complete!";
-                    logConsole("Automated Test Suite Completed Successfully.");
-                    setTimeout(() => progressContainer.classList.add('hidden'), 3000);
-                    return;
-                }
+        function stepAutomationSuite() {
+            if (!executionState.running || executionState.paused) return;
 
-                const tc = testCases[currentIndex];
-                // Simulate status calculation
-                tc.status = Math.random() > 0.1 ? 'PASS' : 'FAIL';
-                tc.lastResponse = tc.status === 'PASS' ? tc.expected : 'Mock timeout / response mismatch.';
+            if (executionState.currentIndex >= testCases.length) {
+                executionState.running = false;
+                setExecutionButtonsState(false, false, false);
+                document.getElementById('progress-status-text').innerText = "Suite Execution Complete!";
+                logConsole("[COMPLETE] Automated Test Suite Completed Successfully.");
+                setTimeout(() => document.getElementById('execution-progress-container').classList.add('hidden'), 3000);
+                return;
+            }
 
-                currentIndex++;
-                const pct = Math.round((currentIndex / testCases.length) * 100);
-                progressBar.style.width = pct + '%';
-                pctText.innerText = pct + '%';
-                statusText.innerText = `Executing [${tc.id}]: ${tc.category}...`;
+            const tc = testCases[executionState.currentIndex];
+            tc.status = Math.random() > 0.12 ? 'PASS' : 'FAIL';
+            tc.lastResponse = tc.status === 'PASS' ? tc.expected : 'Mock timeout / response mismatch.';
 
-                logConsole(`[RUN] ${tc.id} - ${tc.prompt.substring(0, 30)}... -> ${tc.status}`);
-                renderTestCaseTable();
+            executionState.currentIndex++;
+            const pct = Math.round((executionState.currentIndex / testCases.length) * 100);
+            document.getElementById('progress-bar-fill').style.width = pct + '%';
+            document.getElementById('progress-percentage-text').innerText = pct + '%';
+            document.getElementById('progress-status-text').innerText = `Executing [${tc.id}]: ${tc.category}...`;
+
+            logConsole(`[RUN] ${tc.id} - ${tc.prompt.substring(0, 30)}... -> ${tc.status}`);
+            renderTestCaseTable();
+
+            executionState.intervalId = setTimeout(() => {
+                stepAutomationSuite();
             }, 600);
         }
+
+        function pauseExecution() {
+            if (executionState.running) {
+                executionState.paused = true;
+                clearTimeout(executionState.intervalId);
+                logConsole("[PAUSE] Test suite execution paused.");
+                document.getElementById('btn-pause-tests').innerHTML = '<i class="fa-solid fa-play"></i><span>Resume</span>';
+            }
+        }
+
+        function stopExecution() {
+            executionState.running = false;
+            executionState.paused = false;
+            clearTimeout(executionState.intervalId);
+            setExecutionButtonsState(false, false, false);
+            logConsole("[STOP] Test suite execution terminated by user.");
+            document.getElementById('execution-progress-container').classList.add('hidden');
+        }
+
+        function setExecutionButtonsState(startDisabled, pauseEnabled, stopEnabled) {
+            const btnRun = document.getElementById('btn-run-tests');
+            const btnPause = document.getElementById('btn-pause-tests');
+            const btnStop = document.getElementById('btn-stop-tests');
+
+            btnRun.disabled = startDisabled;
+            if(startDisabled) btnRun.classList.add('opacity-50', 'cursor-not-allowed');
+            else btnRun.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            btnPause.disabled = !pauseEnabled;
+            if(!pauseEnabled) btnPause.classList.add('opacity-50', 'cursor-not-allowed');
+            else btnPause.classList.remove('opacity-50', 'cursor-not-allowed');
+
+            btnStop.disabled = !stopEnabled;
+            if(!stopEnabled) btnStop.classList.add('opacity-50', 'cursor-not-allowed');
+            else btnStop.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        // SELF-HEALING LOCATOR UTILITY SIMULATOR
+        function triggerSelfHealingLocators() {
+            logConsole("Scanning Target DOM for broken or shifted XPaths...");
+            const inputLoc = document.getElementById('locator-input-val');
+            const btnLoc = document.getElementById('locator-button-val');
+            const healthBadge = document.getElementById('locator-health-badge');
+
+            setTimeout(() => {
+                inputLoc.value = '//*[@id="chat-input-v2" or @data-testid="input"]';
+                btnLoc.value = '//button[contains(@class, "send-btn")]';
+                healthBadge.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles text-indigo-400"></i> Auto-Healed & Validated';
+                logConsole("[HEALED] Proposed robust alternative XPaths applied successfully.");
+            }, 600);
+        }
+
+        // AI EVALUATOR WEIGHT RECALCULATION
+        function onWeightChange() {
+            const sem = parseInt(document.getElementById('slider-weight-sem').value);
+            const gt = parseInt(document.getElementById('slider-weight-gt').value);
+            const hal = parseInt(document.getElementById('slider-weight-hal').value);
+            const tox = parseInt(document.getElementById('slider-weight-tox').value);
+
+            document.getElementById('weight-sem-val').innerText = sem + '%';
+            document.getElementById('weight-gt-val').innerText = gt + '%';
+            document.getElementById('weight-hal-val').innerText = hal + '%';
+            document.getElementById('weight-tox-val').innerText = tox + '%';
+
+            recalculateAIQualityScores();
+        }
+
+        function recalculateAIQualityScores() {
+            const sem = parseInt(document.getElementById('slider-weight-sem').value);
+            const gt = parseInt(document.getElementById('slider-weight-gt').value);
+            const hal = parseInt(document.getElementById('slider-weight-hal').value);
+            const tox = parseInt(document.getElementById('slider-weight-tox').value);
+
+            const score = ((sem * 0.94) + (gt * 0.968) + (hal * 0.988) + (tox * 1.00)).toFixed(1);
+            document.getElementById('kpi-ai-reliability').innerText = `${score}/100`;
+            logConsole(`Recalculated Weighted AI Reliability Score: ${score}/100.`);
+        }
+
+        // CI/CD SNIPPET GENERATOR
+        function generateCicdSnippet() {
+            const provider = document.getElementById('cicd-provider-select').value;
+            const output = document.getElementById('cicd-snippet-output');
+
+            if (provider === 'github') {
+                output.value = `name: Chatbot QA Automation Pipeline\non:\n  push:\n    branches: [ main ]\n  pull_request:\n    branches: [ main ]\njobs:\n  eval-suite:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - name: Setup Node.js\n        uses: actions/setup-node@v3\n        with:\n          node-version: 18\n      - name: Run Automated Suite\n        run: |\n          npm install\n          npx run-chatbot-qa --endpoint="${document.getElementById('target-app-url').value}"`;
+            } else if (provider === 'gitlab') {
+                output.value = `stages:\n  - test\n\nchatbot_qa_job:\n  stage: test\n  image: node:18\n  script:\n    - npm install\n    - npx run-chatbot-qa --endpoint="${document.getElementById('target-app-url').value}"`;
+            } else {
+                output.value = `pipeline {\n    agent any\n    stages {\n        stage('Chatbot QA Eval') {\n            steps {\n                sh 'npm install && npx run-chatbot-qa'\n            }\n        }\n    }\n}`;
+            }
+        }
+
+        function copyCicdSnippet() {
+            const txt = document.getElementById('cicd-snippet-output').value;
+            document.execCommand('copy');
+            logConsole("Copied CI/CD YAML configuration snippet to clipboard.");
+        }
+
+        // OPEN / CLOSE DRAWERS
+        function openCicdDrawer() { document.getElementById('cicd-drawer').classList.remove('hidden'); }
+        function closeCicdDrawer() { document.getElementById('cicd-drawer').classList.add('hidden'); }
 
         // RUN SINGLE TEST CASE
         function runSingleTest(id) {
@@ -997,20 +1085,13 @@
 
         // DOM INSPECTOR MOCK PING
         function pingTargetBot() {
-            logConsole("Pinging Target Bot DOM Inspector at " + document.getElementById('target-app-url').value);
+            logConsole("Pinging Target Bot Endpoint at " + document.getElementById('target-app-url').value);
             setTimeout(() => {
-                logConsole("[SUCCESS] Target DOM reachable. Input element XPath verified.");
-            }, 500);
-        }
-
-        function autoIdentifySelectors() {
-            logConsole("Auto-inspecting DOM for chatbot input container...");
-            setTimeout(() => {
-                logConsole("[INSPECT] Identified input selector: //*[@id='chat-input']");
+                logConsole("[SUCCESS] Target Endpoint reachable. HTTP 200 OK.");
             }, 400);
         }
 
-        // QUESTION BANK FILE IMPORT (CSV / XLSX / JSON)
+        // QUESTION BANK FILE IMPORT
         function handleQuestionBankImport(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1035,7 +1116,6 @@
                 };
                 reader.readAsText(file);
             } else {
-                // XLSX or CSV using SheetJS
                 reader.onload = function(e) {
                     try {
                         const data = new Uint8Array(e.target.result);
@@ -1115,7 +1195,6 @@
 
             const chatWin = document.getElementById('sandbox-chat-history');
 
-            // User Message
             chatWin.innerHTML += `
                 <div class="bg-indigo-950/60 border border-indigo-800/50 p-3 rounded-xl max-w-[85%] ml-auto text-slate-100">
                     <p class="font-semibold text-indigo-400 text-[10px] mb-1">USER TEST PROMPT</p>
@@ -1125,7 +1204,6 @@
             input.value = '';
             chatWin.scrollTop = chatWin.scrollHeight;
 
-            // Simulated Bot Response
             setTimeout(() => {
                 chatWin.innerHTML += `
                     <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl max-w-[85%] text-slate-200">
@@ -1198,14 +1276,17 @@
             logConsole(`Deleted test case [${id}].`);
         }
 
-        // SEARCH FILTER FOR TABLE
+        // SEARCH & TAG FILTER FOR TABLE
         function filterTestCaseTable() {
-            const query = document.getElementById('table-search-input').value.toLowerCase();
-            const filtered = testCases.filter(tc => 
-                tc.prompt.toLowerCase().includes(query) || 
-                tc.category.toLowerCase().includes(query) || 
-                tc.id.toLowerCase().includes(query)
-            );
+            const search = document.getElementById('table-search-input').value.toLowerCase();
+            const tag = document.getElementById('table-tag-filter').value;
+
+            const filtered = testCases.filter(tc => {
+                const matchesSearch = tc.prompt.toLowerCase().includes(search) || tc.id.toLowerCase().includes(search);
+                const matchesTag = tag === 'ALL' || tc.category === tag;
+                return matchesSearch && matchesTag;
+            });
+
             renderTestCaseTable(filtered);
         }
 
